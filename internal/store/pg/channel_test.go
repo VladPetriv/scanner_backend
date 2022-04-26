@@ -1,4 +1,4 @@
-package pg
+package pg_test
 
 import (
 	"database/sql"
@@ -6,18 +6,20 @@ import (
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
+	"github.com/VladPetriv/tg_scanner/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestChannelPg_CreateChannel(t *testing.T) {
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db, mock, err := utils.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
 	defer db.Close()
 
-	r := NewChannelRepo(&DB{DB: db})
+	r := pg.NewChannelRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
@@ -70,14 +72,14 @@ func TestChannelPg_CreateChannel(t *testing.T) {
 }
 
 func TestChannelPg_GetChannel(t *testing.T) {
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db, mock, err := utils.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
 	defer db.Close()
 
-	r := NewChannelRepo(&DB{DB: db})
+	r := pg.NewChannelRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
@@ -129,14 +131,14 @@ func TestChannelPg_GetChannel(t *testing.T) {
 }
 
 func TestChannelPg_GetChannels(t *testing.T) {
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db, mock, err := utils.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
 	defer db.Close()
 
-	r := NewChannelRepo(&DB{DB: db})
+	r := pg.NewChannelRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
@@ -188,14 +190,14 @@ func TestChannelPg_GetChannels(t *testing.T) {
 }
 
 func TestChannelPg_GetByName(t *testing.T) {
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db, mock, err := utils.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
 	defer db.Close()
 
-	r := NewChannelRepo(&DB{DB: db})
+	r := pg.NewChannelRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
@@ -246,14 +248,14 @@ func TestChannelPg_GetByName(t *testing.T) {
 }
 
 func TestChannelPg_DeleteChannel(t *testing.T) {
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db, mock, err := utils.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
 	defer db.Close()
 
-	r := NewChannelRepo(&DB{DB: db})
+	r := pg.NewChannelRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string

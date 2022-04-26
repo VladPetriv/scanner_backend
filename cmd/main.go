@@ -7,6 +7,7 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/logger"
+	_ "github.com/lib/pq"
 )
 
 func main() {
