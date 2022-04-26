@@ -10,6 +10,7 @@ type Manager struct {
 	Channel ChannelService
 	Message MessageService
 	Replie  ReplieService
+	User    UserService
 }
 
 func NewManager(store *store.Store) (*Manager, error) {
@@ -18,8 +19,9 @@ func NewManager(store *store.Store) (*Manager, error) {
 	}
 
 	return &Manager{
-		Channel: NewChannelDbService(store),
-		Message: NewMessageDbService(store),
-		Replie:  NewReplieDbService(store),
+		Channel: NewChannelDBService(store),
+		Message: NewMessageDBService(store),
+		Replie:  NewReplieDBService(store),
+		User:    NewUserDBService(store),
 	}, nil
 }

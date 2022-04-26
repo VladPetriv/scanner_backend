@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/config"
-	_ "github.com/lib/pq"
 )
 
 type DB struct {
