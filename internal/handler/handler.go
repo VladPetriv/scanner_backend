@@ -17,6 +17,6 @@ func NewHandler(serviceManager *service.Manager) *Handler {
 
 func (h *Handler) InitRouter() *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc("/", h.hello).Methods("GET")
+	router.HandleFunc("tgOrverflow/", h.mainPage).Methods("GET")
 	return router
 }
