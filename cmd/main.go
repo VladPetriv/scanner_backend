@@ -30,7 +30,7 @@ func main() {
 
 	srv := new(server.Server)
 
-	handler := handler.NewHandler(serviceManger)
+	handler := handler.NewHandler(serviceManger, log)
 
 	log.Infof("starting server at bind addr %s", cfg.BindAddr)
 	if err := srv.Run(cfg.BindAddr, handler.InitRouter()); err != nil {
