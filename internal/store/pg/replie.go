@@ -86,22 +86,3 @@ func (repo *ReplieRepo) GetReplieByName(name string) (*model.Replie, error) {
 
 	return replie, nil
 }
-
-func (repo *ReplieRepo) CreateReplie(replie *model.Replie) (int, error) {
-	var id int
-	row := repo.db.QueryRow("INSERT INTO replie (user_id, message_id, title) VALUES ($1, $2, $3) RETURNING id;", replie.UserID, replie.MessageID, replie.Title)
-	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("error while creating replie: %w", err)
-	}
-
-	return 1, nil
-}
-
-func (repo *ReplieRepo) DeleteReplie(replieId int) error {
-	_, err := repo.db.Exec("DELETE FROM replie WHERE id=$1;", replieId)
-	if err != nil {
-		return fmt.Errorf("error while deleting replie: %w", err)
-	}
-
-	return nil
-}

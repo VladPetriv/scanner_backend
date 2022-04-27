@@ -85,22 +85,3 @@ func (repo *MessageRepo) GetMessageByName(name string) (*model.Message, error) {
 
 	return message, nil
 }
-
-func (repo *MessageRepo) CreateMessage(message *model.Message) (int, error) {
-	var id int
-	row := repo.db.QueryRow("INSERT INTO message(channel_id, user_id, title) VALUES ($1, $2, $3) RETURNING id;", message.ChannelID, message.UserID, message.Title)
-	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("error while creating message: %w", err)
-	}
-
-	return id, nil
-}
-
-func (repo *MessageRepo) DeleteMessage(messageID int) error {
-	_, err := repo.db.Exec("DELETE FROM message WHERE id=$1;", messageID)
-	if err != nil {
-		return fmt.Errorf("error while deleting message: %w", err)
-	}
-
-	return nil
-}

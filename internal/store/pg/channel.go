@@ -82,23 +82,3 @@ func (repo *ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error)
 
 	return channel, nil
 }
-
-func (repo *ChannelPgRepo) CreateChannel(channel *model.Channel) (int, error) {
-	var id int
-	row := repo.db.QueryRow("INSERT INTO channel(name) VALUES ($1) RETURNING id;", channel.Name)
-
-	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("error while creating channel: %w", err)
-	}
-
-	return 1, nil
-}
-
-func (repo *ChannelPgRepo) DeleteChannel(channelID int) error {
-	_, err := repo.db.Exec("DELETE FROM channel WHERE id=$1;", channelID)
-	if err != nil {
-		return fmt.Errorf("error while deleting channel: %w", err)
-	}
-
-	return nil
-}

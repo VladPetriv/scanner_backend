@@ -55,30 +55,3 @@ func (s *MessageDBService) GetMessageByName(name string) (*model.Message, error)
 
 	return message, nil
 }
-
-func (s *MessageDBService) CreateMessage(message *model.Message) (int, error) {
-	candidate, err := s.GetMessageByName(message.Title)
-	if err != nil {
-		return 0, err
-	}
-
-	if candidate != nil {
-		return candidate.ID, fmt.Errorf("message with name %s is exist", message.Title)
-	}
-
-	id, err := s.store.Message.CreateMessage(message)
-	if err != nil {
-		return id, fmt.Errorf("[Message] Service.CreateMessage error: %w", err)
-	}
-
-	return id, nil
-}
-
-func (s *MessageDBService) DeleteMessage(messageID int) error {
-	err := s.store.Message.DeleteMessage(messageID)
-	if err != nil {
-		return fmt.Errorf("[Message] Service.DeleteMessage error: %w", err)
-	}
-
-	return nil
-}

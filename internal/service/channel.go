@@ -55,30 +55,3 @@ func (s *ChannelDBService) GetChannelByName(name string) (*model.Channel, error)
 
 	return channel, nil
 }
-
-func (s *ChannelDBService) CreateChannel(channel *model.Channel) error {
-	candidate, err := s.GetChannelByName(channel.Name)
-	if err != nil {
-		return err
-	}
-
-	if candidate != nil {
-		return fmt.Errorf("channel with name %s is exist", channel.Name)
-	}
-
-	_, err = s.store.Channel.CreateChannel(channel)
-	if err != nil {
-		return fmt.Errorf("[Channel] Service error: %w", err)
-	}
-
-	return nil
-}
-
-func (s *ChannelDBService) DeleteChannel(channelID int) error {
-	err := s.store.Channel.DeleteChannel(channelID)
-	if err != nil {
-		return fmt.Errorf("[Channel] Service error: %w", err)
-	}
-
-	return nil
-}

@@ -1,78 +1,17 @@
 package pg_test
 
 import (
-	"database/sql"
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/tg_scanner/pkg/utils"
+	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestChannelPg_CreateChannel(t *testing.T) {
-	db, mock, err := utils.CreateMock()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	defer db.Close()
-
-	r := pg.NewChannelRepo(&pg.DB{DB: db})
-
-	tests := []struct {
-		name    string
-		mock    func()
-		input   model.Channel
-		want    int
-		wantErr bool
-	}{
-		{
-			name: "Ok",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
-
-				mock.ExpectQuery("INSERT INTO channel(name) VALUES ($1) RETURNING id;").
-					WithArgs("test").WillReturnRows(rows)
-
-			},
-			input: model.Channel{Name: "test"},
-			want:  1,
-		},
-		{
-			name: "empty field",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id"})
-
-				mock.ExpectQuery("INSERT INTO channel(name) VALUES ($1) RETURNING id;").
-					WithArgs("").WillReturnRows(rows)
-			},
-			input:   model.Channel{},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-
-			got, err := r.CreateChannel(&tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-
-		})
-	}
-}
-
 func TestChannelPg_GetChannel(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -131,7 +70,7 @@ func TestChannelPg_GetChannel(t *testing.T) {
 }
 
 func TestChannelPg_GetChannels(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -190,7 +129,7 @@ func TestChannelPg_GetChannels(t *testing.T) {
 }
 
 func TestChannelPg_GetByName(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -240,57 +179,6 @@ func TestChannelPg_GetByName(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.want, got)
-			}
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
-func TestChannelPg_DeleteChannel(t *testing.T) {
-	db, mock, err := utils.CreateMock()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	defer db.Close()
-
-	r := pg.NewChannelRepo(&pg.DB{DB: db})
-
-	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		wantErr bool
-	}{
-		{
-			name: "Ok",
-			mock: func() {
-				mock.ExpectExec("DELETE FROM channel WHERE id=$1;").
-					WithArgs(1).WillReturnResult(sqlmock.NewResult(0, 1))
-			},
-			input: 1,
-		},
-		{
-			name: "channel not found",
-			mock: func() {
-				mock.ExpectExec("DELETE FROM channel WHERE id=$1;").
-					WithArgs(404).WillReturnError(sql.ErrNoRows)
-			},
-			input:   404,
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-
-			err := r.DeleteChannel(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
 			}
 
 			assert.NoError(t, mock.ExpectationsWereMet())

@@ -6,70 +6,12 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/tg_scanner/pkg/utils"
+	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUserPg_CreateUser(t *testing.T) {
-	db, mock, err := utils.CreateMock()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	defer db.Close()
-
-	r := pg.NewUserRepo(&pg.DB{DB: db})
-
-	tests := []struct {
-		name    string
-		mock    func()
-		input   model.User
-		want    int
-		wantErr bool
-	}{
-		{
-			name: "Ok",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
-
-				mock.ExpectQuery("INSERT INTO tg_user (username, fullname, photourl) VALUES ($1, $2, $3) RETURNING id;").
-					WithArgs("test", "test test", "test.jpg").WillReturnRows(rows)
-			},
-			input: model.User{Username: "test", FullName: "test test", PhotoURL: "test.jpg"},
-			want:  1,
-		},
-		{
-			name: "Empty fields",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id"})
-
-				mock.ExpectQuery("INSERT INTO tg_user (username, fullname, photourl) VALUES ($1, $2, $3) RETURNING id;").
-					WithArgs("", "", "").WillReturnRows(rows)
-			},
-			input:   model.User{},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-
-			got, err := r.CreateUser(&tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
 func TestUserPg_GetUsers(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -130,7 +72,7 @@ func TestUserPg_GetUsers(t *testing.T) {
 }
 
 func TestUserPg_GetUserByUsername(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}

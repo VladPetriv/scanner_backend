@@ -1,75 +1,16 @@
 package pg
 
 import (
-	"database/sql"
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
-	"github.com/VladPetriv/tg_scanner/internal/model"
-	"github.com/VladPetriv/tg_scanner/pkg/utils"
+	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMessagePg_CreateMessage(t *testing.T) {
-	db, mock, err := utils.CreateMock()
-	if err != nil {
-		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	defer db.Close()
-
-	r := NewMessageRepo(&DB{DB: db})
-
-	tests := []struct {
-		name    string
-		mock    func()
-		input   model.Message
-		want    int
-		wantErr bool
-	}{
-		{
-			name: "Ok",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
-
-				mock.ExpectQuery("INSERT INTO message(channel_id, user_id, title) VALUES ($1, $2, $3) RETURNING id;").
-					WithArgs(1, 1, "test").WillReturnRows(rows)
-			},
-			input: model.Message{ChannelID: 1, UserID: 1, Title: "test"},
-			want:  1,
-		},
-		{
-			name: "empty field",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id"})
-
-				mock.ExpectQuery("INSERT INTO message(channel_id, user_id, title) VALUES ($1, $2, $3) RETURNING id;").
-					WithArgs().WillReturnRows(rows)
-			},
-			input:   model.Message{},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-
-			got, err := r.CreateMessage(&tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
 func TestMessagePg_GetMessage(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -128,7 +69,7 @@ func TestMessagePg_GetMessage(t *testing.T) {
 }
 
 func TestMessagePg_GetMessages(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -188,7 +129,7 @@ func TestMessagePg_GetMessages(t *testing.T) {
 }
 
 func TestMessagePg_GetMessageByName(t *testing.T) {
-	db, mock, err := utils.CreateMock()
+	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -238,57 +179,6 @@ func TestMessagePg_GetMessageByName(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.want, got)
-			}
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
-func TestMessagePg_DeleteMessage(t *testing.T) {
-	db, mock, err := utils.CreateMock()
-	if err != nil {
-		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	defer db.Close()
-
-	r := NewMessageRepo(&DB{DB: db})
-
-	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		wantErr bool
-	}{
-		{
-			name: "Ok",
-			mock: func() {
-				mock.ExpectExec("DELETE FROM message WHERE id=$1;").
-					WithArgs(1).WillReturnResult(sqlmock.NewResult(0, 1))
-			},
-			input: 1,
-		},
-		{
-			name: "message not found",
-			mock: func() {
-				mock.ExpectExec("DELETE FROM message WHERE id=$1;").
-					WithArgs(404).WillReturnError(sql.ErrNoRows)
-			},
-			input:   404,
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-
-			err := r.DeleteMessage(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
 			}
 
 			assert.NoError(t, mock.ExpectationsWereMet())
