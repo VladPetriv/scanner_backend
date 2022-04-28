@@ -1,0 +1,88 @@
+{{define "messages"}}
+<div class="col-xl-6 col-xxl-4">
+  <!-- Message count start -->
+  <h1 class="mt-5 h2">
+    <span class="text-muted"> {{ .MessagesLength }} </span>
+    messages
+  </h1>
+  <!-- Message count end -->
+
+  {{range .Messages}}
+  <div class="card mt-4 border-light">
+    <!--Channel and user info start-->
+    <div class="card-header bg-white border-light">
+      <div class="row">
+        <div class="col">
+          <a
+            class="text-decoration-none fw-semi-bold text-dark"
+            href="/community/60fdb49d535ed8596df02e10"
+          >
+            <img
+              alt="Python"
+              class="rounded me-1"
+              height="25"
+              src="https://image.telq.org/channel_avatar_1007166727_5395322086441989342_mini.jpeg"
+              width="25"
+            />
+
+            Channel info
+          </a>
+        </div>
+
+        <div class="col text-end">
+          <a
+            class="text-decoration-none fw-semi-bold text-dark"
+            href="/user/6115adaf535ed8596d5735a2"
+          >
+            <img
+              alt="Александр-Астафьев"
+              class="rounded me-1"
+              height="25"
+              src="https://static.telq.org/telegram.svg"
+              width="25"
+            />
+
+            User info
+          </a>
+        </div>
+      </div>
+    </div>
+    <!--Channel and user info end-->
+
+    <!--Message info start-->
+    <div class="card-body">
+      <a
+        class="text-reset text-decoration-none"
+        href="/question/626a34dab2d5debe9ece74eb"
+      >
+        <p class="card-text">{{ .Title }}</p>
+      </a>
+    </div>
+    <!-- Message info start -->
+
+    <!-- Replie info start-->
+    <div class="card-footer bg-white border-light">
+      <div class="row text-muted">
+        <div class="col">
+          <a
+            class="text-reset text-decoration-none d-inline-flex"
+            href="/question/626a34dab2d5debe9ece74eb"
+          >
+            <img
+              alt="chat"
+              class="me-2"
+              src="https://static.telq.org/chat.svg"
+              width="18"
+            />
+            Replie count
+          </a>
+        </div>
+
+        <div class="col text-end">Post date</div>
+      </div>
+    </div>
+    <!-- Replie info end-->
+  </div>
+  {{end}}
+</div>
+{{end}}
