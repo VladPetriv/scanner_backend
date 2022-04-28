@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"html/template"
-	"net/http"
-
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/logger"
 	"github.com/gorilla/mux"
@@ -42,13 +39,4 @@ func (h *Handler) InitRouter() *mux.Router {
 	})
 
 	return router
-}
-
-func (h *Handler) ProcessTemplateData(w http.ResponseWriter, templateName string, data interface{}) {
-	tmpl, err := template.ParseFiles(templateName)
-	if err != nil {
-		h.log.Errorf("template error: %s", err)
-	}
-
-	tmpl.Execute(w, data)
 }
