@@ -1,4 +1,4 @@
-{{define "messages"}}
+{{ define "home" }}
 <div class="col-xl-6 col-xxl-4">
   <!-- Message count start -->
   <h1 class="mt-5 h2">
@@ -7,7 +7,7 @@
   </h1>
   <!-- Message count end -->
 
-  {{range .Messages}}
+  {{ range .Messages }}
   <div class="card mt-4 border-light">
     <!--Channel and user info start-->
     <div class="card-header bg-white border-light">
@@ -15,7 +15,7 @@
         <div class="col">
           <a
             class="text-decoration-none fw-semi-bold text-dark"
-            href="/community/60fdb49d535ed8596df02e10"
+            href="/channel/{{ .ChannelID }}"
           >
             <img
               alt="Python"
@@ -83,6 +83,6 @@
     </div>
     <!-- Replie info end-->
   </div>
-  {{end}}
+  {{ end }}
 </div>
-{{end}}
+{{ end }}

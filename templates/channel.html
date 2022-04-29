@@ -1,0 +1,57 @@
+{{ define "channel" }}
+<div class="col-xl-6 col-xxl-4">
+  <h1 class="mt-5 h2">
+    <span class="text-muted"> {{ .ChannelsLength }} </span>
+    channels
+  </h1>
+
+  {{ range .Channels }}
+  <div class="card border-light mt-3" id="to-0">
+    <a
+      class="text-decoration-none text-dark stretched-link"
+      href="/channel/{{ .ID }}"
+    ></a>
+    <div class="card-body">
+      <div class="card-text">
+        <img
+          alt="channel_title"
+          class="rounded me-1"
+          height="25"
+          src="https://image.telq.org/channel_avatar_1032883247_139719091936144306_mini.jpeg"
+          width="25"
+        />
+
+        <span class="fw-semi-bold"> Channel title </span>
+
+        <div class="row mt-2"></div>
+
+        Messages
+        <span class="text-muted"> Message count </span>
+
+        <div class="row"></div>
+
+        Replies
+        <span class="text-muted"> Replies count </span>
+
+        <div class="row"></div>
+
+        Users
+        <span class="text-muted"> User count </span>
+
+        <div class="row"></div>
+
+        Telegram
+        <a
+          class="text-decoration-none position-relative z-2"
+          href="https://t.me/{{ .Name }}"
+          rel="nofollow"
+          target="_blank"
+        >
+          {{ .Name }}
+        </a>
+      </div>
+    </div>
+  </div>
+  {{ end }}
+</div>
+{{ end }}
