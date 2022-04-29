@@ -15,7 +15,7 @@ func main() {
 
 	cfg, err := config.Get()
 	if err != nil {
-		log.Errorf("error while getting conifg: %v", err)
+		log.Errorf("error while getting config: %v", err)
 	}
 
 	store, err := store.New(*cfg, log)

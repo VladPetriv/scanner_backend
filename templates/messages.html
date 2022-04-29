@@ -25,7 +25,7 @@
               width="25"
             />
 
-            Channel info
+            {{ .ChannelName }}
           </a>
         </div>
 
@@ -35,14 +35,14 @@
             href="/user/6115adaf535ed8596d5735a2"
           >
             <img
-              alt="Александр-Астафьев"
+              alt="{{ .FullName }}"
               class="rounded me-1"
               height="25"
-              src="https://static.telq.org/telegram.svg"
+              src="{{ .PhotoURL }}"
               width="25"
             />
 
-            User info
+            {{ .FullName }}
           </a>
         </div>
       </div>
@@ -74,7 +74,7 @@
               src="https://static.telq.org/chat.svg"
               width="18"
             />
-            Replie count
+            {{ .ReplieCount }}
           </a>
         </div>
 

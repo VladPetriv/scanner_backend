@@ -10,7 +10,7 @@ import (
 type HomePageData struct {
 	Title          string
 	Channels       []model.Channel
-	Messages       []model.Message
+	Messages       []model.FullMessage
 	ChannelsLength int
 	MessagesLength int
 }
@@ -25,7 +25,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	messages, err := h.service.Message.GetMessages()
+	messages, err := h.service.Message.GetFullMessages()
 	if err != nil {
 		h.log.Error(err)
 	}
