@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"html/template"
+
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/logger"
 	"github.com/gorilla/mux"
@@ -9,18 +11,21 @@ import (
 type Handler struct {
 	service *service.Manager
 	log     *logger.Logger
+	tmpTree map[string]*template.Template
 }
 
 func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
 	return &Handler{
 		service: serviceManager,
 		log:     log,
+		tmpTree: make(map[string]*template.Template),
 	}
 }
 
 func (h *Handler) InitRouter() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/home", h.homePage).Methods("GET")
+	router.HandleFunc("/channel", h.channelPage).Methods("GET")
 
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()

@@ -8,6 +8,7 @@ import (
 )
 
 type HomePageData struct {
+	Type           string
 	Title          string
 	Channels       []model.Channel
 	Messages       []model.FullMessage
@@ -18,6 +19,7 @@ type HomePageData struct {
 func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 	data := HomePageData{
 		Title: "Telegram Overflow",
+		Type:  "home",
 	}
 
 	channels, err := h.service.Channel.GetChannels()
@@ -35,9 +37,6 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(messages)
 
-	tmpTree := make(map[string]*template.Template)
-
-	tmpTree["channels.html"] = template.Must(template.ParseFiles("templates/channels.html", "templates/messages.html", "templates/navbar.html", "templates/base.html"))
-
-	tmpTree["channels.html"].ExecuteTemplate(w, "base", data)
+	h.tmpTree["home"] = template.Must(template.ParseFiles("templates/home.html", "templates/navChannels.html", "templates/navbar.html", "templates/channel.html", "templates/base.html"))
+	h.tmpTree["home"].ExecuteTemplate(w, "base", data)
 }
