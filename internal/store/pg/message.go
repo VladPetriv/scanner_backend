@@ -85,3 +85,30 @@ func (repo *MessageRepo) GetMessageByName(name string) (*model.Message, error) {
 
 	return message, nil
 }
+
+func (repo *MessageRepo) GetFullMessages() ([]model.FullMessage, error) {
+	messages := make([]model.FullMessage, 0)
+
+	rows, err := repo.db.Query("SELECT m.id, m.Title, c.Name, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)  FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id ORDER BY m.id;")
+	if err != nil {
+		return nil, fmt.Errorf("error while getting full messages: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		message := model.FullMessage{}
+
+		err := rows.Scan(&message.ID, &message.Title, &message.ChannelName, &message.FullName, &message.PhotoURL, &message.ReplieCount)
+		if err != nil {
+			continue
+		}
+
+		messages = append(messages, message)
+	}
+
+	if len(messages) == 0 {
+		return nil, fmt.Errorf("messages not found")
+	}
+
+	return messages, nil
+}

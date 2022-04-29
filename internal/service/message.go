@@ -55,3 +55,16 @@ func (s *MessageDBService) GetMessageByName(name string) (*model.Message, error)
 
 	return message, nil
 }
+
+func (s *MessageDBService) GetFullMessages() ([]model.FullMessage, error) {
+	messages, err := s.store.Message.GetFullMessages()
+	if err != nil {
+		return nil, fmt.Errorf("[Message] Service.GetFullMessages error: %w", err)
+	}
+
+	if messages == nil {
+		return nil, nil
+	}
+
+	return messages, nil
+}
