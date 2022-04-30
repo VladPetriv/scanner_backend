@@ -30,19 +30,19 @@ func TestChannelPg_GetChannel(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name"}).
-					AddRow(1, "test")
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"}).
+					AddRow(1, "test", "test", "test.jpg")
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE id=$1;").
 					WithArgs(1).WillReturnRows(rows)
 			},
 			input: 1,
-			want:  &model.Channel{ID: 1, Name: "test"},
+			want:  &model.Channel{ID: 1, Name: "test", Title: "test", PhotoURL: "test.jpg"},
 		},
 		{
 			name: "channel not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name"})
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE id=$1;").
 					WithArgs(404).WillReturnRows(rows)
@@ -88,22 +88,22 @@ func TestChannelPg_GetChannels(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name"}).
-					AddRow(1, "test1").
-					AddRow(2, "test2")
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"}).
+					AddRow(1, "test1", "test1", "test1.jpg").
+					AddRow(2, "test2", "test2", "test2.jpg")
 
 				mock.ExpectQuery("SELECT * FROM channel;").
 					WillReturnRows(rows)
 			},
 			want: []model.Channel{
-				{ID: 1, Name: "test1"},
-				{ID: 2, Name: "test2"},
+				{ID: 1, Name: "test1", Title: "test1", PhotoURL: "test1.jpg"},
+				{ID: 2, Name: "test2", Title: "test2", PhotoURL: "test2.jpg"},
 			},
 		},
 		{
 			name: "channels not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name"})
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
 				mock.ExpectQuery("SELECT * FROM channel;").
 					WillReturnRows(rows)
 			},
@@ -148,19 +148,19 @@ func TestChannelPg_GetByName(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name"}).
-					AddRow(1, "test")
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"}).
+					AddRow(1, "test", "test", "test.jpg")
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
 					WithArgs("test").WillReturnRows(rows)
 			},
 			input: "test",
-			want:  &model.Channel{ID: 1, Name: "test"},
+			want:  &model.Channel{ID: 1, Name: "test", Title: "test", PhotoURL: "test.jpg"},
 		},
 		{
 			name: "channel not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name"})
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
 					WithArgs().WillReturnRows(rows)

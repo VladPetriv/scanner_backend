@@ -205,24 +205,24 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "id", "name", "fullname", "photourl", "count"}).
-					AddRow(1, "test1", 1, "test1", "test1", "test1.jpg", 1).
-					AddRow(2, "test2", 2, "test2", "test2", "test2.jpg", 3)
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "name", "channelPhotoUrl", "fullname", "photourl", "count"}).
+					AddRow(1, "test1", 1, "test1", "test1.jpg", "test1", "test1.jpg", 1).
+					AddRow(2, "test2", 2, "test2", "test2.jpg", "test2", "test2.jpg", 3)
 
-				mock.ExpectQuery("SELECT m.id, m.Title, c.id, c.Name, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)  FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id;").
+				mock.ExpectQuery("SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)  FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id;").
 					WillReturnRows(rows)
 			},
 			want: []model.FullMessage{
-				{ID: 1, Title: "test1", ChannelID: 1, ChannelName: "test1", FullName: "test1", PhotoURL: "test1.jpg", ReplieCount: 1},
-				{ID: 2, Title: "test2", ChannelID: 2, ChannelName: "test2", FullName: "test2", PhotoURL: "test2.jpg", ReplieCount: 3},
+				{ID: 1, Title: "test1", ChannelID: 1, ChannelName: "test1", ChannelPhotoURL: "test1.jpg", FullName: "test1", PhotoURL: "test1.jpg", ReplieCount: 1},
+				{ID: 2, Title: "test2", ChannelID: 2, ChannelName: "test2", ChannelPhotoURL: "test2.jpg", FullName: "test2", PhotoURL: "test2.jpg", ReplieCount: 3},
 			},
 		},
 		{
 			name: "full messages not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "name", "fullname", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "title", "name", "channelPhotoUrl", "fullname", "photourl"})
 
-				mock.ExpectQuery("SELECT m.id, m.Title, c.id, c.Name, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)  FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id;").
+				mock.ExpectQuery("SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)  FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id;").
 					WillReturnRows(rows)
 			},
 			wantErr: true,
