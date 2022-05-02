@@ -13,6 +13,7 @@ type MessageRepo interface {
 	GetMessage(messageID int) (*model.Message, error)
 	GetMessageByName(name string) (*model.Message, error)
 	GetFullMessages() ([]model.FullMessage, error)
+	GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error)
 }
 
 type ReplieRepo interface {
