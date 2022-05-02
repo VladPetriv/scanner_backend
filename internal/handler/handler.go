@@ -25,7 +25,8 @@ func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
 func (h *Handler) InitRouter() *mux.Router {
 	router := mux.NewRouter()
 	router.HandleFunc("/home", h.homePage).Methods("GET")
-	router.HandleFunc("/channel", h.channelPage).Methods("GET")
+	router.HandleFunc("/channel", h.channelsPage).Methods("GET")
+	router.HandleFunc("/channel/{channel_name}", h.channelPage).Methods("GET")
 
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()
