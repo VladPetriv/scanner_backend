@@ -12,18 +12,20 @@
     <title>{{ .Title }}</title>
   <body class="bg-light">
     <!-- Navbar start -->
-      {{ template "navbar" }}
+      {{ template "header" }}
     <!-- Navbar end -->
 
     <!-- Content start -->
     <div class="container-fluid">
       <div class="row">
-        {{ template "navChannels" . }}  
+        {{ template "navbar" . }}  
         
-        {{ if eq .Type "home" }}
-          {{ template "home" . }}
-        {{ else }}
+        {{ if eq .Type "messages" }}
+          {{ template "messages" . }}
+        {{ else if eq .Type "channel"}}
           {{ template "channel" . }}
+        {{ else }}
+          {{ template "channels" . }}
         {{ end }}
 
       </div>

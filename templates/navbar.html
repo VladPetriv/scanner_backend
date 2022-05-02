@@ -1,37 +1,28 @@
-{{ define "navbar" }}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/home">Telegram Overflow</a>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
+{{define "navbar"}}
+<div class="col-xl-3 col-xxl-4 d-none d-xl-block">
+  <h2 class="mt-5 mb-4">
+    <a class="text-decoration-none text-dark" href="/channel">
+      <span class="text-muted"> {{ .ChannelsLength }} </span>
+      channels
+    </a>
+  </h2>
+
+  {{range .Channels }}
+  <div class="mb-3">
+    <img
+      alt="{{ .Name }}"
+      class="rounded me-1"
+      height="25"
+      src="{{ .PhotoURL }}"
+      width="25"
+    />
+    <a
+      class="text-decoration-none text-dark fw-semi-bold"
+      href="/channel/{{ .Name }}"
     >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/home">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/channel">Channel</a>
-        </li>
-      </ul>
-      <form class="d-flex">
-        <input
-          class="form-control me-2"
-          type="search"
-          placeholder="Search"
-          aria-label="Search"
-        />
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-    </div>
+      {{ .Name }}
+    </a>
   </div>
-</nav>
-{{ end }}
+  {{end}}
+</div>
+{{end}}
