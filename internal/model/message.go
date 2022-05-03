@@ -12,8 +12,10 @@ type FullMessage struct {
 	Title           string `json:"title"`
 	ChannelID       int    `json:"channelId`
 	ChannelName     string `json:"chanellName"`
+	ChannelTitle    string `json:"channelTitle"`
+	ChannelPhotoURL string `json:"channelPhotoUrl"`
+	UserID          int    `json:"userId"`
 	FullName        string `json:"fullName"`
 	PhotoURL        string `json:"PhotoURL"`
 	ReplieCount     int    `json:"replieCount"`
-	ChannelPhotoURL string `json:"channelPhotoUrl"`
 }

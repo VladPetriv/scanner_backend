@@ -13,6 +13,7 @@ type MessageService interface {
 	GetMessageByName(name string) (*model.Message, error)
 	GetFullMessages() ([]model.FullMessage, error)
 	GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error)
+	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
 }
 
 type ReplieService interface {
@@ -24,4 +25,5 @@ type ReplieService interface {
 type UserService interface {
 	GetUsers() ([]model.User, error)
 	GetUserByUsername(username string) (*model.User, error)
+	GetUserByID(ID int) (*model.User, error)
 }
