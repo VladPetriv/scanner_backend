@@ -15,7 +15,7 @@
         <div class="col">
           <a
             class="text-decoration-none fw-semi-bold text-dark"
-            href="/channel/{{ .ChannelID }}"
+            href="/channel/{{ .ChannelName }}"
           >
             <img
               alt="{{ .ChannelName }}"
@@ -32,7 +32,7 @@
         <div class="col text-end">
           <a
             class="text-decoration-none fw-semi-bold text-dark"
-            href="/user/6115adaf535ed8596d5735a2"
+            href="/user/{{ .UserID }}"
           >
             <img
               alt="{{ .FullName }}"
@@ -77,8 +77,6 @@
             {{ .ReplieCount }}
           </a>
         </div>
-
-        <div class="col text-end">Post date</div>
       </div>
     </div>
     <!-- Replie info end-->

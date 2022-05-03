@@ -24,6 +24,8 @@
           {{ template "messages" . }}
         {{ else if eq .Type "channel"}}
           {{ template "channel" . }}
+        {{ else if eq .Type "user"}}
+          {{ template "user" . }}
         {{ else }}
           {{ template "channels" . }}
         {{ end }}

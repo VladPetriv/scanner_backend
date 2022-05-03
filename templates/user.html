@@ -1,0 +1,68 @@
+{{ define "user" }}
+<div class="col-xl-6 col-xxl-4">
+  <h1 class="mt-5 h2">
+    <span class="text-muted"> Message count </span>
+    messages from
+
+    <img
+      alt="{{ .User.FullName }}"
+      class="rounded me-1"
+      height="25"
+      src="{{ .User.PhotoURL }}"
+      width="25"
+    />
+
+    <span class="text-muted"> {{ .User.FullName }} </span>
+  </h1>
+
+  {{ range .Messages }}
+  <div class="card border-light mt-4">
+    <div class="card-header bg-white border-light">
+      <a
+        class="text-decoration-none text-dark fw-semi-bold"
+        href="/channel/{{ .ChannelName }}"
+      >
+        <img
+          alt="{{ .ChannelTitle }}"
+          class="rounded me-1"
+          height="25"
+          src="{{ .ChannelPhotoURL }}"
+          width="25"
+        />
+
+        {{ .ChannelTitle }}
+      </a>
+    </div>
+
+    <div class="card-body">
+      <a
+        class="text-reset text-decoration-none"
+        href="/question/618fa259535ed8596d1aa092"
+      >
+        <p class="card-text">{{ .Title }}</p>
+      </a>
+    </div>
+
+    <div class="card-footer bg-white border-light">
+      <div class="row text-muted">
+        <div class="col">
+          <a
+            class="text-reset text-decoration-none d-inline-flex"
+            href="/question/618fa259535ed8596d1aa092"
+          >
+            <img
+              alt="chat"
+              class="me-2"
+              src="https://static.telq.org/chat.svg"
+              width="18"
+            />
+            {{ .ReplieCount }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{ end }}
+</div>
+
+{{ end }}
