@@ -133,3 +133,71 @@ func TestUserPg_GetUserByUsername(t *testing.T) {
 		})
 	}
 }
+
+func TestUserPg_GetUserByID(t *testing.T) {
+	db, mock, err := util.CreateMock()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	r := pg.NewUserRepo(&pg.DB{DB: db})
+
+	tests := []struct {
+		name    string
+		mock    func()
+		input   int
+		want    *model.User
+		wantErr bool
+	}{
+		{
+			name: "Ok",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "username", "fullname", "photourl"}).
+					AddRow(1, "test", "test test", "test.jpg")
+				mock.ExpectQuery("SELECT * FROM tg_user WHERE id = $1;").
+					WithArgs(1).WillReturnRows(rows)
+			},
+			input: 1,
+			want:  &model.User{ID: 1, Username: "test", FullName: "test test", PhotoURL: "test.jpg"},
+		},
+		{
+			name: "empty fields",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "username", "fullname", "photourl"})
+
+				mock.ExpectQuery("SELECT * FROM tg_user WHERE id = $1;").
+					WithArgs().WillReturnRows(rows)
+			},
+			want: nil,
+		},
+		{
+			name: "user not found",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "username", "fullname", "photourl"})
+
+				mock.ExpectQuery("SELECT * FROM tg_user WHERE id = $1;").
+					WithArgs(404).WillReturnRows(rows)
+			},
+			input: 404,
+			want:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock()
+
+			got, err := r.GetUserByID(tt.input)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
