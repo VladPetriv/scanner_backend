@@ -39,3 +39,16 @@ func (s *UserDBService) GetUserByUsername(username string) (*model.User, error) 
 
 	return user, nil
 }
+
+func (s *UserDBService) GetUserByID(ID int) (*model.User, error) {
+	user, err := s.store.User.GetUserByID(ID)
+	if err != nil {
+		return nil, fmt.Errorf("[User] Service.GetUserByID error: %w", err)
+	}
+
+	if user == nil {
+		return nil, nil
+	}
+
+	return user, nil
+}

@@ -89,7 +89,11 @@ func (repo *MessageRepo) GetMessageByName(name string) (*model.Message, error) {
 func (repo *MessageRepo) GetFullMessages() ([]model.FullMessage, error) {
 	messages := make([]model.FullMessage, 0)
 
-	rows, err := repo.db.Query("SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)  FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id ORDER BY count DESC NULLS LAST;")
+	rows, err := repo.db.Query(
+		`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+		ORDER BY count DESC NULLS LAST;`,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting full messages: %w", err)
 	}
@@ -98,7 +102,10 @@ func (repo *MessageRepo) GetFullMessages() ([]model.FullMessage, error) {
 	for rows.Next() {
 		message := model.FullMessage{}
 
-		err := rows.Scan(&message.ID, &message.Title, &message.ChannelID, &message.ChannelName, &message.ChannelPhotoURL, &message.FullName, &message.PhotoURL, &message.ReplieCount)
+		err := rows.Scan(
+			&message.ID, &message.Title, &message.ChannelID, &message.ChannelName,
+			&message.ChannelPhotoURL, &message.UserID, &message.FullName, &message.PhotoURL, &message.ReplieCount,
+		)
 		if err != nil {
 			continue
 		}
@@ -116,16 +123,57 @@ func (repo *MessageRepo) GetFullMessages() ([]model.FullMessage, error) {
 func (repo *MessageRepo) GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error) {
 	messages := make([]model.FullMessage, 0)
 
-	rows, err := repo.db.Query("SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)  FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST;", ID)
+	rows, err := repo.db.Query(
+		`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+		WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST;`, ID,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("error while getting full messages by channel name: %w", err)
+		return nil, fmt.Errorf("error while getting full messages by channel ID: %w", err)
 	}
 
 	defer rows.Close()
 	for rows.Next() {
 		message := model.FullMessage{}
 
-		err := rows.Scan(&message.ID, &message.Title, &message.ChannelID, &message.ChannelName, &message.ChannelPhotoURL, &message.FullName, &message.PhotoURL, &message.ReplieCount)
+		err := rows.Scan(
+			&message.ID, &message.Title, &message.ChannelID, &message.ChannelName,
+			&message.ChannelPhotoURL, &message.UserID, &message.FullName, &message.PhotoURL, &message.ReplieCount,
+		)
+		if err != nil {
+			continue
+		}
+
+		messages = append(messages, message)
+	}
+
+	if len(messages) == 0 {
+		return nil, fmt.Errorf("messages not found")
+	}
+
+	return messages, nil
+}
+
+func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, error) {
+	messages := make([]model.FullMessage, 0)
+
+	rows, err := repo.db.Query(
+		`SELECT m.id, m.Title, c.id, c.Name, c.Title, c.Photourl as channelPhotoUrl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+		WHERE m.user_id= $1 ORDER BY count DESC NULLS LAST;`, ID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error while getting full messages by user ID: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		message := model.FullMessage{}
+
+		err := rows.Scan(
+			&message.ID, &message.Title, &message.ChannelID, &message.ChannelName,
+			&message.ChannelTitle, &message.ChannelPhotoURL, &message.ReplieCount,
+		)
 		if err != nil {
 			continue
 		}

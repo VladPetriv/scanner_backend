@@ -61,3 +61,26 @@ func (repo *UserRepo) GetUserByUsername(username string) (*model.User, error) {
 
 	return user, nil
 }
+
+func (repo *UserRepo) GetUserByID(ID int) (*model.User, error) {
+	user := &model.User{}
+
+	rows, err := repo.db.Query("SELECT * FROM tg_user WHERE id = $1;", ID)
+	if err != nil {
+		return nil, fmt.Errorf("error while getting user by ID: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.PhotoURL)
+		if err != nil {
+			continue
+		}
+	}
+
+	if user.Username == "" || user.FullName == "" {
+		return nil, nil
+	}
+
+	return user, nil
+}
