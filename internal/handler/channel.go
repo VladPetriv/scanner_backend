@@ -40,7 +40,7 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 
 	h.tmpTree["channels"] = template.Must(
 		template.ParseFiles(
-			"templates/channels.html", "templates/navbar.html", "templates/header.html",
+			"templates/channels.html", "templates/navbar.html", "templates/header.html", "templates/message.html",
 			"templates/messages.html", "templates/channel.html", "templates/user.html", "templates/base.html",
 		),
 	)
@@ -78,7 +78,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 
 	h.tmpTree["singleChannel"] = template.Must(
 		template.ParseFiles(
-			"templates/channel.html", "templates/navbar.html", "templates/header.html",
+			"templates/channel.html", "templates/navbar.html", "templates/header.html", "templates/message.html",
 			"templates/messages.html", "templates/channels.html", "templates/user.html", "templates/base.html",
 		),
 	)

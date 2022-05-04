@@ -28,6 +28,7 @@ func (h *Handler) InitRouter() *mux.Router {
 	router.HandleFunc("/channel", h.channelsPage).Methods("GET")
 	router.HandleFunc("/channel/{channel_name}", h.channelPage).Methods("GET")
 	router.HandleFunc("/user/{user_id}", h.userPage).Methods("GET")
+	router.HandleFunc("/message/{message_id}", h.messagePage).Methods("GET")
 
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()

@@ -21,7 +21,6 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		Title: "Telegram Overflow",
 		Type:  "messages",
 	}
-
 	channels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
@@ -39,7 +38,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 
 	h.tmpTree["messages"] = template.Must(
 		template.ParseFiles(
-			"templates/messages.html", "templates/navbar.html", "templates/header.html",
+			"templates/messages.html", "templates/navbar.html", "templates/header.html", "templates/message.html",
 			"templates/channels.html", "templates/channel.html", "templates/user.html", "templates/base.html",
 		),
 	)
