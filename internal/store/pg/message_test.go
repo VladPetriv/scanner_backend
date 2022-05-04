@@ -13,7 +13,6 @@ func TestMessagePg_GetMessage(t *testing.T) {
 	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
-
 	}
 
 	defer db.Close()
@@ -409,6 +408,86 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetFullMessagesByUserID(tt.input)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestMessagePg_GetFullMessageByMessageID(t *testing.T) {
+	db, mock, err := util.CreateMock()
+
+	if err != nil {
+		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	r := NewMessageRepo(&DB{DB: db})
+
+	tests := []struct {
+		name    string
+		mock    func()
+		input   int
+		want    *model.FullMessage
+		wantErr bool
+	}{
+		{
+			name: "Ok",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "title", "channelPhotoUrl", "id", "fullname", "photourl", "count"}).
+					AddRow(1, "test1", 1, "test1", "test1.jpg", 1, "test1 test", "test1.jpg", 2)
+
+				mock.ExpectQuery(
+					`SELECT m.id, m.Title, c.id, c.Title, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+					WHERE m.id = $1;`,
+				).WithArgs(1).WillReturnRows(rows)
+			},
+			input: 1,
+			want:  &model.FullMessage{ID: 1, Title: "test1", ChannelID: 1, ChannelTitle: "test1", ChannelPhotoURL: "test1.jpg", UserID: 1, FullName: "test1 test", PhotoURL: "test1.jpg", ReplieCount: 2},
+		},
+		{
+			name: "empty field",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "title", "channelPhotoUrl", "id", "fullname", "photourl", "count"})
+
+				mock.ExpectQuery(
+					`SELECT m.id, m.Title, c.id, c.Title, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+					WHERE m.id = $1;`,
+				).WithArgs().WillReturnRows(rows)
+
+			},
+			want: nil,
+		},
+		{
+			name: "message not found",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "title", "channelPhotoUrl", "id", "fullname", "photourl", "count"})
+
+				mock.ExpectQuery(
+					`SELECT m.id, m.Title, c.id, c.Title, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+					WHERE m.id = $1;`,
+				).WithArgs(404).WillReturnRows(rows)
+			},
+			input: 404,
+			want:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock()
+
+			got, err := r.GetFullMessageByMessageID(tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
