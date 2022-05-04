@@ -1,7 +1,7 @@
 {{ define "user" }}
 <div class="col-xl-6 col-xxl-4">
   <h1 class="mt-5 h2">
-    <span class="text-muted"> Message count </span>
+    <span class="text-muted"> {{ .MessagesLength }} </span>
     messages from
 
     <img
@@ -35,10 +35,7 @@
     </div>
 
     <div class="card-body">
-      <a
-        class="text-reset text-decoration-none"
-        href="/question/618fa259535ed8596d1aa092"
-      >
+      <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
         <p class="card-text">{{ .Title }}</p>
       </a>
     </div>
@@ -48,7 +45,7 @@
         <div class="col">
           <a
             class="text-reset text-decoration-none d-inline-flex"
-            href="/question/618fa259535ed8596d1aa092"
+            href="/message/{{ .ID }}"
           >
             <img
               alt="chat"

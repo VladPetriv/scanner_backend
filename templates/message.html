@@ -1,0 +1,115 @@
+{{ define "message" }}
+<div class="col-xl-6 col-xxl-4">
+  <div itemprop="mainEntity" itemscope="" itemtype="http://schema.org/Question">
+    <div class="card border-light mt-5">
+      <div class="card-header bg-white border-light">
+        <div class="row">
+          <!-- Channel info start -->
+          <div class="col">
+            <a
+              class="text-decoration-none text-dark fw-semi-bold"
+              href="/channel/{{ .Message.ChannelID }}"
+            >
+              <img
+                alt="Binance Russian"
+                class="rounded me-1"
+                height="25"
+                src="{{ .Message.ChannelPhotoURL }}"
+                width="25"
+              />
+
+              {{ .Message.ChannelTitle }}
+            </a>
+          </div>
+          <!-- Channel info end -->
+
+          <!-- User info start -->
+          <div class="col text-end">
+            <a
+              class="text-decoration-none text-dark fw-semi-bold"
+              href="/user/{{ .Message.UserID }}"
+            >
+              <img
+                alt="Inspayran-"
+                class="rounded me-1"
+                height="25"
+                src="{{ .Message.PhotoURL }}"
+                width="25"
+              />
+
+              <span
+                itemprop="author"
+                itemscope=""
+                itemtype="http://schema.org/Person"
+              >
+                <span itemprop="name"> {{ .Message.FullName }} </span>
+              </span>
+            </a>
+          </div>
+          <!-- User info end -->
+        </div>
+      </div>
+
+      <!-- Message info start -->
+      <meta content="message title " itemprop="text" />
+
+      <div class="card-body">
+        <h1 class="mb-3 fs-3" itemprop="name">{{ .Message.Title }}</h1>
+
+        <p class="card-text"></p>
+      </div>
+      <!-- Message info end -->
+    </div>
+
+    <h4 class="mt-4">
+      <span class="text-muted" itemprop="answerCount">
+        {{ .Message.ReplieCount }}
+      </span>
+      replies
+    </h4>
+
+    <!-- Replies info start -->
+    {{ range .Message.Replies }}
+    <div
+      class="card mt-4 border-light"
+      id="reply-6271c44db2d5debe9ec27504"
+      itemprop="acceptedAnswer"
+      itemscope=""
+      itemtype="http://schema.org/Answer"
+    >
+      <div class="card-header bg-white border-light">
+        <div class="row">
+          <div class="col">
+            <a
+              class="text-decoration-none text-dark fw-semi-bold"
+              href="/user/{{ .UserID }}"
+            >
+              <img
+                alt="🕶-"
+                class="rounded me-1"
+                height="25"
+                src="{{ .PhotoURL }}"
+                width="25"
+              />
+
+              <span
+                itemprop="author"
+                itemscope=""
+                itemtype="http://schema.org/Person"
+              >
+                <span itemprop="name"> {{ .FullName }} </span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <p class="card-text" itemprop="text">{{ .Title }}</p>
+      </div>
+    </div>
+    {{ end }}
+    <!-- Replies info end -->
+  </div>
+</div>
+{{ end }}
