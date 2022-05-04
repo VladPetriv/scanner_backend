@@ -53,3 +53,16 @@ func (s *ReplieDBService) GetReplieByName(name string) (*model.Replie, error) {
 
 	return replie, nil
 }
+
+func (s *ReplieDBService) GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error) {
+	replies, err := s.store.Replie.GetFullRepliesByMessageID(ID)
+	if err != nil {
+		return nil, fmt.Errorf("[Replie] Service.GetFullRepliesByMessageID error: %w", err)
+	}
+
+	if len(replies) == 0 {
+		return nil, fmt.Errorf("replies not found")
+	}
+
+	return replies, nil
+}

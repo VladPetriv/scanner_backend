@@ -94,3 +94,16 @@ func (s *MessageDBService) GetFullMessagesByUserID(ID int) ([]model.FullMessage,
 
 	return messages, nil
 }
+
+func (s *MessageDBService) GetFullMessageByMessageID(ID int) (*model.FullMessage, error) {
+	message, err := s.store.Message.GetFullMessageByMessageID(ID)
+	if err != nil {
+		return nil, fmt.Errorf("[Message] Service.GetFullMessageByMessageID error: %w", err)
+	}
+
+	if message == nil {
+		return nil, nil
+	}
+
+	return message, nil
+}

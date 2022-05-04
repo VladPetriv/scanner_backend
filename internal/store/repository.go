@@ -15,12 +15,14 @@ type MessageRepo interface {
 	GetFullMessages() ([]model.FullMessage, error)
 	GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
+	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
 
 type ReplieRepo interface {
 	GetReplies() ([]model.Replie, error)
 	GetReplie(replieID int) (*model.Replie, error)
 	GetReplieByName(name string) (*model.Replie, error)
+	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
 }
 
 type UserRepo interface {

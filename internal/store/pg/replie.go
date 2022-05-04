@@ -86,3 +86,31 @@ func (repo *ReplieRepo) GetReplieByName(name string) (*model.Replie, error) {
 
 	return replie, nil
 }
+
+func (repo *ReplieRepo) GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error) {
+	replies := make([]model.FullReplie, 0)
+
+	rows, err := repo.db.Query(
+		"SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1;", ID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error while getting full replies by message ID: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		replie := model.FullReplie{}
+		err := rows.Scan(&replie.ID, &replie.Title, &replie.UserID, &replie.FullName, &replie.PhotoURL)
+		if err != nil {
+			continue
+		}
+
+		replies = append(replies, replie)
+	}
+
+	if len(replies) == 0 {
+		return nil, fmt.Errorf("replies not found")
+	}
+
+	return replies, nil
+}

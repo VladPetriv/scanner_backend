@@ -187,3 +187,33 @@ func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, e
 
 	return messages, nil
 }
+
+func (repo *MessageRepo) GetFullMessageByMessageID(ID int) (*model.FullMessage, error) {
+	message := &model.FullMessage{}
+
+	rows, err := repo.db.Query(
+		`SELECT m.id, m.Title, c.id, c.Title, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+		WHERE m.id = $1;`, ID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error while getting full messages by message ID: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(
+			&message.ID, &message.Title, &message.ChannelID, &message.ChannelTitle,
+			&message.ChannelPhotoURL, &message.UserID, &message.FullName, &message.PhotoURL, &message.ReplieCount,
+		)
+		if err != nil {
+			continue
+		}
+	}
+
+	if message.Title == "" {
+		return nil, nil
+	}
+
+	return message, nil
+}
