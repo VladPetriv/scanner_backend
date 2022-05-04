@@ -6,3 +6,11 @@ type Replie struct {
 	UserID    int    `json:"userId"`
 	Title     string `json:"title"`
 }
+
+type FullReplie struct {
+	ID       int    `json:"id"`
+	UserID   int    `json:"userId"`
+	Title    string `json:"title"`
+	FullName string `json:"Fullname"`
+	PhotoURL string `json:"PhotoURL"`
+}
