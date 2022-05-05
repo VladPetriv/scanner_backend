@@ -48,6 +48,16 @@ func TestRepliePg_GetReplie(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "empty field",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "user_id", "message_id", "title"})
+
+				mock.ExpectQuery("SELECT * FROM replie WHERE id=$1;").
+					WithArgs().WillReturnRows(rows)
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -158,6 +168,17 @@ func TestRepliePg_GetReplieByName(t *testing.T) {
 		},
 		{
 			name: "replie not found",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "user_id", "message_id", "title"})
+
+				mock.ExpectQuery("SELECT * FROM replie WHERE title=$1;").
+					WithArgs("lost").WillReturnRows(rows)
+			},
+			input: "lost",
+			want:  nil,
+		},
+		{
+			name: "empty field",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "user_id", "message_id", "title"})
 

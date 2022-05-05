@@ -82,11 +82,10 @@ func TestUserPg_GetUserByUsername(t *testing.T) {
 	r := pg.NewUserRepo(&pg.DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   string
-		want    *model.User
-		wantErr bool
+		name  string
+		mock  func()
+		input string
+		want  *model.User
 	}{
 		{
 			name: "Ok",
@@ -106,7 +105,7 @@ func TestUserPg_GetUserByUsername(t *testing.T) {
 			},
 		},
 		{
-			name: "Empty fields",
+			name: "empty field",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "username", "fullname", "photourl"})
 
@@ -115,6 +114,17 @@ func TestUserPg_GetUserByUsername(t *testing.T) {
 			},
 			want: nil,
 		},
+		{
+			name: "user not found",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "username", "fullname", "photourl"})
+
+				mock.ExpectQuery("SELECT * FROM tg_user WHERE username=$1;").
+					WithArgs("lost").WillReturnRows(rows)
+			},
+			input: "lost",
+			want:  nil,
+		},
 	}
 
 	for _, tt := range tests {
@@ -122,13 +132,9 @@ func TestUserPg_GetUserByUsername(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetUserByUsername(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
 
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
@@ -145,11 +151,10 @@ func TestUserPg_GetUserByID(t *testing.T) {
 	r := pg.NewUserRepo(&pg.DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    *model.User
-		wantErr bool
+		name  string
+		mock  func()
+		input int
+		want  *model.User
 	}{
 		{
 			name: "Ok",
@@ -163,7 +168,7 @@ func TestUserPg_GetUserByID(t *testing.T) {
 			want:  &model.User{ID: 1, Username: "test", FullName: "test test", PhotoURL: "test.jpg"},
 		},
 		{
-			name: "empty fields",
+			name: "empty field",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "username", "fullname", "photourl"})
 
@@ -190,13 +195,9 @@ func TestUserPg_GetUserByID(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetUserByID(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
 
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}

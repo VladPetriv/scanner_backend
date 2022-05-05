@@ -49,6 +49,16 @@ func TestMessagePg_GetMessage(t *testing.T) {
 			input:   404,
 			wantErr: true,
 		},
+		{
+			name: "Ok",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title"})
+
+				mock.ExpectQuery("SELECT * FROM message WHERE id=$1;").
+					WithArgs().WillReturnRows(rows)
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -159,6 +169,16 @@ func TestMessagePg_GetMessageByName(t *testing.T) {
 		},
 		{
 			name: "message not found",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title"})
+
+				mock.ExpectQuery("SELECT * FROM message WHERE title=$1;").
+					WithArgs().WillReturnRows(rows)
+			},
+			want: nil,
+		},
+		{
+			name: "empty field",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title"})
 
@@ -290,7 +310,7 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 			},
 		},
 		{
-			name: "empty fields",
+			name: "empty field",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "title", "id", "name", "channelPhotoUrl", "id", "fullname", "photourl"})
 
@@ -374,7 +394,7 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 			},
 		},
 		{
-			name: "empty fields",
+			name: "empty field",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "title", "id", "name", "title", "channelPhotoUrl", "count"})
 

@@ -50,6 +50,16 @@ func TestChannelPg_GetChannel(t *testing.T) {
 			input:   404,
 			wantErr: true,
 		},
+		{
+			name: "empty field",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
+
+				mock.ExpectQuery("SELECT * FROM channel WHERE id=$1;").
+					WithArgs().WillReturnRows(rows)
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -161,6 +171,16 @@ func TestChannelPg_GetByName(t *testing.T) {
 			name: "channel not found",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
+
+				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
+					WithArgs().WillReturnRows(rows)
+			},
+			want: nil,
+		},
+		{
+			name: "empty field",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "name", "tilte", "photourl"})
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
 					WithArgs().WillReturnRows(rows)
