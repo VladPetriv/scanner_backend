@@ -12,7 +12,7 @@ type MessageRepo interface {
 	GetMessages() ([]model.Message, error)
 	GetMessage(messageID int) (*model.Message, error)
 	GetMessageByName(name string) (*model.Message, error)
-	GetFullMessages() ([]model.FullMessage, error)
+	GetFullMessages(page int) ([]model.FullMessage, error)
 	GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)

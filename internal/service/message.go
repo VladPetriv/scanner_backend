@@ -56,8 +56,14 @@ func (s *MessageDBService) GetMessageByName(name string) (*model.Message, error)
 	return message, nil
 }
 
-func (s *MessageDBService) GetFullMessages() ([]model.FullMessage, error) {
-	messages, err := s.store.Message.GetFullMessages()
+func (s *MessageDBService) GetFullMessages(page int) ([]model.FullMessage, error) {
+	if page == 1 || page == 0 {
+		page = 0
+	} else if page != 0 {
+		page *= 10
+	}
+
+	messages, err := s.store.Message.GetFullMessages(page)
 	if err != nil {
 		return nil, fmt.Errorf("[Message] Service.GetFullMessages error: %w", err)
 	}

@@ -1,3 +1,5 @@
+github.com/AndyEverLie/go-pagination-bootstrap v0.0.0-20160303144606-22183c45086a h1:8rDRKmEftCCM3U928ZlkQQGGmqHxKF0R8uFwXEZ+C1I=
+github.com/AndyEverLie/go-pagination-bootstrap v0.0.0-20160303144606-22183c45086a/go.mod h1:0A9MM7g6o0yPyL5eydSUk3r8Bj6AhPBVV+MuIKXgNXQ=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

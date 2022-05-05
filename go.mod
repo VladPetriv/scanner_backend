@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/AndyEverLie/go-pagination-bootstrap v0.0.0-20160303144606-22183c45086a // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.1.0 // indirect
