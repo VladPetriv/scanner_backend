@@ -8,10 +8,12 @@ import (
 )
 
 type Config struct {
-	PgUser     string
-	PgPassword string
-	PgDb       string
-	BindAddr   string
+	PgUser         string
+	PgPassword     string
+	PgDb           string
+	PgHost         string
+	MigrationsPath string
+	BindAddr       string
 }
 
 func Get() (*Config, error) {
@@ -20,9 +22,11 @@ func Get() (*Config, error) {
 	}
 
 	return &Config{
-		PgUser:     os.Getenv("POSTGRES_USER"),
-		PgPassword: os.Getenv("POSTGRES_PASSWORD"),
-		PgDb:       os.Getenv("POSTGRES_DB"),
-		BindAddr:   os.Getenv("BIND_ADDR"),
+		PgUser:         os.Getenv("POSTGRES_USER"),
+		PgPassword:     os.Getenv("POSTGRES_PASSWORD"),
+		PgDb:           os.Getenv("POSTGRES_DB"),
+		PgHost:         os.Getenv("POSTGRES_HOST"),
+		MigrationsPath: os.Getenv("MIGRATIONS_PATH"),
+		BindAddr:       os.Getenv("BIND_ADDR"),
 	}, nil
 }
