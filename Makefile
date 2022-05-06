@@ -16,7 +16,19 @@ migrate_up:
 migrate_down:
 	migrate -path ./internal/store/migrations/ -database "postgresql://vlad:admin@localhost:5432/scanner?sslmode=disable" -verbose down
 
-.PHONT: test
+.PHONY: test
 
 test:
 	go test -v ./...
+
+.PHONY: docker_build
+
+docker_build:
+	docker-compose build
+
+.PHONY: docker_run
+
+docker_run:
+	docker-compose up
+
+
