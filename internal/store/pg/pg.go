@@ -12,7 +12,11 @@ type DB struct {
 }
 
 func Dial(cfg config.Config) (*DB, error) {
-	connectionString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", cfg.PgUser, cfg.PgPassword, cfg.PgDb)
+	connectionString := fmt.Sprintf(
+		"user=%s password=%s host=%s dbname=%s sslmode=disable",
+		cfg.PgUser, cfg.PgPassword, cfg.PgHost, cfg.PgDb,
+	)
+
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		return nil, fmt.Errorf("error while create connection to db: %w", err)
