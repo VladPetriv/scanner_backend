@@ -1,0 +1,32 @@
+version: "1.0"
+
+services:
+  tg_scanner:
+    container_name: main
+    env_file:
+      - ./.env
+    build:
+      context: .
+    command: sh -c "./wait-for-postgres.sh postgres; /scanner-backend"
+    ports:
+      - 3000:3000
+      - 9229:9229
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    container_name: postgres
+    image: postgres:12
+    env_file:
+      - ./.env
+    environment:
+      PG_DATA: /var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  pgdata:
