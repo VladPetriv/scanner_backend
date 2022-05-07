@@ -37,11 +37,17 @@
   </div>
 
   <div class="row">
+    {{ if eq .MessagesLength 0  }}
+    <h2 class="mt-4" id="questions">
+      <span class="text-muted"> No messages found) </span>
+      <a class="text-decoration-none" href="/home"> Go home page </a>
+    </h2>
+    {{ else }}
     <h2 class="mt-4" id="questions">
       <span class="text-muted"> {{ .MessagesLength }} </span>
       messages in channel
 
-      <a class="text-decoration-none" href="/"> Go home page </a>
+      <a class="text-decoration-none" href="/home"> Go home page </a>
     </h2>
 
     {{ range .Messages }}
@@ -89,9 +95,8 @@
         </div>
       </div>
     </div>
-
+    {{ end }}
     {{ end }}
   </div>
-
   {{ end }}
 </div>

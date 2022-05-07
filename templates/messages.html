@@ -1,5 +1,13 @@
 {{ define "messages" }}
 <div class="col-xl-6 col-xxl-4">
+
+  {{ if eq .MessagesLength 0  }}
+   <!-- Message status start -->
+  <h1 class="mt-5 h2">
+    <span class="text-muted"> No messages found </span>  
+  </h1>
+  <!-- Message status end -->
+  {{ else }}
   <!-- Message count start -->
   <h1 class="mt-5 h2">
     <span class="text-muted"> {{ .MessagesLength }} </span>
@@ -82,7 +90,8 @@
 
   <ul class="pagination justify-content-center mt-5">
     {{ .Pager.Render  }} 
-   </ul>
+  </ul>
+  {{ end }}
    
   </div>
 {{ end }}

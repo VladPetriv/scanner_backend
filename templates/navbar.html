@@ -1,5 +1,13 @@
 {{define "navbar"}}
 <div class="col-xl-3 col-xxl-4 d-none d-xl-block">
+  {{ if eq .ChannelsLength 0 }}
+     
+  <h2 class="mt-5 mb-4">
+    <a class="text-decoration-none text-dark" href="/channel">
+      <span class="text-muted"> No channels found </span>
+     </a>
+  </h2>
+  {{else}}
   <h2 class="mt-5 mb-4">
     <a class="text-decoration-none text-dark" href="/channel">
       <span class="text-muted"> {{ .ChannelsLength }} </span>
@@ -23,6 +31,8 @@
       {{ .Name }}
     </a>
   </div>
+  {{end}}
+
   {{end}}
 </div>
 {{end}}

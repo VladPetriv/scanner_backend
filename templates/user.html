@@ -15,6 +15,9 @@
     <span class="text-muted"> {{ .User.FullName }} </span>
   </h1>
 
+  {{ if eq .MessagesLength 0  }}
+    <span class="text-muted"> No messages found) </span>
+  {{ else }}
   {{ range .Messages }}
   <div class="card border-light mt-4">
     <div class="card-header bg-white border-light">
@@ -60,6 +63,7 @@
     </div>
   </div>
   {{ end }}
+  {{ end }} 
 </div>
 
 {{ end }}

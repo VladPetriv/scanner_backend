@@ -61,6 +61,14 @@
       <!-- Message info end -->
     </div>
 
+
+    {{ if eq .Message.ReplieCount 0 }}
+    <h4 class="mt-4">
+      <span class="text-muted" itemprop="answerCount">
+        No replies found)
+      </span>
+    </h4>
+    {{ else }}
     <h4 class="mt-4">
       <span class="text-muted" itemprop="answerCount">
         {{ .Message.ReplieCount }}
@@ -110,6 +118,7 @@
     </div>
     {{ end }}
     <!-- Replies info end -->
-  </div>
+    {{ end  }}
+    </div>
 </div>
 {{ end }}
