@@ -15,6 +15,7 @@ COPY --from=build /scanner-backend /scanner-backend
 COPY ./.env ./
 COPY ./templates ./templates
 COPY ./wait-for-postgres.sh ./
+COPY ./internal/store/migrations ./
 
 RUN apk --no-cache add postgresql-client && chmod +x wait-for-postgres.sh
 
