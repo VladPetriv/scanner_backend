@@ -1,11 +1,11 @@
-.PHONY:build
+.PHONY:build-l
 
-build:
+build-l:
 	go build -o server ./cmd/main.go
 
-.PHONY:run
+.PHONY:run-l
 
-run:
+run-l:
 	go run ./cmd/main.go
 
 migrate_up:
@@ -21,14 +21,14 @@ migrate_down:
 test:
 	go test -v ./...
 
-.PHONY: docker_build
+.PHONY: build
 
-docker_build:
+build:
 	docker-compose build
 
-.PHONY: docker_run
+.PHONY: run
 
-docker_run:
+run:
 	docker-compose up
 
 
