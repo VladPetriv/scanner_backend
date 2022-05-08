@@ -46,7 +46,7 @@ func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.User = *user
-	data.Channels = channels
+	data.Channels = channels[:10]
 	data.ChannelsLength = len(channels)
 	data.Messages = messages
 	data.MessagesLength = len(messages)

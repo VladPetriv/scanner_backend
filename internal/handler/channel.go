@@ -3,7 +3,9 @@ package handler
 import (
 	"html/template"
 	"net/http"
+	"strconv"
 
+	"github.com/AndyEverLie/go-pagination-bootstrap"
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/gorilla/mux"
 )
@@ -13,7 +15,10 @@ type ChannelPageData struct {
 	Title          string
 	Channels       []model.Channel
 	ChannelsLength int
+	MainChannels   []model.Channel
+	Pager          *pagination.Pagination
 }
+
 type SingleChannelPageData struct {
 	Type           string
 	Title          string
@@ -22,9 +27,13 @@ type SingleChannelPageData struct {
 	ChannelsLength int
 	Messages       []model.FullMessage
 	MessagesLength int
+	Pager          *pagination.Pagination
 }
 
 func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
+	page := r.URL.Query().Get("page")
+	iPage, _ := strconv.Atoi(page)
+
 	data := ChannelPageData{
 		Title: "Telegram channels",
 		Type:  "channels",
@@ -35,8 +44,17 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	data.Channels = channels
+	mainChannels, err := h.service.Channel.GetChannelsByPage(iPage)
+	if err != nil {
+		h.log.Error(err)
+	}
+
+	pager := pagination.New(len(channels), 10, iPage, "/channel?=0")
+
+	data.Channels = channels[:10]
 	data.ChannelsLength = len(channels)
+	data.MainChannels = mainChannels
+	data.Pager = pager
 
 	h.tmpTree["channels"] = template.Must(
 		template.ParseFiles(
@@ -51,10 +69,14 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	channelName := vars["channel_name"]
 
+	page := r.URL.Query().Get("page")
+	iPage, _ := strconv.Atoi(page)
+
 	data := SingleChannelPageData{
 		Type:  "channel",
 		Title: "Telegram channel",
 	}
+
 	channels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
@@ -65,16 +87,24 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	fullMessages, err := h.service.Message.GetFullMessagesByChannelID(channel.ID)
+	length, err := h.service.Message.GetFullMessagesByChannelID(channel.ID, 1024*1024, iPage)
 	if err != nil {
 		h.log.Error(err)
 	}
 
+	fullMessages, err := h.service.Message.GetFullMessagesByChannelID(channel.ID, 10, iPage)
+	if err != nil {
+		h.log.Error(err)
+	}
+
+	pager := pagination.New(len(length), 10, iPage, "/channel/ru_python?page=0")
+
 	data.Channel = *channel
-	data.Channels = channels
+	data.Channels = channels[:10]
 	data.Messages = fullMessages
 	data.ChannelsLength = len(channels)
-	data.MessagesLength = len(fullMessages)
+	data.MessagesLength = len(length)
+	data.Pager = pager
 
 	h.tmpTree["singleChannel"] = template.Must(
 		template.ParseFiles(

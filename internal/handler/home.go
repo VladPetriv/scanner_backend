@@ -21,7 +21,6 @@ type HomePageData struct {
 
 func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 	page := r.URL.Query().Get("page")
-
 	iPage, _ := strconv.Atoi(page)
 
 	data := HomePageData{
@@ -46,7 +45,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 
 	pager := pagination.New(len(messagesLength), 10, iPage, "/home?page=0")
 
-	data.Channels = channels
+	data.Channels = channels[:10]
 	data.Messages = messages
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(messagesLength)

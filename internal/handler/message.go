@@ -45,7 +45,7 @@ func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 
 	message.Replies = replies
 
-	data.Channels = channels
+	data.Channels = channels[:10]
 	data.ChannelsLength = len(channels)
 	data.Message = *message
 
