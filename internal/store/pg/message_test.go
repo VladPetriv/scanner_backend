@@ -219,6 +219,7 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 	tests := []struct {
 		name    string
 		mock    func()
+		input   int
 		want    []model.FullMessage
 		wantErr bool
 	}{
@@ -232,13 +233,14 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-					ORDER BY count DESC NULLS LAST;`,
+					ORDER BY count DESC NULLS LAST LIMIT 10 OFFSET $1;`,
 				).WillReturnRows(rows)
 			},
 			want: []model.FullMessage{
 				{ID: 1, Title: "test1", ChannelID: 1, ChannelName: "test1", ChannelPhotoURL: "test1.jpg", UserID: 1, FullName: "test1", PhotoURL: "test1.jpg", ReplieCount: 1},
 				{ID: 2, Title: "test2", ChannelID: 2, ChannelName: "test2", ChannelPhotoURL: "test2.jpg", UserID: 2, FullName: "test2", PhotoURL: "test2.jpg", ReplieCount: 3},
 			},
+			input: 10,
 		},
 		{
 			name: "full messages not found",
@@ -248,7 +250,21 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-					ORDER BY count DESC NULLS LAST;`,
+					ORDER BY count DESC NULLS LAST LIMIT 10 OFFSET $1;`,
+				).WillReturnRows(rows)
+			},
+			input:   10,
+			wantErr: true,
+		},
+		{
+			name: "empty field",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "name", "channelPhotoUrl", "id", "fullname", "photourl"})
+
+				mock.ExpectQuery(
+					`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+					ORDER BY count DESC NULLS LAST LIMIT 10 OFFSET $1;`,
 				).WillReturnRows(rows)
 			},
 			wantErr: true,
@@ -259,7 +275,7 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
 
-			got, err := r.GetFullMessages()
+			got, err := r.GetFullMessages(tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -285,7 +301,9 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 	tests := []struct {
 		name    string
 		mock    func()
-		input   int
+		ID      int
+		page    int
+		limit   int
 		want    []model.FullMessage
 		wantErr bool
 	}{
@@ -299,11 +317,13 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-					WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST;`,
-				).WithArgs(1).WillReturnRows(rows)
+					WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST LIMIT $2 OFFSET $3;`,
+				).WithArgs(1, 10, 100).WillReturnRows(rows)
 
 			},
-			input: 1,
+			ID:    1,
+			page:  10,
+			limit: 100,
 			want: []model.FullMessage{
 				{ID: 1, Title: "test1", ChannelID: 1, ChannelName: "test", ChannelPhotoURL: "test1.jpg", UserID: 1, FullName: "test1", PhotoURL: "test1.jpg", ReplieCount: 1},
 				{ID: 2, Title: "test2", ChannelID: 1, ChannelName: "test", ChannelPhotoURL: "test2.jpg", UserID: 2, FullName: "test2", PhotoURL: "test2.jpg", ReplieCount: 2},
@@ -317,11 +337,10 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-					WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST;`,
-				).WithArgs(0).WillReturnRows(rows)
+					WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST LIMIT $2 OFFSET $3;`,
+				).WithArgs().WillReturnRows(rows)
 
 			},
-			input:   0,
 			wantErr: true,
 		},
 		{
@@ -332,10 +351,12 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-					WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST;`,
-				).WithArgs(1).WillReturnRows(rows)
+					WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST LIMIT $2 OFFSET $3;`,
+				).WithArgs(404, 10, 100).WillReturnRows(rows)
 			},
-			input:   1,
+			ID:      404,
+			limit:   100,
+			page:    10,
 			wantErr: true,
 		},
 	}
@@ -344,7 +365,7 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
 
-			got, err := r.GetFullMessagesByChannelID(tt.input)
+			got, err := r.GetFullMessagesByChannelID(tt.ID, tt.page, tt.limit)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
