@@ -4,6 +4,7 @@ import "github.com/VladPetriv/scanner_backend/internal/model"
 
 type ChannelService interface {
 	GetChannels() ([]model.Channel, error)
+	GetChannelsByPage(page int) ([]model.Channel, error)
 	GetChannel(channelID int) (*model.Channel, error)
 	GetChannelByName(name string) (*model.Channel, error)
 }
@@ -12,7 +13,7 @@ type MessageService interface {
 	GetMessage(messagelID int) (*model.Message, error)
 	GetMessageByName(name string) (*model.Message, error)
 	GetFullMessages(page int) ([]model.FullMessage, error)
-	GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error)
+	GetFullMessagesByChannelID(ID, limit, page int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }

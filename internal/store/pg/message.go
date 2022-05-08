@@ -120,13 +120,13 @@ func (repo *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) 
 	return messages, nil
 }
 
-func (repo *MessageRepo) GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error) {
+func (repo *MessageRepo) GetFullMessagesByChannelID(ID, limit, page int) ([]model.FullMessage, error) {
 	messages := make([]model.FullMessage, 0)
 
 	rows, err := repo.db.Query(
 		`SELECT m.id, m.Title, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-		WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST;`, ID,
+		WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST LIMIT $2 OFFSET $3;`, ID, limit, page,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting full messages by channel ID: %w", err)

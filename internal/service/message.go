@@ -75,8 +75,14 @@ func (s *MessageDBService) GetFullMessages(page int) ([]model.FullMessage, error
 	return messages, nil
 }
 
-func (s *MessageDBService) GetFullMessagesByChannelID(ID int) ([]model.FullMessage, error) {
-	messages, err := s.store.Message.GetFullMessagesByChannelID(ID)
+func (s *MessageDBService) GetFullMessagesByChannelID(ID, limit, page int) ([]model.FullMessage, error) {
+	if page == 1 || page == 0 {
+		page = 0
+	} else if page != 0 {
+		page *= 10
+	}
+
+	messages, err := s.store.Message.GetFullMessagesByChannelID(ID, limit, page)
 	if err != nil {
 		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByChannelID error: %w", err)
 	}

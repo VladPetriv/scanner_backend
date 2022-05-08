@@ -16,7 +16,33 @@ func NewChannelRepo(db *DB) *ChannelPgRepo {
 
 func (repo *ChannelPgRepo) GetChannels() ([]model.Channel, error) {
 	channels := make([]model.Channel, 0)
+
 	rows, err := repo.db.Query("SELECT * FROM channel;")
+	if err != nil {
+		return nil, fmt.Errorf("error while getting channels: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		channel := model.Channel{}
+		err := rows.Scan(&channel.ID, &channel.Name, &channel.Title, &channel.PhotoURL)
+		if err != nil {
+			continue
+		}
+
+		channels = append(channels, channel)
+	}
+	if len(channels) == 0 {
+		return nil, fmt.Errorf("channels not found")
+	}
+
+	return channels, nil
+}
+
+func (repo *ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) {
+	channels := make([]model.Channel, 0)
+
+	rows, err := repo.db.Query("SELECT * FROM channel LIMIT 10 OFFSET $1;", page)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting channels: %w", err)
 	}
