@@ -10,7 +10,7 @@
     channels
   </h1>
 
-  {{ range .Channels }}
+  {{ range .MainChannels }}
   <div class="card border-light mt-3" id="to-0">
     <a
       class="text-decoration-none text-dark stretched-link"
@@ -58,7 +58,12 @@
     </div>
   </div>
   {{ end }}
+    
+  <ul class="pagination justify-content-center mt-5">
+    {{ .Pager.Render  }} 
+  </ul>
 
   {{ end }}
+
   </div>
 {{ end }}

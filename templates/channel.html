@@ -90,12 +90,16 @@
               />
               {{ .ReplieCount }}
             </a>
-          </div>
-          <div class="col text-end">Post data</div>
+          </div> 
         </div>
       </div>
     </div>
     {{ end }}
+
+    <ul class="pagination justify-content-center mt-5">
+      {{ .Pager.Render  }} 
+    </ul>
+
     {{ end }}
   </div>
   {{ end }}
