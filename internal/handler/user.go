@@ -53,8 +53,8 @@ func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
 
 	h.tmpTree["user"] = template.Must(
 		template.ParseFiles(
-			"templates/user.html", "templates/navbar.html", "templates/header.html", "templates/message.html",
-			"templates/messages.html", "templates/channels.html", "templates/channel.html", "templates/base.html",
+			"templates/user/user.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
+			"templates/message/messages.html", "templates/channel/channels.html", "templates/channel/channel.html", "templates/base.html",
 		),
 	)
 	h.tmpTree["user"].ExecuteTemplate(w, "base", data)

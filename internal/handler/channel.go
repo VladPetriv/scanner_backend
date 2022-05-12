@@ -58,8 +58,8 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 
 	h.tmpTree["channels"] = template.Must(
 		template.ParseFiles(
-			"templates/channels.html", "templates/navbar.html", "templates/header.html", "templates/message.html",
-			"templates/messages.html", "templates/channel.html", "templates/user.html", "templates/base.html",
+			"templates/channel/channels.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
+			"templates/message/messages.html", "templates/channel/channel.html", "templates/user/user.html", "templates/base.html",
 		),
 	)
 	h.tmpTree["channels"].ExecuteTemplate(w, "base", data)
@@ -108,8 +108,8 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 
 	h.tmpTree["singleChannel"] = template.Must(
 		template.ParseFiles(
-			"templates/channel.html", "templates/navbar.html", "templates/header.html", "templates/message.html",
-			"templates/messages.html", "templates/channels.html", "templates/user.html", "templates/base.html",
+			"templates/channel/channel.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
+			"templates/message/messages.html", "templates/channel/channels.html", "templates/user/user.html", "templates/base.html",
 		),
 	)
 	h.tmpTree["singleChannel"].ExecuteTemplate(w, "base", data)
