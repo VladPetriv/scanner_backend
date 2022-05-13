@@ -1,3 +1,9 @@
+CREATE TABLE web_user (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255),
+    password VARCHAR(255)
+);
+
 CREATE TABLE channel (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255),
