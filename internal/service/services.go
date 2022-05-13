@@ -30,3 +30,9 @@ type UserService interface {
 	GetUserByUsername(username string) (*model.User, error)
 	GetUserByID(ID int) (*model.User, error)
 }
+
+type WebUserService interface {
+	GetWebUser(userID int) (*model.WebUser, error)
+	GetWebUserByEmail(email string) (*model.WebUser, error)
+	CreateWebUser(user *model.WebUser) error
+}

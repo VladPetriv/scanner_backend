@@ -31,3 +31,9 @@ type UserRepo interface {
 	GetUserByUsername(username string) (*model.User, error)
 	GetUserByID(ID int) (*model.User, error)
 }
+
+type WebUserRepo interface {
+	GetWebUser(userID int) (*model.WebUser, error)
+	GetWebUserByEmail(email string) (*model.WebUser, error)
+	CreateWebUser(user *model.WebUser) (int, error)
+}

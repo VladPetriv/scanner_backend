@@ -11,6 +11,7 @@ type Manager struct {
 	Message MessageService
 	Replie  ReplieService
 	User    UserService
+	WebUser WebUserService
 }
 
 func NewManager(store *store.Store) (*Manager, error) {
@@ -23,5 +24,6 @@ func NewManager(store *store.Store) (*Manager, error) {
 		Message: NewMessageDBService(store),
 		Replie:  NewReplieDBService(store),
 		User:    NewUserDBService(store),
+		WebUser: NewWebUserDbService(store),
 	}, nil
 }

@@ -17,6 +17,7 @@ type Store struct {
 	Message MessageRepo
 	Replie  ReplieRepo
 	User    UserRepo
+	WebUser WebUserRepo
 }
 
 func New(cfg config.Config, log *logger.Logger) (*Store, error) {
@@ -40,6 +41,7 @@ func New(cfg config.Config, log *logger.Logger) (*Store, error) {
 		store.Message = pg.NewMessageRepo(pgDB)
 		store.Replie = pg.NewReplieRepo(pgDB)
 		store.User = pg.NewUserRepo(pgDB)
+		store.WebUser = pg.NewWebUserRepo(pgDB)
 
 		go store.KeepAliveDB(cfg)
 	}
