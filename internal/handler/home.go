@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -18,6 +19,7 @@ type HomePageData struct {
 	ChannelsLength int
 	MessagesLength int
 	Pager          *pagination.Pagination
+	UserEmail      interface{}
 }
 
 func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +53,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(messagesLength)
 	data.Pager = pager
+	data.UserEmail = fmt.Sprint(h.checkUserStatus(r))
 
 	h.tmpTree["messages"] = template.Must(
 		template.ParseFiles(

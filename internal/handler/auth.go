@@ -90,3 +90,9 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		PageData{Title: "Login", Message: "User password is incorrect!"},
 	)
 }
+
+func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
+	h.removeFromSessionStore(w, r)
+
+	http.Redirect(w, r, "/home", http.StatusFound)
+}

@@ -18,6 +18,7 @@ type ChannelPageData struct {
 	ChannelsLength int
 	MainChannels   []model.Channel
 	Pager          *pagination.Pagination
+	UserEmail      interface{}
 }
 
 type SingleChannelPageData struct {
@@ -29,6 +30,7 @@ type SingleChannelPageData struct {
 	Messages       []model.FullMessage
 	MessagesLength int
 	Pager          *pagination.Pagination
+	UserEmail      interface{}
 }
 
 func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +58,7 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 	data.ChannelsLength = len(channels)
 	data.MainChannels = mainChannels
 	data.Pager = pager
+	data.UserEmail = h.checkUserStatus(r)
 
 	h.tmpTree["channels"] = template.Must(
 		template.ParseFiles(
@@ -109,6 +112,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(length)
 	data.Pager = pager
+	data.UserEmail = h.checkUserStatus(r)
 
 	h.tmpTree["singleChannel"] = template.Must(
 		template.ParseFiles(

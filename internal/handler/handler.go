@@ -29,6 +29,7 @@ func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
 
 func (h *Handler) InitRouter() *mux.Router {
 	router := mux.NewRouter()
+
 	router.Handle("/", http.RedirectHandler("/home", http.StatusFound)).Methods("GET")
 	router.HandleFunc("/home", h.homePage).Methods("GET")
 	router.HandleFunc("/channel", h.channelsPage).Methods("GET")
@@ -39,6 +40,7 @@ func (h *Handler) InitRouter() *mux.Router {
 	router.HandleFunc("/login", h.loginPage).Methods("GET")
 	router.HandleFunc("/registration", h.registration).Methods("POST")
 	router.HandleFunc("/login", h.login).Methods("POST")
+	router.HandleFunc("/logout", h.logout).Methods("POST")
 
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()
@@ -74,8 +76,23 @@ func (h *Handler) checkUserStatus(r *http.Request) interface{} {
 }
 
 func (h *Handler) writeToSessionStore(w http.ResponseWriter, r *http.Request, value interface{}) {
-	session, _ := h.store.Get(r, "session")
+	session, err := h.store.Get(r, "session")
+	if err != nil {
+		h.log.Error("Session error: ", err)
+	}
+
 	session.Values["userEmail"] = value
+	session.Save(r, w)
+}
+
+func (h *Handler) removeFromSessionStore(w http.ResponseWriter, r *http.Request) {
+	session, err := h.store.Get(r, "session")
+	if err != nil {
+		h.log.Error("session error: ", err)
+	}
+
+	delete(session.Values, "userEmail")
+
 	session.Save(r, w)
 }
 

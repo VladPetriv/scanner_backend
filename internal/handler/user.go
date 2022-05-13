@@ -18,6 +18,7 @@ type UserPageData struct {
 	ChannelsLength int
 	Messages       []model.FullMessage
 	MessagesLength int
+	UserEmail      interface{}
 }
 
 func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +52,7 @@ func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
 	data.ChannelsLength = len(channels)
 	data.Messages = messages
 	data.MessagesLength = len(messages)
+	data.UserEmail = h.checkUserStatus(r)
 
 	h.tmpTree["user"] = template.Must(
 		template.ParseFiles(
