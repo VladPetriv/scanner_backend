@@ -55,7 +55,11 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		template.ParseFiles(
 			"templates/message/messages.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
 			"templates/channel/channels.html", "templates/channel/channel.html", "templates/user/user.html", "templates/base.html",
+			"templates/auth/register.html",
 		),
 	)
-	h.tmpTree["messages"].ExecuteTemplate(w, "base", data)
+	err = h.tmpTree["messages"].ExecuteTemplate(w, "base", data)
+	if err != nil {
+		h.log.Error(err)
+	}
 }

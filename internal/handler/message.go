@@ -55,5 +55,8 @@ func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 			"templates/message/messages.html", "templates/channel/channel.html", "templates/user/user.html", "templates/base.html",
 		),
 	)
-	h.tmpTree["channels"].ExecuteTemplate(w, "base", data)
+	err = h.tmpTree["channels"].ExecuteTemplate(w, "base", data)
+	if err != nil {
+		h.log.Error(err)
+	}
 }

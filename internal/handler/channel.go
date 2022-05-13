@@ -62,7 +62,10 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 			"templates/message/messages.html", "templates/channel/channel.html", "templates/user/user.html", "templates/base.html",
 		),
 	)
-	h.tmpTree["channels"].ExecuteTemplate(w, "base", data)
+	err = h.tmpTree["channels"].ExecuteTemplate(w, "base", data)
+	if err != nil {
+		h.log.Error(err)
+	}
 }
 
 func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
@@ -112,5 +115,8 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 			"templates/message/messages.html", "templates/channel/channels.html", "templates/user/user.html", "templates/base.html",
 		),
 	)
-	h.tmpTree["singleChannel"].ExecuteTemplate(w, "base", data)
+	err = h.tmpTree["singleChannel"].ExecuteTemplate(w, "base", data)
+	if err != nil {
+		h.log.Error(err)
+	}
 }
