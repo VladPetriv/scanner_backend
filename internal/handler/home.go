@@ -7,6 +7,7 @@ import (
 
 	"github.com/AndyEverLie/go-pagination-bootstrap"
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 type HomePageData struct {
@@ -45,7 +46,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 
 	pager := pagination.New(len(messagesLength), 10, iPage, "/home?page=0")
 
-	data.Channels = channels[:10]
+	data.Channels = util.ProcessChannels(channels)
 	data.Messages = messages
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(messagesLength)

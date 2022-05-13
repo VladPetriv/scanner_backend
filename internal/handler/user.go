@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/gorilla/mux"
 )
 
@@ -46,7 +47,7 @@ func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.User = *user
-	data.Channels = channels[:10]
+	data.Channels = util.ProcessChannels(channels)
 	data.ChannelsLength = len(channels)
 	data.Messages = messages
 	data.MessagesLength = len(messages)

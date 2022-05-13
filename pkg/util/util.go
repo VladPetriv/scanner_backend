@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/VladPetriv/scanner_backend/internal/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,9 +28,13 @@ func HashPassword(password string) (string, error) {
 
 func ComparePassword(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	if err != nil {
-		return false
-	}
+	return err == nil
+}
 
-	return true
+func ProcessChannels(channels []model.Channel) []model.Channel {
+	if len(channels) <= 10 {
+		return channels
+	} else {
+		return channels[:10]
+	}
 }

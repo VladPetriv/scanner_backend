@@ -7,6 +7,7 @@ import (
 
 	"github.com/AndyEverLie/go-pagination-bootstrap"
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/gorilla/mux"
 )
 
@@ -51,7 +52,7 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 
 	pager := pagination.New(len(channels), 10, iPage, "/channel?=0")
 
-	data.Channels = channels[:10]
+	data.Channels = util.ProcessChannels(channels)
 	data.ChannelsLength = len(channels)
 	data.MainChannels = mainChannels
 	data.Pager = pager
@@ -103,7 +104,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	pager := pagination.New(len(length), 10, iPage, "/channel/ru_python?page=0")
 
 	data.Channel = *channel
-	data.Channels = channels[:10]
+	data.Channels = util.ProcessChannels(channels)
 	data.Messages = fullMessages
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(length)
