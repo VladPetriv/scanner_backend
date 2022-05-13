@@ -17,11 +17,11 @@ Go, GoTemplates, PostgreSQL, Gorilla-Mux, Logrus, Go-Sqlmock, Testify, Golang-Mi
 ```bash
 #Make sure that you have installed PostgreSQL on your machine
 
-git clone git@github.com:VladPetriv/scanner_backend.git
+ git clone git@github.com:VladPetriv/scanner_backend.git
 
-cd scanner_backend 
+ cd scanner_backend 
 
-go mod download
+ go mod download
 
 ```
 
@@ -41,22 +41,24 @@ Please create .env file with this fields:
 Start an application locally:
 
 ```bash
-make run-l # Or you can use go run ./cmd/main.go
+ make run-l # Or you can use go run ./cmd/main.go
 ```
 
 Start with docker-compose:
 
 ```bash
-make build # Build docker compoe
+ make build # Build docker compoe
 
-make run # Up docker compose
+ make run # Up docker compose
 ```
 
 Running test suite
 
 
 ```bash
-make test
+ make mock
+
+ make test
 ```
 
 
