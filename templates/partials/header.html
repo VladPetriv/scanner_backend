@@ -24,13 +24,37 @@
       </ul>
 
       <div class="d-flex">
-        <input
-          class="form-control me-2"
-          type="search"
-          placeholder="Search"
-          aria-label="Search"
-        />
-        <button class="btn btn-outline-success" type="submit">Search</button>
+        {{ if eq .UserEmail "" }}
+        <a class="btn btn-link" href="/login">Login</a>
+        <a class="btn btn-link" href="/registration">Registration</a>
+        {{ else }}
+        <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDarkDropdownMenuLink"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Welcome, {{ .UserEmail }}
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-dark"
+                aria-labelledby="navbarDarkDropdownMenuLink"
+              >
+                <li>
+                  <form action="/logout" method="POST">
+                    <button class="dropdown-item" type="submit">Logout</button>
+                  </form>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        {{ end }}
       </div>
     </div>
   </div>
