@@ -42,7 +42,7 @@ func (s *ChannelDBService) GetChannelsByPage(page int) ([]model.Channel, error) 
 
 	channels, err := s.store.Channel.GetChannelsByPage(page)
 	if err != nil {
-		return nil, fmt.Errorf("[Channel] Service.GetChannels error: %w", err)
+		return nil, fmt.Errorf("[Channel] Service.GetChannelsByPage error: %w", err)
 	}
 
 	if channels == nil {
@@ -72,7 +72,7 @@ func (s *ChannelDBService) GetChannelByName(name string) (*model.Channel, error)
 	}
 
 	if channel == nil {
-		return nil, nil
+		return nil, fmt.Errorf("channel not found")
 	}
 
 	return channel, nil

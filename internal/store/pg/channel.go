@@ -32,8 +32,9 @@ func (repo *ChannelPgRepo) GetChannels() ([]model.Channel, error) {
 
 		channels = append(channels, channel)
 	}
+
 	if len(channels) == 0 {
-		return nil, fmt.Errorf("channels not found")
+		return nil, nil
 	}
 
 	return channels, nil
@@ -57,8 +58,9 @@ func (repo *ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) 
 
 		channels = append(channels, channel)
 	}
+
 	if len(channels) == 0 {
-		return nil, fmt.Errorf("channels not found")
+		return nil, nil
 	}
 
 	return channels, nil

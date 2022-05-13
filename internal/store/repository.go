@@ -2,6 +2,7 @@ package store
 
 import "github.com/VladPetriv/scanner_backend/internal/model"
 
+//go:generate mockery --dir . --name ChannelRepo --output ./mocks
 type ChannelRepo interface {
 	GetChannels() ([]model.Channel, error)
 	GetChannelsByPage(page int) ([]model.Channel, error)
@@ -9,6 +10,7 @@ type ChannelRepo interface {
 	GetChannelByName(name string) (*model.Channel, error)
 }
 
+//go:generate mockery --dir . --name MessageRepo --output ./mocks
 type MessageRepo interface {
 	GetMessages() ([]model.Message, error)
 	GetMessage(messageID int) (*model.Message, error)
@@ -19,6 +21,7 @@ type MessageRepo interface {
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
 
+//go:generate mockery --dir . --name ReplieRepo --output ./mocks
 type ReplieRepo interface {
 	GetReplies() ([]model.Replie, error)
 	GetReplie(replieID int) (*model.Replie, error)
@@ -26,12 +29,14 @@ type ReplieRepo interface {
 	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
 }
 
+//go:generate mockery --dir . --name UserRepo --output ./mocks
 type UserRepo interface {
 	GetUsers() ([]model.User, error)
 	GetUserByUsername(username string) (*model.User, error)
 	GetUserByID(ID int) (*model.User, error)
 }
 
+//go:generate mockery --dir . --name WebUserRepo --output ./mocks
 type WebUserRepo interface {
 	GetWebUser(userID int) (*model.WebUser, error)
 	GetWebUserByEmail(email string) (*model.WebUser, error)

@@ -90,10 +90,9 @@ func TestChannelPg_GetChannels(t *testing.T) {
 	r := pg.NewChannelRepo(&pg.DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		want    []model.Channel
-		wantErr bool
+		name string
+		mock func()
+		want []model.Channel
 	}{
 		{
 			name: "Ok",
@@ -117,7 +116,7 @@ func TestChannelPg_GetChannels(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM channel;").
 					WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 	}
 
@@ -126,12 +125,9 @@ func TestChannelPg_GetChannels(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetChannels()
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
@@ -149,11 +145,10 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 	r := pg.NewChannelRepo(&pg.DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    []model.Channel
-		wantErr bool
+		name  string
+		mock  func()
+		input int
+		want  []model.Channel
 	}{
 		{
 			name: "Ok",
@@ -180,8 +175,8 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 					WithArgs(1).WillReturnRows(rows)
 
 			},
-			input:   1,
-			wantErr: true,
+			input: 1,
+			want:  nil,
 		},
 		{
 			name: "empty field",
@@ -191,7 +186,7 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM channel LIMIT 10 OFFSET $1;").
 					WithArgs().WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 	}
 
@@ -200,12 +195,9 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetChannelsByPage(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})

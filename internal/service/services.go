@@ -2,12 +2,15 @@ package service
 
 import "github.com/VladPetriv/scanner_backend/internal/model"
 
+//go:generate mockery --dir . --name ChannelService --output ./mocks
 type ChannelService interface {
 	GetChannels() ([]model.Channel, error)
 	GetChannelsByPage(page int) ([]model.Channel, error)
 	GetChannel(channelID int) (*model.Channel, error)
 	GetChannelByName(name string) (*model.Channel, error)
 }
+
+//go:generate mockery --dir . --name MessageService --output ./mocks
 type MessageService interface {
 	GetMessages() ([]model.Message, error)
 	GetMessage(messagelID int) (*model.Message, error)
@@ -18,6 +21,7 @@ type MessageService interface {
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
 
+//go:generate mockery --dir . --name ReplieService --output ./mocks
 type ReplieService interface {
 	GetReplies() ([]model.Replie, error)
 	GetReplie(replieID int) (*model.Replie, error)
@@ -25,12 +29,14 @@ type ReplieService interface {
 	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
 }
 
+//go:generate mockery --dir . --name UserService --output ./mocks
 type UserService interface {
 	GetUsers() ([]model.User, error)
 	GetUserByUsername(username string) (*model.User, error)
 	GetUserByID(ID int) (*model.User, error)
 }
 
+//go:generate mockery --dir . --name WebUserService --output ./mocks
 type WebUserService interface {
 	GetWebUser(userID int) (*model.WebUser, error)
 	GetWebUserByEmail(email string) (*model.WebUser, error)
