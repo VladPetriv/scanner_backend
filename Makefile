@@ -31,4 +31,9 @@ build:
 run:
 	docker-compose up
 
+.PHONY: mock
+
+mock:
+	cd ./internal/store/; go generate;
+	cd ./internal/service/; go generate;
 
