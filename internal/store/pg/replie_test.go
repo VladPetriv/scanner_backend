@@ -230,7 +230,7 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 					AddRow(1, "test1", 1, "test1 test", "test1.jpg").
 					AddRow(2, "test2", 2, "test2 test", "test2.jpg")
 
-				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1;").
+				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs(1).WillReturnRows(rows)
 			},
 			input: 1,
@@ -245,7 +245,7 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "photourl"})
 
-				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1;").
+				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs().WillReturnRows(rows)
 			},
 			wantErr: true,
@@ -255,7 +255,7 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "photourl"})
 
-				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1;").
+				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs(404).WillReturnRows(rows)
 			},
 			input:   404,
