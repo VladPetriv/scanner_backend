@@ -91,7 +91,7 @@ func (repo *ReplieRepo) GetFullRepliesByMessageID(ID int) ([]model.FullReplie, e
 	replies := make([]model.FullReplie, 0)
 
 	rows, err := repo.db.Query(
-		"SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1;", ID,
+		"SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;", ID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting full replies by message ID: %w", err)
