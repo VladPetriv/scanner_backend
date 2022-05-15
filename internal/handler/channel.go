@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/AndyEverLie/go-pagination-bootstrap"
+	"github.com/VladPetriv/go-pagination-bootstrap"
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/gorilla/mux"

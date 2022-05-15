@@ -3,7 +3,6 @@ module github.com/VladPetriv/scanner_backend
 go 1.17
 
 require (
-	github.com/AndyEverLie/go-pagination-bootstrap v0.0.0-20160303144606-22183c45086a
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/gorilla/mux v1.8.0
@@ -33,4 +32,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
 
-require github.com/stretchr/objx v0.1.0 // indirect
+require (
+	github.com/VladPetriv/go-pagination-bootstrap v0.0.0-20220515154725-61715a21c00b // indirect
+	github.com/stretchr/objx v0.1.0 // indirect
+)
