@@ -42,3 +42,11 @@ type WebUserRepo interface {
 	GetWebUserByEmail(email string) (*model.WebUser, error)
 	CreateWebUser(user *model.WebUser) (int, error)
 }
+
+//go:generate mockery --dir . --name SavedRepo --output ./mocks
+type SavedRepo interface {
+	GetSavedMessages(UserID int) ([]model.Saved, error)
+	GetSavedMessageByMessageID(ID int) (*model.Saved, error)
+	CreateSavedMessage(saved *model.Saved) (int, error)
+	DeleteSavedMessage(ID int) (int, error)
+}

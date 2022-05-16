@@ -12,6 +12,7 @@ type Manager struct {
 	Replie  ReplieService
 	User    UserService
 	WebUser WebUserService
+	Saved   SavedService
 }
 
 func NewManager(store *store.Store) (*Manager, error) {
@@ -25,5 +26,6 @@ func NewManager(store *store.Store) (*Manager, error) {
 		Replie:  NewReplieDBService(store),
 		User:    NewUserDBService(store),
 		WebUser: NewWebUserDbService(store),
+		Saved:   NewSavedDbService(store),
 	}, nil
 }

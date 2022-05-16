@@ -18,6 +18,7 @@ type Store struct {
 	Replie  ReplieRepo
 	User    UserRepo
 	WebUser WebUserRepo
+	Saved   SavedRepo
 }
 
 func New(cfg config.Config, log *logger.Logger) (*Store, error) {
@@ -42,6 +43,7 @@ func New(cfg config.Config, log *logger.Logger) (*Store, error) {
 		store.Replie = pg.NewReplieRepo(pgDB)
 		store.User = pg.NewUserRepo(pgDB)
 		store.WebUser = pg.NewWebUserRepo(pgDB)
+		store.Saved = pg.NewSavedRepo(pgDB)
 
 		go store.KeepAliveDB(cfg)
 	}

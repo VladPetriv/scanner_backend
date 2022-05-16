@@ -42,3 +42,11 @@ type WebUserService interface {
 	GetWebUserByEmail(email string) (*model.WebUser, error)
 	CreateWebUser(user *model.WebUser) error
 }
+
+//go:generate mockery --dir . --name SavedService --output ./mocks
+type SavedService interface {
+	GetSavedMessages(UserID int) ([]model.Saved, error)
+	GetSavedMessageByMessageID(ID int) (*model.Saved, error)
+	CreateSavedMessage(saved *model.Saved) error
+	DeleteSavedMessage(ID int) error
+}
