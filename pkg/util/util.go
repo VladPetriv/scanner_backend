@@ -38,3 +38,11 @@ func ProcessChannels(channels []model.Channel) []model.Channel {
 		return channels[:10]
 	}
 }
+
+func ProcessWebUserData(user *model.WebUser) (int, string) {
+	if user != nil {
+		return user.ID, user.Email
+	}
+
+	return 0, ""
+}

@@ -41,7 +41,16 @@ func (h *Handler) InitRouter() *mux.Router {
 	router.HandleFunc("/registration", h.registration).Methods("POST")
 	router.HandleFunc("/login", h.login).Methods("POST")
 	router.HandleFunc("/logout", h.logout).Methods("POST")
+	router.HandleFunc("/saved/{user_id}", h.savedPage).Methods("GET")
+	router.HandleFunc("/saved/delete/{saved_id}", h.deleteSavedMessage).Methods("POST")
+	router.HandleFunc("/saved/create/{user_id}/{message_id}", h.createSavedMessage).Methods("POST")
 
+	h.logAllRoutes(router)
+
+	return router
+}
+
+func (h *Handler) logAllRoutes(router *mux.Router) {
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()
 		if err != nil {
@@ -57,8 +66,6 @@ func (h *Handler) InitRouter() *mux.Router {
 
 		return nil
 	})
-
-	return router
 }
 
 func (h *Handler) checkUserStatus(r *http.Request) interface{} {

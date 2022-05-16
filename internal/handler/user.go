@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -18,7 +19,8 @@ type UserPageData struct {
 	ChannelsLength int
 	Messages       []model.FullMessage
 	MessagesLength int
-	UserEmail      interface{}
+	WebUserID      int
+	UserEmail      string
 }
 
 func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
@@ -47,17 +49,23 @@ func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
+	webUser, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	if err != nil {
+		h.log.Error(err)
+	}
+
 	data.User = *user
 	data.Channels = util.ProcessChannels(channels)
 	data.ChannelsLength = len(channels)
 	data.Messages = messages
 	data.MessagesLength = len(messages)
-	data.UserEmail = h.checkUserStatus(r)
+	data.WebUserID, data.UserEmail = util.ProcessWebUserData(webUser)
 
 	h.tmpTree["user"] = template.Must(
 		template.ParseFiles(
 			"templates/user/user.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
-			"templates/message/messages.html", "templates/channel/channels.html", "templates/channel/channel.html", "templates/base.html",
+			"templates/message/messages.html", "templates/channel/channels.html", "templates/user/saved.html", "templates/channel/channel.html",
+			"templates/base.html",
 		),
 	)
 	err = h.tmpTree["user"].ExecuteTemplate(w, "base", data)

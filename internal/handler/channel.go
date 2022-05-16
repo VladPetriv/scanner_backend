@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -19,6 +20,7 @@ type ChannelPageData struct {
 	MainChannels   []model.Channel
 	Pager          *pagination.Pagination
 	UserEmail      interface{}
+	WebUserID      int
 }
 
 type SingleChannelPageData struct {
@@ -31,6 +33,7 @@ type SingleChannelPageData struct {
 	MessagesLength int
 	Pager          *pagination.Pagination
 	UserEmail      interface{}
+	WebUserID      int
 }
 
 func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
@@ -52,18 +55,24 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
+	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	if err != nil {
+		h.log.Error(err)
+	}
+
 	pager := pagination.New(len(channels), 10, iPage, "/channel?=0")
 
 	data.Channels = util.ProcessChannels(channels)
 	data.ChannelsLength = len(channels)
 	data.MainChannels = mainChannels
 	data.Pager = pager
-	data.UserEmail = h.checkUserStatus(r)
+	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
 
 	h.tmpTree["channels"] = template.Must(
 		template.ParseFiles(
 			"templates/channel/channels.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
-			"templates/message/messages.html", "templates/channel/channel.html", "templates/user/user.html", "templates/base.html",
+			"templates/message/messages.html", "templates/channel/channel.html", "templates/user/saved.html", "templates/user/user.html",
+			"templates/base.html",
 		),
 	)
 	err = h.tmpTree["channels"].ExecuteTemplate(w, "base", data)
@@ -104,6 +113,11 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
+	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	if err != nil {
+		h.log.Error(err)
+	}
+
 	pager := pagination.New(len(length), 10, iPage, "/channel/ru_python?page=0")
 
 	data.Channel = *channel
@@ -112,12 +126,14 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(length)
 	data.Pager = pager
-	data.UserEmail = h.checkUserStatus(r)
+	data.UserEmail = user.Email
+	data.WebUserID = user.ID
 
 	h.tmpTree["singleChannel"] = template.Must(
 		template.ParseFiles(
 			"templates/channel/channel.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
-			"templates/message/messages.html", "templates/channel/channels.html", "templates/user/user.html", "templates/base.html",
+			"templates/message/messages.html", "templates/channel/channels.html", "templates/user/saved.html", "templates/user/user.html",
+			"templates/base.html",
 		),
 	)
 	err = h.tmpTree["singleChannel"].ExecuteTemplate(w, "base", data)
