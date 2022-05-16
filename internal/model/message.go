@@ -19,4 +19,6 @@ type FullMessage struct {
 	PhotoURL        string `json:"photoURL"`
 	ReplieCount     int    `json:"replieCount"`
 	Replies         []FullReplie
+	SavedID         int
+	Status          bool
 }
