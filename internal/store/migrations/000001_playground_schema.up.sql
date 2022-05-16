@@ -1,7 +1,15 @@
 CREATE TABLE web_user (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255),
-    password VARCHAR(255)
+  id SERIAL PRIMARY KEY,
+  email  VARCHAR(255) UNIQUE,
+  password VARCHAR(255)
+);
+
+CREATE TABLE saved (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  message_id INT UNIQUE NOT NULL,
+  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES web_user(id) ON DELETE CASCADE,
+  CONSTRAINT fk_message FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 );
 
 CREATE TABLE channel (

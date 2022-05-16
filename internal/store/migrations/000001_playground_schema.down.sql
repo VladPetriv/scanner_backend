@@ -1,3 +1,4 @@
+DROP TABLE saved;
 DROP TABLE web_user;
 DROP TABLE replie;
 DROP TABLE message;
