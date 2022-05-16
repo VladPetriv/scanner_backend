@@ -28,6 +28,8 @@
           {{ template "user" . }}
         {{ else if eq .Type "message"}}
           {{ template "message" . }}
+        {{ else if eq .Type "saved" }}
+          {{ template "saved" . }}
         {{ else }}
           {{ template "channels" . }}
         {{ end }}

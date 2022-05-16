@@ -33,18 +33,22 @@
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle"
-                href="#"
                 id="navbarDarkDropdownMenuLink"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                Welcome, {{ .UserEmail }}
+                {{ .UserEmail }}
               </a>
               <ul
-                class="dropdown-menu dropdown-menu-dark"
+                class="dropdown-menu dropdown-menu"
                 aria-labelledby="navbarDarkDropdownMenuLink"
               >
+                <li>
+                  <a class="dropdown-item" href="/saved/{{ .WebUserID }}"
+                    >Saved</a
+                  >
+                </li>
                 <li>
                   <form action="/logout" method="POST">
                     <button class="dropdown-item" type="submit">Logout</button>

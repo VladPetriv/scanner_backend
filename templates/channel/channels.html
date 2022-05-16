@@ -1,6 +1,6 @@
 {{ define "channels" }}
 <div class="col-xl-6 col-xxl-4">
-  {{ if eq .ChannelsLength 0  }}
+  {{ if eq .ChannelsLength 0 }}
   <h1 class="mt-5 h2">
     <span class="text-muted"> No channels found </span>
   </h1>
@@ -58,12 +58,11 @@
     </div>
   </div>
   {{ end }}
-    
+
   <ul class="pagination justify-content-center mt-5">
-    {{ .Pager.Render  }} 
+    {{ .Pager.Render }}
   </ul>
 
   {{ end }}
-
-  </div>
+</div>
 {{ end }}

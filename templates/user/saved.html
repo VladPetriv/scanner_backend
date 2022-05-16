@@ -1,4 +1,4 @@
-{{ define "messages" }}
+{{ define "saved" }}
 <div class="col-xl-6 col-xxl-4">
   {{ if eq .MessagesLength 0 }}
   <!-- Message status start -->
@@ -10,10 +10,11 @@
   <!-- Message count start -->
   <h1 class="mt-5 h2">
     <span class="text-muted"> {{ .MessagesLength }} </span>
-    messages
+    messages saved
   </h1>
   <!-- Message count end -->
-  {{$userID := .WebUserID}} {{ range .Messages }}
+
+  {{ range .Messages }}
   <div class="card mt-4 border-light">
     <!--Channel and user info start-->
     <div class="card-header bg-white border-light">
@@ -81,22 +82,14 @@
           </a>
         </div>
         <div class="col text-end">
-          {{ if .Status }} {{ else }}
-          <form action="/saved/create/{{ $userID }}/{{ .ID }}" method="POST">
-            <button type="submit" class="btn btn-outline-success">Save</button>
+          <form action="/saved/delete/{{ .SavedID }}" method="POST">
+            <button type="submit" class="btn btn-outline-danger">Remove</button>
           </form>
-          {{ end }}
         </div>
       </div>
     </div>
     <!-- Replie info end-->
   </div>
-  {{ end }}
-
-  <ul class="pagination justify-content-center mt-5">
-    {{ .Pager.Render }}
-  </ul>
-
-  {{ end }}
+  {{ end }} {{ end }}
 </div>
 {{ end }}
