@@ -33,6 +33,6 @@ require (
 )
 
 require (
-	github.com/VladPetriv/go-pagination-bootstrap v0.0.0-20220515154725-61715a21c00b // indirect
+	github.com/VladPetriv/go-pagination-bootstrap v0.0.0-20220515154725-61715a21c00b
 	github.com/stretchr/objx v0.1.0 // indirect
 )
