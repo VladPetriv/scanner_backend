@@ -22,7 +22,6 @@ func (s *ChannelDBService) GetChannels() ([]model.Channel, error) {
 	if err != nil {
 		return nil, fmt.Errorf("[Channel] Service.GetChannels error: %w", err)
 	}
-
 	if channels == nil {
 		return nil, fmt.Errorf("channels not found")
 	}
@@ -76,4 +75,13 @@ func (s *ChannelDBService) GetChannelByName(name string) (*model.Channel, error)
 	}
 
 	return channel, nil
+}
+
+func (s *ChannelDBService) GetChannelStats(channelID int) (*model.Stat, error) {
+	stat, err := s.store.Channel.GetChannelStats(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("[Channel] Service.GetChannelStats error: %w", err)
+	}
+
+	return stat, nil
 }

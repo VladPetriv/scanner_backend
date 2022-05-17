@@ -8,6 +8,7 @@ type ChannelService interface {
 	GetChannelsByPage(page int) ([]model.Channel, error)
 	GetChannel(channelID int) (*model.Channel, error)
 	GetChannelByName(name string) (*model.Channel, error)
+	GetChannelStats(channelID int) (*model.Stat, error)
 }
 
 //go:generate mockery --dir . --name MessageService --output ./mocks

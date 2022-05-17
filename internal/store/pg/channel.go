@@ -110,3 +110,42 @@ func (repo *ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error)
 
 	return channel, nil
 }
+
+func (repo *ChannelPgRepo) GetChannelStats(channelID int) (*model.Stat, error) {
+	var sum int
+	stat := &model.Stat{}
+	messageCount := make([]int, 0)
+	replieCount := make([]int, 0)
+
+	rows, err := repo.db.Query(
+		"SELECT m.id, COUNT(r.id) FROM channel c LEFT JOIN message m ON m.channel_id = c.id LEFT JOIN replie r ON r.message_id = m.id WHERE c.id = $1 GROUP BY m.id;",
+		channelID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error while getting channel stats: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var mC int
+		var rC int
+
+		err := rows.Scan(&mC, &rC)
+		if err != nil {
+			continue
+		}
+
+		messageCount = append(messageCount, mC)
+		replieCount = append(replieCount, rC)
+	}
+
+	stat.MessagesCount = len(messageCount)
+
+	for _, replie := range replieCount {
+		sum += replie
+	}
+
+	stat.RepliesCount = sum
+
+	return stat, nil
+}
