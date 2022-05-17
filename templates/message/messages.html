@@ -13,7 +13,9 @@
     messages
   </h1>
   <!-- Message count end -->
-  {{$userID := .WebUserID}} {{ range .Messages }}
+  {{$userID := .WebUserID}} 
+  {{$userEmail := .UserEmail}} 
+  {{ range .Messages }}
   <div class="card mt-4 border-light">
     <!--Channel and user info start-->
     <div class="card-header bg-white border-light">
@@ -81,10 +83,16 @@
           </a>
         </div>
         <div class="col text-end">
-          {{ if .Status }} {{ else }}
-          <form action="/saved/create/{{ $userID }}/{{ .ID }}" method="POST">
-            <button type="submit" class="btn btn-outline-success">Save</button>
-          </form>
+          {{ if eq $userEmail "" }} 
+            Sign in or sign up to save messages 
+          {{ else }}
+            {{ if .Status }}
+              Message is saved 
+            {{ else }}
+              <form action="/saved/create/{{ $userID }}/{{ .ID }}" method="POST">
+                <button type="submit" class="btn btn-outline-success">Save</button>
+              </form>
+            {{ end }} 
           {{ end }}
         </div>
       </div>
