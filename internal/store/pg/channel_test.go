@@ -270,3 +270,65 @@ func TestChannelPg_GetByName(t *testing.T) {
 		})
 	}
 }
+
+func TestChannelPg_GetChannelStats(t *testing.T) {
+	db, mock, err := util.CreateMock()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	r := pg.NewChannelRepo(&pg.DB{DB: db})
+
+	tests := []struct {
+		name  string
+		mock  func()
+		input int
+		want  *model.Stat
+	}{
+		{
+			name: "Ok: [Stat found]",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "count"}).
+					AddRow(1, 12).
+					AddRow(2, 0)
+
+				mock.ExpectQuery("SELECT m.id, COUNT(r.id) FROM channel c LEFT JOIN message m ON m.channel_id = c.id LEFT JOIN replie r ON r.message_id = m.id WHERE c.id = $1 GROUP BY m.id;").
+					WithArgs(1).WillReturnRows(rows)
+			},
+			input: 1,
+			want: &model.Stat{
+				MessagesCount: 2,
+				RepliesCount:  12,
+			},
+		},
+		{
+			name: "Error: [Empty field]",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "count"})
+
+				mock.ExpectQuery("SELECT m.id, COUNT(r.id) FROM channel c LEFT JOIN message m ON m.channel_id = c.id LEFT JOIN replie r ON r.message_id = m.id WHERE c.id = $1 GROUP BY m.id;").
+					WithArgs().WillReturnRows(rows)
+			},
+			input: 1,
+			want: &model.Stat{
+				MessagesCount: 0,
+				RepliesCount:  0,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock()
+
+			got, err := r.GetChannelStats(tt.input)
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}

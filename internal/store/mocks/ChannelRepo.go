@@ -56,6 +56,29 @@ func (_m *ChannelRepo) GetChannelByName(name string) (*model.Channel, error) {
 	return r0, r1
 }
 
+// GetChannelStats provides a mock function with given fields: channelID
+func (_m *ChannelRepo) GetChannelStats(channelID int) (*model.Stat, error) {
+	ret := _m.Called(channelID)
+
+	var r0 *model.Stat
+	if rf, ok := ret.Get(0).(func(int) *model.Stat); ok {
+		r0 = rf(channelID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Stat)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(channelID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetChannels provides a mock function with given fields:
 func (_m *ChannelRepo) GetChannels() ([]model.Channel, error) {
 	ret := _m.Called()

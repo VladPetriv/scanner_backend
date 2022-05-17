@@ -256,3 +256,51 @@ func TestChannelService_GetChannelByName(t *testing.T) {
 		channelRepo.AssertExpectations(t)
 	}
 }
+
+func TestChannelServie_GetChannelStats(t *testing.T) {
+	tests := []struct {
+		name    string
+		mock    func(channelRepo *mocks.ChannelRepo)
+		input   int
+		want    *model.Stat
+		wantErr bool
+		err     error
+	}{
+		{
+			name: "Ok: [Stat found]",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelStats", 1).Return(&model.Stat{MessagesCount: 1, RepliesCount: 12}, nil)
+			},
+			input: 1,
+			want:  &model.Stat{MessagesCount: 1, RepliesCount: 12},
+		},
+		{
+			name: "Error: [Store error]",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelStats", 1).Return(nil, errors.New("error while getting channel stat: some error"))
+			},
+			input:   1,
+			wantErr: true,
+			err:     errors.New("[Channel] Service.GetChannelStats error: error while getting channel stat: some error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Logf("running: %s", tt.name)
+
+		channelRepo := &mocks.ChannelRepo{}
+		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		tt.mock(channelRepo)
+
+		got, err := channelService.GetChannelStats(tt.input)
+		if tt.wantErr {
+			assert.Error(t, err)
+			assert.Equal(t, tt.err.Error(), err.Error())
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		}
+
+		channelRepo.AssertExpectations(t)
+	}
+}
