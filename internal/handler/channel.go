@@ -45,6 +45,8 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		Type:  "channels",
 	}
 
+	result := make([]model.Channel, 0)
+
 	channels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
@@ -60,11 +62,22 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
+	for _, channel := range mainChannels {
+		stat, err := h.service.Channel.GetChannelStats(channel.ID)
+		if err != nil {
+			h.log.Error(err)
+		}
+
+		channel.Stats = *stat
+
+		result = append(result, channel)
+	}
+
 	pager := pagination.New(len(channels), 10, iPage, "/channel?=0")
 
 	data.Channels = util.ProcessChannels(channels)
 	data.ChannelsLength = len(channels)
-	data.MainChannels = mainChannels
+	data.MainChannels = result
 	data.Pager = pager
 	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
 
