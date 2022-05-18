@@ -13,7 +13,8 @@ type Config struct {
 	PgDb           string
 	PgHost         string
 	MigrationsPath string
-	BindAddr       string
+	Port           string
+	DatabaseURL    string
 }
 
 func Get() (*Config, error) {
@@ -27,6 +28,7 @@ func Get() (*Config, error) {
 		PgDb:           os.Getenv("POSTGRES_DB"),
 		PgHost:         os.Getenv("POSTGRES_HOST"),
 		MigrationsPath: os.Getenv("MIGRATIONS_PATH"),
-		BindAddr:       os.Getenv("BIND_ADDR"),
+		Port:           os.Getenv("PORT"),
+		DatabaseURL:    os.Getenv("DATABASE_URL"),
 	}, nil
 }
