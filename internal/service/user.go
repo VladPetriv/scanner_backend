@@ -18,11 +18,11 @@ func NewUserDBService(store *store.Store) *UserDBService {
 func (s *UserDBService) GetUsers() ([]model.User, error) {
 	users, err := s.store.User.GetUsers()
 	if err != nil {
-		return nil, fmt.Errorf("[User] Service.GetUser error: %w", err)
+		return nil, fmt.Errorf("[User] Service.GetUsers error: %w", err)
 	}
 
 	if users == nil {
-		return nil, fmt.Errorf("user not found")
+		return nil, fmt.Errorf("users not found")
 	}
 
 	return users, nil
@@ -34,7 +34,7 @@ func (s *UserDBService) GetUserByUsername(username string) (*model.User, error) 
 		return nil, fmt.Errorf("[User] Service.GetUserByUsername error: %w", err)
 	}
 	if user == nil {
-		return nil, nil
+		return nil, fmt.Errorf("user not found")
 	}
 
 	return user, nil
@@ -47,7 +47,7 @@ func (s *UserDBService) GetUserByID(ID int) (*model.User, error) {
 	}
 
 	if user == nil {
-		return nil, nil
+		return nil, fmt.Errorf("user not found")
 	}
 
 	return user, nil

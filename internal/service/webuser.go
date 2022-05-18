@@ -22,7 +22,7 @@ func (s *WebUserDbService) GetWebUser(userID int) (*model.WebUser, error) {
 	}
 
 	if user == nil {
-		return nil, fmt.Errorf("user not found")
+		return nil, fmt.Errorf("web user not found")
 	}
 
 	return user, nil
@@ -35,7 +35,7 @@ func (s *WebUserDbService) GetWebUserByEmail(email string) (*model.WebUser, erro
 	}
 
 	if user == nil {
-		return nil, fmt.Errorf("user not found")
+		return nil, fmt.Errorf("web user not found")
 	}
 
 	return user, nil

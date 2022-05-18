@@ -20,7 +20,7 @@ type HomePageData struct {
 	ChannelsLength int
 	MessagesLength int
 	Pager          *pagination.Pagination
-	UserEmail      interface{}
+	UserEmail      string
 	WebUserID      int
 }
 
