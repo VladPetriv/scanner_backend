@@ -20,11 +20,10 @@ func TestMessagePg_GetMessage(t *testing.T) {
 	r := NewMessageRepo(&DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    *model.Message
-		wantErr bool
+		name  string
+		mock  func()
+		input int
+		want  *model.Message
 	}{
 		{
 			name: "Ok",
@@ -46,8 +45,8 @@ func TestMessagePg_GetMessage(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM message WHERE id=$1;").
 					WithArgs(404).WillReturnRows(rows)
 			},
-			input:   404,
-			wantErr: true,
+			input: 404,
+			want:  nil,
 		},
 		{
 			name: "Ok",
@@ -57,7 +56,7 @@ func TestMessagePg_GetMessage(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM message WHERE id=$1;").
 					WithArgs().WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 	}
 
@@ -66,12 +65,9 @@ func TestMessagePg_GetMessage(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetMessage(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
@@ -89,10 +85,9 @@ func TestMessagePg_GetMessages(t *testing.T) {
 	r := NewMessageRepo(&DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		want    []model.Message
-		wantErr bool
+		name string
+		mock func()
+		want []model.Message
 	}{
 		{
 			name: "ok",
@@ -117,7 +112,7 @@ func TestMessagePg_GetMessages(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM message;").
 					WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 	}
 
@@ -126,12 +121,9 @@ func TestMessagePg_GetMessages(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetMessages()
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
@@ -217,11 +209,10 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 	r := NewMessageRepo(&DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    []model.FullMessage
-		wantErr bool
+		name  string
+		mock  func()
+		input int
+		want  []model.FullMessage
 	}{
 		{
 			name: "Ok",
@@ -253,8 +244,8 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 					ORDER BY m.id DESC NULLS LAST LIMIT 10 OFFSET $1;`,
 				).WillReturnRows(rows)
 			},
-			input:   10,
-			wantErr: true,
+			input: 10,
+			want:  nil,
 		},
 		{
 			name: "empty field",
@@ -267,7 +258,7 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 					ORDER BY m.id DESC NULLS LAST LIMIT 10 OFFSET $1;`,
 				).WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 	}
 
@@ -276,12 +267,9 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetFullMessages(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
@@ -341,7 +329,7 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 				).WithArgs().WillReturnRows(rows)
 
 			},
-			wantErr: true,
+			want: nil,
 		},
 		{
 			name: "messages not found",
@@ -354,10 +342,10 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 					WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST LIMIT $2 OFFSET $3;`,
 				).WithArgs(404, 10, 100).WillReturnRows(rows)
 			},
-			ID:      404,
-			limit:   100,
-			page:    10,
-			wantErr: true,
+			ID:    404,
+			limit: 100,
+			page:  10,
+			want:  nil,
 		},
 	}
 
@@ -366,12 +354,9 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetFullMessagesByChannelID(tt.ID, tt.page, tt.limit)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
@@ -389,11 +374,10 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 	r := NewMessageRepo(&DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    []model.FullMessage
-		wantErr bool
+		name  string
+		mock  func()
+		input int
+		want  []model.FullMessage
 	}{
 		{
 			name: "Ok",
@@ -426,7 +410,7 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 				).WithArgs().WillReturnRows(rows)
 
 			},
-			wantErr: true,
+			want: nil,
 		},
 		{
 			name: "messages not found",
@@ -439,8 +423,8 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 					WHERE m.user_id= $1 ORDER BY count DESC NULLS LAST;`,
 				).WithArgs(1).WillReturnRows(rows)
 			},
-			input:   1,
-			wantErr: true,
+			input: 1,
+			want:  nil,
 		},
 	}
 
@@ -449,12 +433,9 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetFullMessagesByUserID(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
