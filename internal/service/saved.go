@@ -44,7 +44,7 @@ func (s *SavedDbService) GetSavedMessageByMessageID(ID int) (*model.Saved, error
 func (s *SavedDbService) CreateSavedMessage(savedMessage *model.Saved) error {
 	_, err := s.store.Saved.CreateSavedMessage(savedMessage)
 	if err != nil {
-		return fmt.Errorf("[Saved] Service.CreateSaveMessage error: %w", err)
+		return fmt.Errorf("[Saved] Service.CreateSavedMessage error: %w", err)
 	}
 
 	return nil

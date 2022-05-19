@@ -57,7 +57,7 @@ func (repo *ReplieRepo) GetReplie(replieId int) (*model.Replie, error) {
 	}
 
 	if replie.Title == "" {
-		return nil, fmt.Errorf("replie not found")
+		return nil, nil
 	}
 
 	return replie, nil
@@ -109,7 +109,7 @@ func (repo *ReplieRepo) GetFullRepliesByMessageID(ID int) ([]model.FullReplie, e
 	}
 
 	if len(replies) == 0 {
-		return nil, fmt.Errorf("replies not found")
+		return nil, nil
 	}
 
 	return replies, nil

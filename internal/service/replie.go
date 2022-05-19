@@ -48,7 +48,7 @@ func (s *ReplieDBService) GetReplieByName(name string) (*model.Replie, error) {
 	}
 
 	if replie == nil {
-		return nil, nil
+		return nil, fmt.Errorf("replie not found")
 	}
 
 	return replie, nil
