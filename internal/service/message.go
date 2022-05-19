@@ -24,7 +24,7 @@ func (s *MessageDBService) GetMessages() ([]model.Message, error) {
 	}
 
 	if messages == nil {
-		return nil, nil
+		return nil, fmt.Errorf("messages not found")
 	}
 
 	return messages, nil
@@ -50,7 +50,7 @@ func (s *MessageDBService) GetMessageByName(name string) (*model.Message, error)
 	}
 
 	if message == nil {
-		return nil, nil
+		return nil, fmt.Errorf("message not found")
 	}
 
 	return message, nil
@@ -69,7 +69,7 @@ func (s *MessageDBService) GetFullMessages(page int) ([]model.FullMessage, error
 	}
 
 	if messages == nil {
-		return nil, nil
+		return nil, fmt.Errorf("messages not found")
 	}
 
 	return messages, nil
@@ -88,7 +88,7 @@ func (s *MessageDBService) GetFullMessagesByChannelID(ID, limit, page int) ([]mo
 	}
 
 	if messages == nil {
-		return nil, nil
+		return nil, fmt.Errorf("messages not found")
 	}
 
 	return messages, nil
@@ -101,7 +101,7 @@ func (s *MessageDBService) GetFullMessagesByUserID(ID int) ([]model.FullMessage,
 	}
 
 	if messages == nil {
-		return nil, nil
+		return nil, fmt.Errorf("messages not found")
 	}
 
 	return messages, nil
@@ -114,7 +114,7 @@ func (s *MessageDBService) GetFullMessageByMessageID(ID int) (*model.FullMessage
 	}
 
 	if message == nil {
-		return nil, nil
+		return nil, fmt.Errorf("messages not found")
 	}
 
 	return message, nil

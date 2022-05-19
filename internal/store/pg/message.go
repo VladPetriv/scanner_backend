@@ -34,7 +34,7 @@ func (repo *MessageRepo) GetMessages() ([]model.Message, error) {
 	}
 
 	if len(messages) == 0 {
-		return nil, fmt.Errorf("messages not found")
+		return nil, nil
 	}
 
 	return messages, nil
@@ -57,7 +57,7 @@ func (repo *MessageRepo) GetMessage(messageID int) (*model.Message, error) {
 	}
 
 	if message.Title == "" {
-		return nil, fmt.Errorf("message not found")
+		return nil, nil
 	}
 
 	return message, nil
@@ -114,7 +114,7 @@ func (repo *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) 
 	}
 
 	if len(messages) == 0 {
-		return nil, fmt.Errorf("messages not found")
+		return nil, nil
 	}
 
 	return messages, nil
@@ -148,7 +148,7 @@ func (repo *MessageRepo) GetFullMessagesByChannelID(ID, limit, page int) ([]mode
 	}
 
 	if len(messages) == 0 {
-		return nil, fmt.Errorf("messages not found")
+		return nil, nil
 	}
 
 	return messages, nil
@@ -182,7 +182,7 @@ func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, e
 	}
 
 	if len(messages) == 0 {
-		return nil, fmt.Errorf("messages not found")
+		return nil, nil
 	}
 
 	return messages, nil

@@ -35,6 +35,6 @@ func main() {
 	log.Infof("starting server at port %s", cfg.Port)
 
 	if err := srv.Run(cfg.Port, handler.InitRouter()); err != nil {
-		log.Error("error while starting server: %s", err)
+		log.Error("error while starting server: ", err)
 	}
 }
