@@ -46,7 +46,7 @@ func TestRepliePg_GetReplie(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM replie WHERE id=$1;").
 					WithArgs().WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 		{
 			name: "empty field",
@@ -56,7 +56,7 @@ func TestRepliePg_GetReplie(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM replie WHERE id=$1;").
 					WithArgs().WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 	}
 
@@ -65,12 +65,9 @@ func TestRepliePg_GetReplie(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetReplie(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
@@ -217,11 +214,10 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 	r := NewReplieRepo(&DB{DB: db})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    []model.FullReplie
-		wantErr bool
+		name  string
+		mock  func()
+		input int
+		want  []model.FullReplie
 	}{
 		{
 			name: "Ok",
@@ -239,7 +235,6 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 				{ID: 2, Title: "test2", UserID: 2, FullName: "test2 test", PhotoURL: "test2.jpg"},
 			},
 		},
-
 		{
 			name: "empty field",
 			mock: func() {
@@ -248,7 +243,7 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs().WillReturnRows(rows)
 			},
-			wantErr: true,
+			want: nil,
 		},
 		{
 			name: "replies not found",
@@ -258,8 +253,8 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs(404).WillReturnRows(rows)
 			},
-			input:   404,
-			wantErr: true,
+			input: 404,
+			want:  nil,
 		},
 	}
 
@@ -268,12 +263,9 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetFullRepliesByMessageID(tt.input)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
-			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
