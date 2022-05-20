@@ -128,7 +128,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error(err.Error())
 	}
 
 	pager := pagination.New(len(length), 10, iPage, "/channel/ru_python?page=0")
@@ -139,8 +139,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	data.ChannelsLength = len(channels)
 	data.MessagesLength = len(length)
 	data.Pager = pager
-	data.UserEmail = user.Email
-	data.WebUserID = user.ID
+	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
 
 	h.tmpTree["singleChannel"] = template.Must(
 		template.ParseFiles(
