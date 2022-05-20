@@ -116,7 +116,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	length, err := h.service.Message.GetFullMessagesByChannelID(channel.ID, 1024*1024, iPage)
+	length, err := h.service.Message.GetMessagesLengthByChannelID(channel.ID)
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -131,13 +131,13 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err.Error())
 	}
 
-	pager := pagination.New(len(length), 10, iPage, "/channel/ru_python?page=0")
+	pager := pagination.New(length, 10, iPage, "/channel/ru_python?page=0")
 
 	data.Channel = *channel
 	data.Channels = util.ProcessChannels(channels)
 	data.Messages = fullMessages
 	data.ChannelsLength = len(channels)
-	data.MessagesLength = len(length)
+	data.MessagesLength = length
 	data.Pager = pager
 	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
 
