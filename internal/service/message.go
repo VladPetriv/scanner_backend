@@ -119,3 +119,16 @@ func (s *MessageDBService) GetFullMessageByMessageID(ID int) (*model.FullMessage
 
 	return message, nil
 }
+
+func (s *MessageDBService) GetMessagesLengthByChannelID(ID int) (int, error) {
+	length, err := s.store.Message.GetMessagesLengthByChannelID(ID)
+	if err != nil {
+		return 0, fmt.Errorf("[Message] Service.GetMessagesLengthByChannelID error: %w", err)
+	}
+
+	if length == 0 {
+		return 0, fmt.Errorf("messages not found")
+	}
+
+	return length, nil
+}

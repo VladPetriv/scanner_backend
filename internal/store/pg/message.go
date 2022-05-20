@@ -154,6 +154,35 @@ func (repo *MessageRepo) GetFullMessagesByChannelID(ID, limit, page int) ([]mode
 	return messages, nil
 }
 
+func (repo *MessageRepo) GetMessagesLengthByChannelID(ID int) (int, error) {
+	messages := make([]model.FullMessage, 0)
+
+	rows, err := repo.db.Query(
+		`SELECT m.id FROM message m LEFT JOIN channel c ON c.id = m.channel_id WHERE m.channel_id = $1;`, ID,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("error while getting full messages by channel ID: %w", err)
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		message := model.FullMessage{}
+
+		err := rows.Scan(&message.ID)
+		if err != nil {
+			continue
+		}
+
+		messages = append(messages, message)
+	}
+
+	if len(messages) == 0 {
+		return 0, nil
+	}
+
+	return len(messages), nil
+}
+
 func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, error) {
 	messages := make([]model.FullMessage, 0)
 
