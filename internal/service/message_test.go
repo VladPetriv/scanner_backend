@@ -429,3 +429,60 @@ func TestMessageService_GetFullMessagesByMessageID(t *testing.T) {
 		messageRepo.AssertExpectations(t)
 	}
 }
+
+func TestMessageService_GetMessagesLengthByChannelID(t *testing.T) {
+	tests := []struct {
+		name    string
+		mock    func(messageRepo *mocks.MessageRepo)
+		input   int
+		want    int
+		wantErr bool
+		err     error
+	}{
+		{
+			name: "Ok: [Messages found]",
+			mock: func(messageRepo *mocks.MessageRepo) {
+				messageRepo.On("GetMessagesLengthByChannelID", 1).Return(3, nil)
+			},
+			input: 1,
+			want:  3,
+		},
+		{
+			name: "Error: [Messages not found]",
+			mock: func(messageRepo *mocks.MessageRepo) {
+				messageRepo.On("GetMessagesLengthByChannelID", 1).Return(0, nil)
+			},
+			input:   1,
+			wantErr: true,
+			err:     errors.New("messages not found"),
+		},
+		{
+			name: "Error: [Store error]",
+			mock: func(messageRepo *mocks.MessageRepo) {
+				messageRepo.On("GetMessagesLengthByChannelID", 1).Return(0, errors.New("error while getting full messages by channel ID: some error"))
+			},
+			input:   1,
+			wantErr: true,
+			err:     errors.New("[Message] Service.GetMessagesLengthByChannelID error: error while getting full messages by channel ID: some error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Logf("running: %s", tt.name)
+
+		messageRepo := &mocks.MessageRepo{}
+		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		tt.mock(messageRepo)
+
+		got, err := messageService.GetMessagesLengthByChannelID(tt.input)
+		if tt.wantErr {
+			assert.Error(t, err)
+			assert.Equal(t, tt.err.Error(), err.Error())
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		}
+
+		messageRepo.AssertExpectations(t)
+	}
+}

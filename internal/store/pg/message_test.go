@@ -521,3 +521,70 @@ func TestMessagePg_GetFullMessageByMessageID(t *testing.T) {
 		})
 	}
 }
+
+func TestMessagePg_GetMessagesLengthByChannelID(t *testing.T) {
+	db, mock, err := util.CreateMock()
+	if err != nil {
+		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	r := NewMessageRepo(&DB{DB: db})
+
+	tests := []struct {
+		name    string
+		mock    func()
+		input   int
+		want    int
+		wantErr bool
+	}{
+		{
+			name: "Ok: [Messages found]",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id"}).
+					AddRow(1).
+					AddRow(2)
+
+				mock.ExpectQuery("SELECT m.id FROM message m LEFT JOIN channel c ON c.id = m.channel_id WHERE m.channel_id = $1;").
+					WithArgs(1).WillReturnRows(rows)
+			},
+			input: 1,
+			want:  2,
+		},
+		{
+			name: "Error: [Message not found]",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id"})
+
+				mock.ExpectQuery("SELECT m.id FROM message m LEFT JOIN channel c ON c.id = m.channel_id WHERE m.channel_id = $1;").
+					WithArgs(1).WillReturnRows(rows)
+			},
+			input: 1,
+			want:  0,
+		},
+		{
+			name: "Error: [pq error]",
+			mock: func() {
+				mock.ExpectQuery("SELECT m.id FROM message m LEFT JOIN channel c ON c.id = m.channel_id WHERE m.channel_id = $1;").
+					WithArgs(1).WillReturnError(sqlmock.ErrCancelled)
+			},
+			input:   1,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		tt.mock()
+
+		got, err := r.GetMessagesLengthByChannelID(tt.input)
+		if tt.wantErr {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		}
+
+		assert.NoError(t, mock.ExpectationsWereMet())
+	}
+}
