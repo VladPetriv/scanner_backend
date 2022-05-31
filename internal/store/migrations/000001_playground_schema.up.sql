@@ -4,14 +4,6 @@ CREATE TABLE web_user (
   password VARCHAR(255)
 );
 
-CREATE TABLE saved (
-  id SERIAL PRIMARY KEY,
-  user_id INT NOT NULL,
-  message_id INT UNIQUE NOT NULL,
-  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES web_user(id) ON DELETE CASCADE,
-  CONSTRAINT fk_message FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
-);
-
 CREATE TABLE channel (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255),
@@ -23,7 +15,7 @@ CREATE TABLE tg_user (
   id SERIAL PRIMARY KEY,
   username VARCHAR(255) UNIQUE NOT NULL,
   fullname VARCHAR(255) UNIQUE NOT NULL,
-  photourl TEXT NOT NULL 
+  photourl TEXT NOT NULL
 );
 
 CREATE TABLE message (
@@ -31,8 +23,17 @@ CREATE TABLE message (
   channel_id INT NOT NULL,
   user_id INT NOT NULL,
   title TEXT,
+  message_url TEXT,
   CONSTRAINT fk_channel FOREIGN KEY(channel_id) REFERENCES channel(id),
   CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES tg_user(id)
+);
+
+CREATE TABLE saved (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  message_id INT UNIQUE NOT NULL,
+  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES web_user(id) ON DELETE CASCADE,
+  CONSTRAINT fk_message FOREIGN KEY (message_id) REFERENCES message(id) ON DELETE CASCADE
 );
 
 CREATE TABLE replie (

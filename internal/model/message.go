@@ -1,14 +1,16 @@
 package model
 
 type Message struct {
-	ID        int    `json:"id"`
-	ChannelID int    `json:"channelId"`
-	UserID    int    `json:"userId"`
-	Title     string `json:"title"`
+	ID         int    `json:"id"`
+	ChannelID  int    `json:"channelId"`
+	UserID     int    `json:"userId"`
+	Title      string `json:"title"`
+	MessageURL string `json:"messageURL"`
 }
 
 type FullMessage struct {
 	ID              int    `json:"id"`
+	MessageURL      string `json:"messageURL"`
 	Title           string `json:"title"`
 	ChannelID       int    `json:"channelId"`
 	ChannelName     string `json:"chanellName"`
