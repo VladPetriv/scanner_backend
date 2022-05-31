@@ -42,7 +42,7 @@
                 itemscope=""
                 itemtype="http://schema.org/Person"
               >
-                <span itemprop="name"> {{ .Message.FullName }} </span>
+              <span itemprop="name"> {{ .Message.FullName }} </span>
               </span>
             </a>
           </div>
@@ -54,9 +54,9 @@
       <meta content="message title " itemprop="text" />
 
       <div class="card-body">
-        <h1 class="mb-3 fs-3" itemprop="name">{{ .Message.Title }}</h1>
+        <h3 class="mb-3 fs-3" itemprop="name">{{ .Message.Title }}</h1>
 
-        <p class="card-text"></p>
+        <a href="{{ .Message.MessageURL }}" target="_blank">Visit telegram</a>
       </div>
       <!-- Message info end -->
     </div>
