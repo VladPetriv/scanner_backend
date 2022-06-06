@@ -25,7 +25,7 @@ func (repo *MessageRepo) GetMessages() ([]model.Message, error) {
 	defer rows.Close()
 	for rows.Next() {
 		message := model.Message{}
-		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL)
+		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL, &message.Image)
 		if err != nil {
 			continue
 		}
@@ -50,7 +50,7 @@ func (repo *MessageRepo) GetMessage(messageID int) (*model.Message, error) {
 
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL)
+		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL, &message.Image)
 		if err != nil {
 			continue
 		}
@@ -73,7 +73,7 @@ func (repo *MessageRepo) GetMessageByName(name string) (*model.Message, error) {
 
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL)
+		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL, &message.Image)
 		if err != nil {
 			continue
 		}
@@ -221,7 +221,7 @@ func (repo *MessageRepo) GetFullMessageByMessageID(ID int) (*model.FullMessage, 
 	message := &model.FullMessage{}
 
 	rows, err := repo.db.Query(
-		`SELECT m.id, m.Title, m.message_url, c.id, c.Name, c.Title, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		`SELECT m.id, m.Title, m.message_url, m.image, c.id, c.Name, c.Title, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
 		WHERE m.id = $1;`, ID,
 	)
@@ -232,7 +232,7 @@ func (repo *MessageRepo) GetFullMessageByMessageID(ID int) (*model.FullMessage, 
 	defer rows.Close()
 	for rows.Next() {
 		err := rows.Scan(
-			&message.ID, &message.Title, &message.MessageURL, &message.ChannelID, &message.ChannelName, &message.ChannelTitle,
+			&message.ID, &message.Title, &message.MessageURL, &message.Image, &message.ChannelID, &message.ChannelName, &message.ChannelTitle,
 			&message.ChannelPhotoURL, &message.UserID, &message.FullName, &message.PhotoURL, &message.ReplieCount,
 		)
 		if err != nil {

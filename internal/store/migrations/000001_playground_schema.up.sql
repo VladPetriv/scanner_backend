@@ -24,6 +24,7 @@ CREATE TABLE message (
   user_id INT NOT NULL,
   title TEXT,
   message_url TEXT,
+  image TEXT,
   CONSTRAINT fk_channel FOREIGN KEY(channel_id) REFERENCES channel(id),
   CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES tg_user(id)
 );

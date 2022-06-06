@@ -6,12 +6,14 @@ type Message struct {
 	UserID     int    `json:"userId"`
 	Title      string `json:"title"`
 	MessageURL string `json:"messageURL"`
+	Image      string `json:"image"`
 }
 
 type FullMessage struct {
 	ID              int    `json:"id"`
 	MessageURL      string `json:"messageURL"`
 	Title           string `json:"title"`
+	Image           string `json:"image"`
 	ChannelID       int    `json:"channelId"`
 	ChannelName     string `json:"chanellName"`
 	ChannelTitle    string `json:"channelTitle"`
