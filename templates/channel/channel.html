@@ -69,11 +69,26 @@
         </a>
       </div>
 
-      <div class="card-body">
-        <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
-          <p class="card-text">{{ .Title }}</p>
-        </a>
-      </div>
+      {{ if eq .Image "" }}
+        <div class="card-body">
+          <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
+            <p class="card-text">{{ .Title }}</p>
+          </a>
+        </div>
+      {{ else }}
+        <div class="card-body">
+          <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
+              <div class="row">
+                <div class="col-3">
+                  <img alt="screenshot" class="rounded img-fluid" height="100px" src="{{ .Image }}">
+                </div>
+               <div class="col-9">
+                    <p class="card-text">{{ .Title }}</p>
+              </div>
+            </div>
+          </a>      
+        </div>
+      {{ end  }}
 
       <div class="card-footer bg-white border-light">
         <div class="row text-muted">
