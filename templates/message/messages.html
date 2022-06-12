@@ -58,10 +58,27 @@
     <!--Channel and user info end-->
 
     <!--Message info start-->
-    <div class="card-body">
-      <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
-        <p class="card-text">{{ .Title }}</p>
-      </a>
+    <div class="card-body"> 
+      {{ if eq .Image ""}}
+      <div class="row">
+        <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
+          <p class="card-text">{{ .Title }}</p>
+        </a>
+      </div>
+      {{ else  }}
+       <div class="row">
+        <div class="col-3">
+          <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .Image }}">
+        </div>
+        <div class="col-9">
+          <a class="text-reset text-decoration-none" href="/message/{{ .ID }}"> 
+            <p class="card-text">
+              {{ .Title  }}
+            </p>
+          </a>
+        </div>
+      </div>
+      {{ end  }}
     </div>
     <!-- Message info start -->
 

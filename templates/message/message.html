@@ -54,9 +54,22 @@
       <meta content="message title " itemprop="text" />
 
       <div class="card-body">
-        <h3 class="mb-3 fs-3" itemprop="name">{{ .Message.Title }}</h1>
-
-        <a href="{{ .Message.MessageURL }}" target="_blank">Visit telegram</a>
+        {{ if eq .Message.Image "" }}
+          <p class="mb-3 fs-3" itemprop="name">{{ .Message.Title }}</p>
+          <a href="{{ .Message.MessageURL }}" target="_blank">Visit telegram</a>
+        {{ else  }}
+        <div class="row">
+          <div class="col-3">
+            <a href="{{ .Message.Image }}" target="_blank">
+              <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .Message.Image }}">
+            </a>
+          </div>
+          <div class="col-9">
+            <p class="card-text"> {{ .Message.Title }} </p>
+            <a href="{{ .Message.MessageURL }}" target="_blank">Visit telegram</a> 
+          </div>
+        </div> 
+        {{ end  }}
       </div>
       <!-- Message info end -->
     </div>
