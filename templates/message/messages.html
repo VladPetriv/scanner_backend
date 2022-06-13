@@ -59,7 +59,7 @@
 
     <!--Message info start-->
     <div class="card-body"> 
-      {{ if eq .Image ""}}
+      {{ if or ( eq .Image "" ) (eq .Image "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
       <div class="row">
         <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
           <p class="card-text">{{ .Title }}</p>
