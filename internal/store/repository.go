@@ -19,7 +19,6 @@ type MessageRepo interface {
 	GetFullMessages(page int) ([]model.FullMessage, error)
 	GetFullMessagesByChannelID(ID, limit, page int) ([]model.FullMessage, error)
 	GetMessagesLengthByChannelID(ID int) (int, error)
-
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
