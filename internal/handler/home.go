@@ -38,7 +38,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	messagesLength, err := h.service.Message.GetMessages()
+	messagesLength, err := h.service.Message.GetMessagesLength()
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -55,12 +55,12 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 
 	messages = checkMessagesStatus(messages, h.service)
 
-	pager := pagination.New(len(messagesLength), 10, iPage, "/home?page=0")
+	pager := pagination.New(messagesLength, 10, iPage, "/home?page=0")
 
 	data.Channels = util.ProcessChannels(channels)
 	data.Messages = messages
 	data.ChannelsLength = len(channels)
-	data.MessagesLength = len(messagesLength)
+	data.MessagesLength = messagesLength
 	data.Pager = pager
 	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
 

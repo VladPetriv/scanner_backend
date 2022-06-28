@@ -13,9 +13,7 @@ type ChannelService interface {
 
 //go:generate mockery --dir . --name MessageService --output ./mocks
 type MessageService interface {
-	GetMessages() ([]model.Message, error)
-	GetMessage(messageID int) (*model.Message, error)
-	GetMessageByName(name string) (*model.Message, error)
+	GetMessagesLength() (int, error)
 	GetFullMessages(page int) ([]model.FullMessage, error)
 	GetFullMessagesByChannelID(ID, limit, page int) ([]model.FullMessage, error)
 	GetMessagesLengthByChannelID(ID int) (int, error)

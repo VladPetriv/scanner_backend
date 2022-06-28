@@ -14,76 +14,15 @@ func NewMessageRepo(db *DB) *MessageRepo {
 	return &MessageRepo{db: db}
 }
 
-func (repo *MessageRepo) GetMessages() ([]model.Message, error) {
-	messages := make([]model.Message, 0)
+func (repo *MessageRepo) GetMessagesLength() (int, error) {
+	var count int
 
-	rows, err := repo.db.Query("SELECT * FROM message;")
-	if err != nil {
-		return nil, fmt.Errorf("error while getting messages: %w", err)
+	row := repo.db.QueryRow("SELECT COUNT(*) FROM message;")
+	if err := row.Scan(&count); err != nil {
+		return 0, fmt.Errorf("error while getting messages length: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		message := model.Message{}
-		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL, &message.Image)
-		if err != nil {
-			continue
-		}
-
-		messages = append(messages, message)
-	}
-
-	if len(messages) == 0 {
-		return nil, nil
-	}
-
-	return messages, nil
-}
-
-func (repo *MessageRepo) GetMessage(messageID int) (*model.Message, error) {
-	message := &model.Message{}
-
-	rows, err := repo.db.Query("SELECT * FROM message WHERE id=$1;", messageID)
-	if err != nil {
-		return nil, fmt.Errorf("error while getting message: %w", err)
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL, &message.Image)
-		if err != nil {
-			continue
-		}
-	}
-
-	if message.Title == "" {
-		return nil, nil
-	}
-
-	return message, nil
-}
-
-func (repo *MessageRepo) GetMessageByName(name string) (*model.Message, error) {
-	message := &model.Message{}
-
-	rows, err := repo.db.Query("SELECT * FROM message WHERE title=$1;", name)
-	if err != nil {
-		return nil, fmt.Errorf("error while getting message: %w", err)
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&message.ID, &message.UserID, &message.ChannelID, &message.Title, &message.MessageURL, &message.Image)
-		if err != nil {
-			continue
-		}
-	}
-
-	if message.Title == "" {
-		return nil, nil
-	}
-
-	return message, nil
+	return count, nil
 }
 
 func (repo *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) {

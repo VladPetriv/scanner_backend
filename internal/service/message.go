@@ -17,43 +17,17 @@ func NewMessageDBService(store *store.Store) *MessageDBService {
 	}
 }
 
-func (s *MessageDBService) GetMessages() ([]model.Message, error) {
-	messages, err := s.store.Message.GetMessages()
+func (s *MessageDBService) GetMessagesLength() (int, error) {
+	length, err := s.store.Message.GetMessagesLength()
 	if err != nil {
-		return nil, fmt.Errorf("[Message] Service.GetMessages error: %w", err)
+		return 0, fmt.Errorf("[Message] Service.GetMessagesLength error: %w", err)
 	}
 
-	if messages == nil {
-		return nil, fmt.Errorf("messages not found")
+	if length == 0 {
+		return 0, fmt.Errorf("messages not found")
 	}
 
-	return messages, nil
-}
-
-func (s *MessageDBService) GetMessage(messageID int) (*model.Message, error) {
-	message, err := s.store.Message.GetMessage(messageID)
-	if err != nil {
-		return nil, fmt.Errorf("[Message] Service.GetMessage error: %w", err)
-	}
-
-	if message == nil {
-		return nil, fmt.Errorf("message not found")
-	}
-
-	return message, nil
-}
-
-func (s *MessageDBService) GetMessageByName(name string) (*model.Message, error) {
-	message, err := s.store.Message.GetMessageByName(name)
-	if err != nil {
-		return nil, fmt.Errorf("[Message] Service.GetMessageByName error: %w", err)
-	}
-
-	if message == nil {
-		return nil, fmt.Errorf("message not found")
-	}
-
-	return message, nil
+	return length, nil
 }
 
 func (s *MessageDBService) GetFullMessages(page int) ([]model.FullMessage, error) {
