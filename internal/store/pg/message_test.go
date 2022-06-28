@@ -9,128 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMessagePg_GetMessage(t *testing.T) {
-	db, mock, err := util.CreateMock()
-	if err != nil {
-		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	defer db.Close()
-
-	r := NewMessageRepo(&DB{DB: db})
-
-	tests := []struct {
-		name  string
-		mock  func()
-		input int
-		want  *model.Message
-	}{
-		{
-			name: "Ok",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"}).
-					AddRow(1, 1, 1, "test", "test.com", "test.jpg")
-
-				mock.ExpectQuery("SELECT * FROM message WHERE id=$1;").
-					WithArgs(1).WillReturnRows(rows)
-			},
-			input: 1,
-			want:  &model.Message{ID: 1, UserID: 1, ChannelID: 1, Title: "test", MessageURL: "test.com", Image: "test.jpg"},
-		},
-		{
-			name: "message not found",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"})
-
-				mock.ExpectQuery("SELECT * FROM message WHERE id=$1;").
-					WithArgs(404).WillReturnRows(rows)
-			},
-			input: 404,
-			want:  nil,
-		},
-		{
-			name: "Ok",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"})
-
-				mock.ExpectQuery("SELECT * FROM message WHERE id=$1;").
-					WithArgs().WillReturnRows(rows)
-			},
-			want: nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-
-			got, err := r.GetMessage(tt.input)
-
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
-func TestMessagePg_GetMessages(t *testing.T) {
-	db, mock, err := util.CreateMock()
-	if err != nil {
-		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
-	}
-
-	defer db.Close()
-
-	r := NewMessageRepo(&DB{DB: db})
-
-	tests := []struct {
-		name string
-		mock func()
-		want []model.Message
-	}{
-		{
-			name: "ok",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"}).
-					AddRow(1, 1, 1, "test1", "test1.com", "test1.jpg").
-					AddRow(2, 2, 2, "test2", "test2.com", "test2.jpg")
-
-				mock.ExpectQuery("SELECT * FROM message;").
-					WillReturnRows(rows)
-			},
-			want: []model.Message{
-				{ID: 1, UserID: 1, ChannelID: 1, Title: "test1", MessageURL: "test1.com", Image: "test1.jpg"},
-				{ID: 2, UserID: 2, ChannelID: 2, Title: "test2", MessageURL: "test2.com", Image: "test2.jpg"},
-			},
-		},
-		{
-			name: "message not found",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"})
-
-				mock.ExpectQuery("SELECT * FROM message;").
-					WillReturnRows(rows)
-			},
-			want: nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-
-			got, err := r.GetMessages()
-
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-
-			assert.NoError(t, mock.ExpectationsWereMet())
-		})
-	}
-}
-
-func TestMessagePg_GetMessageByName(t *testing.T) {
+func TestMessagePg_GetMessagesLength(t *testing.T) {
 	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
@@ -143,41 +22,29 @@ func TestMessagePg_GetMessageByName(t *testing.T) {
 	tests := []struct {
 		name    string
 		mock    func()
-		input   string
-		want    *model.Message
+		want    int
 		wantErr bool
 	}{
 		{
 			name: "ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"}).
-					AddRow(1, 1, 1, "test1", "test.com", "test.jpg")
+				rows := sqlmock.NewRows([]string{"count"}).
+					AddRow(10)
 
-				mock.ExpectQuery("SELECT * FROM message WHERE title=$1;").
-					WithArgs("test1").WillReturnRows(rows)
+				mock.ExpectQuery("SELECT COUNT(*) FROM message;").
+					WillReturnRows(rows)
 			},
-			input: "test1",
-			want:  &model.Message{ID: 1, UserID: 1, ChannelID: 1, Title: "test1", MessageURL: "test.com", Image: "test.jpg"},
+			want: 10,
 		},
 		{
 			name: "message not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"})
+				rows := sqlmock.NewRows([]string{"count"})
 
-				mock.ExpectQuery("SELECT * FROM message WHERE title=$1;").
-					WithArgs().WillReturnRows(rows)
+				mock.ExpectQuery("SELECT COUNT(*) FROM message;").
+					WillReturnRows(rows)
 			},
-			want: nil,
-		},
-		{
-			name: "empty field",
-			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "user_id", "channel_id", "title", "message_url", "image"})
-
-				mock.ExpectQuery("SELECT * FROM message WHERE title=$1;").
-					WithArgs().WillReturnRows(rows)
-			},
-			want: nil,
+			wantErr: true,
 		},
 	}
 
@@ -185,7 +52,7 @@ func TestMessagePg_GetMessageByName(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
 
-			got, err := r.GetMessageByName(tt.input)
+			got, err := r.GetMessagesLength()
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
