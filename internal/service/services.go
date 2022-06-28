@@ -6,7 +6,6 @@ import "github.com/VladPetriv/scanner_backend/internal/model"
 type ChannelService interface {
 	GetChannels() ([]model.Channel, error)
 	GetChannelsByPage(page int) ([]model.Channel, error)
-	GetChannel(channelID int) (*model.Channel, error)
 	GetChannelByName(name string) (*model.Channel, error)
 	GetChannelStats(channelID int) (*model.Stat, error)
 }
@@ -23,9 +22,6 @@ type MessageService interface {
 
 //go:generate mockery --dir . --name ReplieService --output ./mocks
 type ReplieService interface {
-	GetReplies() ([]model.Replie, error)
-	GetReplie(replieID int) (*model.Replie, error)
-	GetReplieByName(name string) (*model.Replie, error)
 	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
 }
 

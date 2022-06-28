@@ -66,28 +66,6 @@ func (repo *ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) 
 	return channels, nil
 }
 
-func (repo *ChannelPgRepo) GetChannel(channelID int) (*model.Channel, error) {
-	channel := &model.Channel{}
-
-	rows, err := repo.db.Query("SELECT * FROM channel WHERE id=$1;", channelID)
-	if err != nil {
-		return nil, fmt.Errorf("error while getting channel: %w", err)
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&channel.ID, &channel.Name, &channel.Title, &channel.PhotoURL)
-		if err != nil {
-			continue
-		}
-	}
-
-	if channel.Name == "" {
-		return nil, fmt.Errorf("channel not found")
-	}
-
-	return channel, nil
-}
 func (repo *ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error) {
 	channel := &model.Channel{}
 
