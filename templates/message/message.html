@@ -54,7 +54,7 @@
       <meta content="message title " itemprop="text" />
 
       <div class="card-body">
-        {{ if or ( eq .Message.ImageURL "" ) (eq .Message.Image "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
+        {{ if or ( eq .Message.ImageURL "" ) (eq .Message.ImageURL "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
           <p class="mb-3 fs-3" itemprop="name">{{ .Message.Title }}</p>
           <a href="{{ .Message.MessageURL }}" target="_blank">view in Telegram</a>
         {{ else  }}

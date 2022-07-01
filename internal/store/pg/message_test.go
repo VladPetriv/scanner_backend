@@ -90,7 +90,7 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -112,7 +112,7 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -131,7 +131,7 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -186,7 +186,7 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -220,7 +220,7 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -239,7 +239,7 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -295,7 +295,7 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
 					LEFT JOIN channel c ON c.id = m.channel_id 
@@ -317,7 +317,7 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
 					LEFT JOIN channel c ON c.id = m.channel_id 
@@ -336,7 +336,7 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
 					LEFT JOIN channel c ON c.id = m.channel_id 
@@ -390,7 +390,7 @@ func TestMessagePg_GetFullMessageByMessageID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -409,7 +409,7 @@ func TestMessagePg_GetFullMessageByMessageID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 
@@ -428,7 +428,7 @@ func TestMessagePg_GetFullMessageByMessageID(t *testing.T) {
 
 				mock.ExpectQuery(
 					`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-					c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+					c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 					u.id, u.Fullname, u.imageurl as userImageUrl, 
 					(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 					FROM message m 

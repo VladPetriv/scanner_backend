@@ -30,7 +30,7 @@ func (repo *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) 
 
 	rows, err := repo.db.Query(
 		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-		c.id, c.Name, c.Photourl as channelImageUrl, 
+		c.id, c.Name, c.imageurl as channelImageUrl, 
 		u.id, u.Fullname, u.imageurl as userImageUrl, 
 		(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 	  FROM message m 
@@ -69,7 +69,7 @@ func (repo *MessageRepo) GetFullMessagesByChannelID(ID, limit, page int) ([]mode
 
 	rows, err := repo.db.Query(
 		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-		c.id, c.Name, c.Photourl as channelImageUrl, 
+		c.id, c.Name, c.imageurl as channelImageUrl, 
 		u.id, u.Fullname, u.imageurl as userImageUrl, 
 		(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 		FROM message m 
@@ -138,7 +138,7 @@ func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, e
 
 	rows, err := repo.db.Query(
 		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-		c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+		c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 		(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 		FROM message m 
 		LEFT JOIN channel c ON c.id = m.channel_id 
@@ -177,7 +177,7 @@ func (repo *MessageRepo) GetFullMessageByMessageID(ID int) (*model.FullMessage, 
 
 	rows, err := repo.db.Query(
 		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
-		 c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+		 c.id, c.Name, c.Title, c.imageurl as channelImageUrl, 
 		 u.id, u.Fullname, u.imageurl as userImageUrl, 
 		 (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
 		 FROM message m 
