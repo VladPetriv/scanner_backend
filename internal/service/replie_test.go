@@ -13,8 +13,8 @@ import (
 
 func TestReplieService_GetFullRepliesByMessageID(t *testing.T) {
 	replies := []model.FullReplie{
-		{ID: 1, UserID: 1, Title: "test1", FullName: "test test1", PhotoURL: "test1.jpg"},
-		{ID: 2, UserID: 2, Title: "test2", FullName: "test test2", PhotoURL: "test2.jpg"},
+		{ID: 1, UserID: 1, Title: "test1", FullName: "test test1", UserImageURL: "test1.jpg"},
+		{ID: 2, UserID: 2, Title: "test2", FullName: "test test2", UserImageURL: "test2.jpg"},
 	}
 
 	tests := []struct {

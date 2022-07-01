@@ -8,9 +8,9 @@ type Replie struct {
 }
 
 type FullReplie struct {
-	ID       int    `json:"id"`
-	UserID   int    `json:"userId"`
-	Title    string `json:"title"`
-	FullName string `json:"Fullname"`
-	PhotoURL string `json:"PhotoURL"`
+	ID           int    `json:"id"`
+	UserID       int    `json:"userId"`
+	Title        string `json:"title"`
+	FullName     string `json:"Fullname"`
+	UserImageURL string `json:"userImageUrl"`
 }

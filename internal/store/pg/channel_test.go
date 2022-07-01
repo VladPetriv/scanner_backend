@@ -28,7 +28,7 @@ func TestChannelPg_GetChannels(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"}).
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"}).
 					AddRow(1, "test1", "test1", "test1.jpg").
 					AddRow(2, "test2", "test2", "test2.jpg")
 
@@ -36,14 +36,14 @@ func TestChannelPg_GetChannels(t *testing.T) {
 					WillReturnRows(rows)
 			},
 			want: []model.Channel{
-				{ID: 1, Name: "test1", Title: "test1", PhotoURL: "test1.jpg"},
-				{ID: 2, Name: "test2", Title: "test2", PhotoURL: "test2.jpg"},
+				{ID: 1, Name: "test1", Title: "test1", ImageURL: "test1.jpg"},
+				{ID: 2, Name: "test2", Title: "test2", ImageURL: "test2.jpg"},
 			},
 		},
 		{
 			name: "channels not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
 				mock.ExpectQuery("SELECT * FROM channel;").
 					WillReturnRows(rows)
 			},
@@ -84,7 +84,7 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"}).
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"}).
 					AddRow(1, "test1", "test1", "test1.jpg").
 					AddRow(2, "test2", "test2", "test2.jpg")
 
@@ -92,15 +92,15 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 					WithArgs(1).WillReturnRows(rows)
 			},
 			want: []model.Channel{
-				{ID: 1, Name: "test1", Title: "test1", PhotoURL: "test1.jpg"},
-				{ID: 2, Name: "test2", Title: "test2", PhotoURL: "test2.jpg"},
+				{ID: 1, Name: "test1", Title: "test1", ImageURL: "test1.jpg"},
+				{ID: 2, Name: "test2", Title: "test2", ImageURL: "test2.jpg"},
 			},
 			input: 1,
 		},
 		{
 			name: "channels not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
 
 				mock.ExpectQuery("SELECT * FROM channel LIMIT 10 OFFSET $1;").
 					WithArgs(1).WillReturnRows(rows)
@@ -112,7 +112,7 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 		{
 			name: "empty field",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
 
 				mock.ExpectQuery("SELECT * FROM channel LIMIT 10 OFFSET $1;").
 					WithArgs().WillReturnRows(rows)
@@ -154,19 +154,19 @@ func TestChannelPg_GetByName(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"}).
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"}).
 					AddRow(1, "test", "test", "test.jpg")
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
 					WithArgs("test").WillReturnRows(rows)
 			},
 			input: "test",
-			want:  &model.Channel{ID: 1, Name: "test", Title: "test", PhotoURL: "test.jpg"},
+			want:  &model.Channel{ID: 1, Name: "test", Title: "test", ImageURL: "test.jpg"},
 		},
 		{
 			name: "channel not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
 					WithArgs().WillReturnRows(rows)
@@ -176,7 +176,7 @@ func TestChannelPg_GetByName(t *testing.T) {
 		{
 			name: "empty field",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "tilte", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "name", "tilte", "imageurl"})
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
 					WithArgs().WillReturnRows(rows)

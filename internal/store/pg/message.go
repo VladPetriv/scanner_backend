@@ -29,8 +29,13 @@ func (repo *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) 
 	messages := make([]model.FullMessage, 0)
 
 	rows, err := repo.db.Query(
-		`SELECT m.id, m.Title, m.message_url, m.image, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
-		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
+		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
+		c.id, c.Name, c.Photourl as channelImageUrl, 
+		u.id, u.Fullname, u.imageurl as userImageUrl, 
+		(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+	  FROM message m 
+		LEFT JOIN channel c ON c.id = m.channel_id 
+		LEFT JOIN tg_user u ON u.id = m.user_id
 		ORDER BY m.id DESC NULLS LAST LIMIT 10 OFFSET $1;`, page,
 	)
 	if err != nil {
@@ -42,8 +47,8 @@ func (repo *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) 
 		message := model.FullMessage{}
 
 		err := rows.Scan(
-			&message.ID, &message.Title, &message.MessageURL, &message.Image, &message.ChannelID, &message.ChannelName,
-			&message.ChannelPhotoURL, &message.UserID, &message.FullName, &message.PhotoURL, &message.ReplieCount,
+			&message.ID, &message.Title, &message.MessageURL, &message.ImageURL, &message.ChannelID, &message.ChannelName,
+			&message.ChannelImageURL, &message.UserID, &message.FullName, &message.UserImageURL, &message.ReplieCount,
 		)
 		if err != nil {
 			continue
@@ -63,9 +68,15 @@ func (repo *MessageRepo) GetFullMessagesByChannelID(ID, limit, page int) ([]mode
 	messages := make([]model.FullMessage, 0)
 
 	rows, err := repo.db.Query(
-		`SELECT m.id, m.Title, m.message_url, m.image, c.id, c.Name, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
-		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-		WHERE m.channel_id = $1 ORDER BY count DESC NULLS LAST LIMIT $2 OFFSET $3;`, ID, limit, page,
+		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
+		c.id, c.Name, c.Photourl as channelImageUrl, 
+		u.id, u.Fullname, u.imageurl as userImageUrl, 
+		(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		FROM message m 
+		LEFT JOIN channel c ON c.id = m.channel_id 
+		LEFT JOIN tg_user u ON u.id = m.user_id
+		WHERE m.channel_id = $1 
+		ORDER BY count DESC NULLS LAST LIMIT $2 OFFSET $3;`, ID, limit, page,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting full messages by channel ID: %w", err)
@@ -76,8 +87,8 @@ func (repo *MessageRepo) GetFullMessagesByChannelID(ID, limit, page int) ([]mode
 		message := model.FullMessage{}
 
 		err := rows.Scan(
-			&message.ID, &message.Title, &message.MessageURL, &message.Image, &message.ChannelID, &message.ChannelName,
-			&message.ChannelPhotoURL, &message.UserID, &message.FullName, &message.PhotoURL, &message.ReplieCount,
+			&message.ID, &message.Title, &message.MessageURL, &message.ImageURL, &message.ChannelID, &message.ChannelName,
+			&message.ChannelImageURL, &message.UserID, &message.FullName, &message.UserImageURL, &message.ReplieCount,
 		)
 		if err != nil {
 			continue
@@ -126,9 +137,14 @@ func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, e
 	messages := make([]model.FullMessage, 0)
 
 	rows, err := repo.db.Query(
-		`SELECT m.id, m.Title, m.message_url, m.image, c.id, c.Name, c.Title, c.Photourl as channelPhotoUrl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
-		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-		WHERE m.user_id= $1 ORDER BY count DESC NULLS LAST;`, ID,
+		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
+		c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+		(SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		FROM message m 
+		LEFT JOIN channel c ON c.id = m.channel_id 
+		LEFT JOIN tg_user u ON u.id = m.user_id
+		WHERE m.user_id= $1 
+		ORDER BY count DESC NULLS LAST;`, ID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting full messages by user ID: %w", err)
@@ -139,8 +155,8 @@ func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, e
 		message := model.FullMessage{}
 
 		err := rows.Scan(
-			&message.ID, &message.Title, &message.MessageURL, &message.Image, &message.ChannelID, &message.ChannelName,
-			&message.ChannelTitle, &message.ChannelPhotoURL, &message.ReplieCount,
+			&message.ID, &message.Title, &message.MessageURL, &message.ImageURL, &message.ChannelID, &message.ChannelName,
+			&message.ChannelTitle, &message.ChannelImageURL, &message.ReplieCount,
 		)
 		if err != nil {
 			continue
@@ -160,9 +176,14 @@ func (repo *MessageRepo) GetFullMessageByMessageID(ID int) (*model.FullMessage, 
 	message := &model.FullMessage{}
 
 	rows, err := repo.db.Query(
-		`SELECT m.id, m.Title, m.message_url, m.image, c.id, c.Name, c.Title, c.Photourl as channelPhotoUrl, u.id, u.Fullname, u.Photourl, (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
-		FROM message m LEFT JOIN channel c ON c.id = m.channel_id LEFT JOIN tg_user u ON u.id = m.user_id
-		WHERE m.id = $1;`, ID,
+		`SELECT m.id, m.Title, m.message_url, m.imageurl, 
+		 c.id, c.Name, c.Title, c.Photourl as channelImageUrl, 
+		 u.id, u.Fullname, u.imageurl as userImageUrl, 
+		 (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		 FROM message m 
+		 LEFT JOIN channel c ON c.id = m.channel_id 
+		 LEFT JOIN tg_user u ON u.id = m.user_id
+		 WHERE m.id = $1;`, ID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting full messages by message ID: %w", err)
@@ -171,8 +192,9 @@ func (repo *MessageRepo) GetFullMessageByMessageID(ID int) (*model.FullMessage, 
 	defer rows.Close()
 	for rows.Next() {
 		err := rows.Scan(
-			&message.ID, &message.Title, &message.MessageURL, &message.Image, &message.ChannelID, &message.ChannelName, &message.ChannelTitle,
-			&message.ChannelPhotoURL, &message.UserID, &message.FullName, &message.PhotoURL, &message.ReplieCount,
+			&message.ID, &message.Title, &message.MessageURL, &message.ImageURL,
+			&message.ChannelID, &message.ChannelName, &message.ChannelTitle, &message.ChannelImageURL,
+			&message.UserID, &message.FullName, &message.UserImageURL, &message.ReplieCount,
 		)
 		if err != nil {
 			continue

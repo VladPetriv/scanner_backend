@@ -28,25 +28,25 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 		{
 			name: "Ok",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "photourl"}).
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "imageurl"}).
 					AddRow(1, "test1", 1, "test1 test", "test1.jpg").
 					AddRow(2, "test2", 2, "test2 test", "test2.jpg")
 
-				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
+				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.imageurl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs(1).WillReturnRows(rows)
 			},
 			input: 1,
 			want: []model.FullReplie{
-				{ID: 1, Title: "test1", UserID: 1, FullName: "test1 test", PhotoURL: "test1.jpg"},
-				{ID: 2, Title: "test2", UserID: 2, FullName: "test2 test", PhotoURL: "test2.jpg"},
+				{ID: 1, Title: "test1", UserID: 1, FullName: "test1 test", UserImageURL: "test1.jpg"},
+				{ID: 2, Title: "test2", UserID: 2, FullName: "test2 test", UserImageURL: "test2.jpg"},
 			},
 		},
 		{
 			name: "empty field",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "imageurl"})
 
-				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
+				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.imageurl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs().WillReturnRows(rows)
 			},
 			want: nil,
@@ -54,9 +54,9 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 		{
 			name: "replies not found",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "photourl"})
+				rows := sqlmock.NewRows([]string{"id", "title", "id", "fullname", "imageurl"})
 
-				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.photourl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
+				mock.ExpectQuery("SELECT r.id, r.title, u.id, u.fullname, u.imageurl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
 					WithArgs(404).WillReturnRows(rows)
 			},
 			input: 404,

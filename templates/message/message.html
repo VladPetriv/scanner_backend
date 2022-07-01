@@ -14,7 +14,7 @@
                 alt="Binance Russian"
                 class="rounded me-1"
                 height="25"
-                src="{{ .Message.ChannelPhotoURL }}"
+                src="{{ .Message.ChannelImageURL }}"
                 width="25"
               />
 
@@ -33,7 +33,7 @@
                 alt="Inspayran-"
                 class="rounded me-1"
                 height="25"
-                src="{{ .Message.PhotoURL }}"
+                src="{{ .Message.UserImageURL }}"
                 width="25"
               />
 
@@ -54,14 +54,14 @@
       <meta content="message title " itemprop="text" />
 
       <div class="card-body">
-        {{ if or ( eq .Message.Image "" ) (eq .Message.Image "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
+        {{ if or ( eq .Message.ImageURL "" ) (eq .Message.Image "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
           <p class="mb-3 fs-3" itemprop="name">{{ .Message.Title }}</p>
-          <a href="{{ .Message.MessageURL }}" target="_blank">Visit telegram</a>
+          <a href="{{ .Message.MessageURL }}" target="_blank">view in Telegram</a>
         {{ else  }}
         <div class="row">
           <div class="col-3">
-            <a href="{{ .Message.Image }}" target="_blank">
-              <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .Message.Image }}">
+            <a href="{{ .Message.ImageURL }}" target="_blank">
+              <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .Message.ImageURL }}">
             </a>
           </div>
           <div class="col-9">
@@ -109,7 +109,7 @@
                 alt="🕶-"
                 class="rounded me-1"
                 height="25"
-                src="{{ .PhotoURL }}"
+                src="{{ .UserImageURL }}"
                 width="25"
               />
 

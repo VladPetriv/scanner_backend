@@ -13,8 +13,8 @@ import (
 
 func TestChannelService_GetChannels(t *testing.T) {
 	data := []model.Channel{
-		{ID: 1, Name: "test1", Title: "test1", PhotoURL: "test1.jpg"},
-		{ID: 2, Name: "test2", Title: "test2", PhotoURL: "test2.jpg"},
+		{ID: 1, Name: "test1", Title: "test1", ImageURL: "test1.jpg"},
+		{ID: 2, Name: "test2", Title: "test2", ImageURL: "test2.jpg"},
 	}
 
 	tests := []struct {
@@ -140,7 +140,7 @@ func TestChannelService_GetChannelsByPage(t *testing.T) {
 }
 
 func TestChannelService_GetChannelByName(t *testing.T) {
-	channel := &model.Channel{ID: 1, Name: "test", Title: "test", PhotoURL: "test.jpg"}
+	channel := &model.Channel{ID: 1, Name: "test", Title: "test", ImageURL: "test.jpg"}
 
 	tests := []struct {
 		name    string

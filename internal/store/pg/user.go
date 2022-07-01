@@ -24,7 +24,7 @@ func (repo *UserRepo) GetUsers() ([]model.User, error) {
 	defer rows.Close()
 	for rows.Next() {
 		user := model.User{}
-		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.PhotoURL)
+		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.ImageURL)
 		if err != nil {
 			continue
 		}
@@ -49,7 +49,7 @@ func (repo *UserRepo) GetUserByUsername(username string) (*model.User, error) {
 
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.PhotoURL)
+		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.ImageURL)
 		if err != nil {
 			continue
 		}
@@ -72,7 +72,7 @@ func (repo *UserRepo) GetUserByID(ID int) (*model.User, error) {
 
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.PhotoURL)
+		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.ImageURL)
 		if err != nil {
 			continue
 		}

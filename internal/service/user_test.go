@@ -13,9 +13,9 @@ import (
 
 func TestUserService_GetUsers(t *testing.T) {
 	users := []model.User{
-		{ID: 1, Username: "test1", FullName: "test1 test", PhotoURL: "test1.jpg"},
-		{ID: 2, Username: "test2", FullName: "test2 test", PhotoURL: "test2.jpg"},
-		{ID: 3, Username: "test3", FullName: "test3 test", PhotoURL: "test3.jpg"},
+		{ID: 1, Username: "test1", FullName: "test1 test", ImageURL: "test1.jpg"},
+		{ID: 2, Username: "test2", FullName: "test2 test", ImageURL: "test2.jpg"},
+		{ID: 3, Username: "test3", FullName: "test3 test", ImageURL: "test3.jpg"},
 	}
 
 	tests := []struct {
@@ -71,7 +71,12 @@ func TestUserService_GetUsers(t *testing.T) {
 }
 
 func TestUserService_GetUserByUsername(t *testing.T) {
-	user := &model.User{ID: 1, Username: "test1", FullName: "test1 test", PhotoURL: "test1.jpg"}
+	user := &model.User{
+		ID:       1,
+		Username: "test1",
+		FullName: "test1 test",
+		ImageURL: "test1.jpg",
+	}
 
 	tests := []struct {
 		name    string
@@ -130,7 +135,12 @@ func TestUserService_GetUserByUsername(t *testing.T) {
 }
 
 func TestUserService_GetUserByID(t *testing.T) {
-	user := &model.User{ID: 1, Username: "test1", FullName: "test1 test", PhotoURL: "test1.jpg"}
+	user := &model.User{
+		ID:       1,
+		Username: "test1",
+		FullName: "test1 test",
+		ImageURL: "test1.jpg",
+	}
 
 	tests := []struct {
 		name    string

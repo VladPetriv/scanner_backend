@@ -28,7 +28,7 @@
               alt="{{ .ChannelName }}"
               class="rounded me-1"
               height="25"
-              src="{{ .ChannelPhotoURL }}"
+              src="{{ .ChannelImageURL }}"
               width="25"
             />
 
@@ -45,7 +45,7 @@
               alt="{{ .FullName }}"
               class="rounded me-1"
               height="25"
-              src="{{ .PhotoURL }}"
+              src="{{ .UserImageURL }}"
               width="25"
             />
 
@@ -57,7 +57,7 @@
     <!--Channel and user info end-->
 
     <!--Message info start-->
-    {{ if or ( eq .Image "" ) (eq .Image "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
+    {{ if or ( eq .ImageURL "" ) (eq .ImageURL "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
     <div class="card-body">
       <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
         <p class="card-text">{{ .Title }}</p>
@@ -71,7 +71,7 @@
           <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .Image }}">
         </div>
         <div class="col-9">
-          <p class="card-text">{{.Title}}</p>
+          <p class="card-text">{{ .Title }}</p>
         </div>
       </div>
       </a>

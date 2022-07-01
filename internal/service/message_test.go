@@ -128,8 +128,8 @@ func TestMessageService_GetFullMessages(t *testing.T) {
 
 func TestMessageService_GetFullMessagesByChannelID(t *testing.T) {
 	messages := []model.FullMessage{
-		{ID: 1, Title: "test1", ChannelID: 1},
-		{ID: 2, Title: "test2", ChannelID: 1},
+		{ID: 1, Title: "test1", ChannelID: 1, ImageURL: "test1.jpg"},
+		{ID: 2, Title: "test2", ChannelID: 1, ImageURL: "test2.jpg"},
 	}
 
 	tests := []struct {
@@ -189,8 +189,8 @@ func TestMessageService_GetFullMessagesByChannelID(t *testing.T) {
 }
 func TestMessageService_GetFullMessagesByUserID(t *testing.T) {
 	messages := []model.FullMessage{
-		{ID: 1, Title: "test1", ChannelID: 1, UserID: 1},
-		{ID: 2, Title: "test2", ChannelID: 2, UserID: 1},
+		{ID: 1, Title: "test1", ChannelID: 1, UserID: 1, ImageURL: "test1.jpg"},
+		{ID: 2, Title: "test2", ChannelID: 2, UserID: 1, ImageURL: "test2.jpg"},
 	}
 
 	tests := []struct {

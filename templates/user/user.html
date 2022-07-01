@@ -8,7 +8,7 @@
       alt="{{ .User.FullName }}"
       class="rounded me-1"
       height="25"
-      src="{{ .User.PhotoURL }}"
+      src="{{ .User.ImageURL }}"
       width="25"
     />
 
@@ -29,7 +29,7 @@
           alt="{{ .ChannelTitle }}"
           class="rounded me-1"
           height="25"
-          src="{{ .ChannelPhotoURL }}"
+          src="{{ .ChannelImageURL }}"
           width="25"
         />
 
@@ -37,7 +37,7 @@
       </a>
     </div>
 
-    {{ if or ( eq .Image "" ) (eq .Image "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
+    {{ if or ( eq .ImageURL "" ) (eq .ImageURL "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media")}}
     <div class="card-body">
       <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
         <p class="card-text">{{ .Title }}</p>
@@ -48,10 +48,10 @@
       <a class="text-reset text-decoration-none" href="/message/{{ .ID }}">
       <div class="row">
         <div class="col-3">
-          <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .Image }}">
+          <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .ImageURL }}">
         </div>
         <div class="col-9">
-          <p class="card-text">{{.Title}}</p>
+          <p class="card-text">{{ .Title }}</p>
         </div>
       </div>
       </a>

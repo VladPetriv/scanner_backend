@@ -4,7 +4,7 @@ type User struct {
 	ID       int    `json:"id"`
 	Username string `json:"username"`
 	FullName string `json:"fullname"`
-	PhotoURL string `json:"photoUrl"`
+	ImageURL string `json:"imageUrl"`
 }
 
 type WebUser struct {
