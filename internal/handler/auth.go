@@ -47,6 +47,7 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 			PageData{Title: "Registration", Message: fmt.Sprintf("User with email %s is exist", u.Email)},
 		)
 	}
+
 	hashedPassword, _ := util.HashPassword(u.Password)
 
 	u.Password = hashedPassword
@@ -55,7 +56,7 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.tmpTree["register"].Execute(
 			w,
-			PageData{Title: "Registration", Message: "error while creating user.Please try again later!"},
+			PageData{Title: "Registration", Message: "error while creating user. Please try again later!"},
 		)
 		h.log.Error(err)
 	}
