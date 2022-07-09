@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/VladPetriv/go-pagination-bootstrap"
+
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/pkg/util"

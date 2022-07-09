@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/VladPetriv/scanner_backend/config"
 	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/scanner_backend/logger"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 type Store struct {
@@ -21,7 +21,7 @@ type Store struct {
 	Saved   SavedRepo
 }
 
-func New(cfg config.Config, log *logger.Logger) (*Store, error) {
+func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
 	pgDB, err := pg.Dial(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("pg.Dial() failed: %w", err)
@@ -29,7 +29,7 @@ func New(cfg config.Config, log *logger.Logger) (*Store, error) {
 
 	if pgDB != nil {
 		log.Info("Running migrations...")
-		if err := runMigrations(&cfg); err != nil {
+		if err := runMigrations(cfg); err != nil {
 			return nil, fmt.Errorf("run migrations error: %w", err)
 		}
 	}
@@ -51,8 +51,9 @@ func New(cfg config.Config, log *logger.Logger) (*Store, error) {
 	return &store, nil
 }
 
-func (s *Store) KeepAliveDB(cfg config.Config) {
+func (s *Store) KeepAliveDB(cfg *config.Config) {
 	var err error
+
 	for {
 		time.Sleep(time.Second * 5)
 

@@ -7,9 +7,10 @@ import (
 	"strconv"
 
 	"github.com/VladPetriv/go-pagination-bootstrap"
+	"github.com/gorilla/mux"
+
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/pkg/util"
-	"github.com/gorilla/mux"
 )
 
 type ChannelPageData struct {

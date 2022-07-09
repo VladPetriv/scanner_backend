@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/VladPetriv/scanner_backend/config"
+	_ "github.com/lib/pq"
+
 	"github.com/VladPetriv/scanner_backend/internal/handler"
 	"github.com/VladPetriv/scanner_backend/internal/server"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
-	"github.com/VladPetriv/scanner_backend/logger"
-	_ "github.com/lib/pq"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 		log.Errorf("error while getting config: %v", err)
 	}
 
-	store, err := store.New(*cfg, log)
+	store, err := store.New(cfg, log)
 	if err != nil {
 		log.Errorf("error while creating store: %v", err)
 	}

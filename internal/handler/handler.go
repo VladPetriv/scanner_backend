@@ -4,11 +4,12 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/internal/service"
-	"github.com/VladPetriv/scanner_backend/logger"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+
+	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/service"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 type Handler struct {

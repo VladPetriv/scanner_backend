@@ -4,14 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/VladPetriv/scanner_backend/config"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
 )
 
 type DB struct {
 	*sql.DB
 }
 
-func Dial(cfg config.Config) (*DB, error) {
+func Dial(cfg *config.Config) (*DB, error) {
 	var connectionString string
 
 	if cfg.DatabaseURL == "" {
