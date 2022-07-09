@@ -12,10 +12,11 @@ import (
 )
 
 type Handler struct {
-	store   *sessions.CookieStore
-	service *service.Manager
-	log     *logger.Logger
-	tmpTree map[string]*template.Template
+	store     *sessions.CookieStore
+	service   *service.Manager
+	log       *logger.Logger
+	tmpTree   map[string]*template.Template
+	templates *template.Template
 }
 
 func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
@@ -24,6 +25,13 @@ func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
 		service: serviceManager,
 		log:     log,
 		tmpTree: make(map[string]*template.Template),
+		templates: template.Must(
+			template.ParseFiles(
+				"templates/message/messages.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
+				"templates/channel/channels.html", "templates/channel/channel.html", "templates/user/saved.html", "templates/user/user.html",
+				"templates/base.html",
+			),
+		),
 	}
 }
 

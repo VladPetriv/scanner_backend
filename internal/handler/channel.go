@@ -141,14 +141,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	data.Pager = pager
 	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
 
-	h.tmpTree["singleChannel"] = template.Must(
-		template.ParseFiles(
-			"templates/channel/channel.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
-			"templates/message/messages.html", "templates/channel/channels.html", "templates/user/saved.html", "templates/user/user.html",
-			"templates/base.html",
-		),
-	)
-	err = h.tmpTree["singleChannel"].ExecuteTemplate(w, "base", data)
+	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		h.log.Error(err)
 	}

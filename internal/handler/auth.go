@@ -56,12 +56,12 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.tmpTree["register"].Execute(
 			w,
-			PageData{Title: "Registration", Message: "error while creating user. Please try again later!"},
+			PageData{Title: "Registration", Message: "Error while creating user. Please try again later!"},
 		)
 		h.log.Error(err)
 	}
 
-	http.Redirect(w, r, "/login", http.StatusFound)
+	http.Redirect(w, r, "/auth/login", http.StatusFound)
 }
 
 func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
@@ -75,14 +75,14 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	if candidate == nil {
 		h.tmpTree["login"].Execute(
 			w,
-			PageData{Title: "Login", Message: fmt.Sprintf("User with email %s not found.Maybe you want to signup?", u.Email)},
+			PageData{Title: "Login", Message: fmt.Sprintf("User with email %s not found", u.Email)},
 		)
 	}
 
 	if util.ComparePassword(u.Password, candidate.Password) {
 		h.writeToSessionStore(w, r, u.Email)
 
-		http.Redirect(w, r, "/home", http.StatusFound)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -95,5 +95,5 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
 	h.removeFromSessionStore(w, r)
 
-	http.Redirect(w, r, "/home", http.StatusFound)
+	http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 }

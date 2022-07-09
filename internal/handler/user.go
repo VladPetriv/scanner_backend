@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"strconv"
 
@@ -61,14 +60,7 @@ func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
 	data.MessagesLength = len(messages)
 	data.WebUserID, data.UserEmail = util.ProcessWebUserData(webUser)
 
-	h.tmpTree["user"] = template.Must(
-		template.ParseFiles(
-			"templates/user/user.html", "templates/partials/navbar.html", "templates/partials/header.html", "templates/message/message.html",
-			"templates/message/messages.html", "templates/channel/channels.html", "templates/user/saved.html", "templates/channel/channel.html",
-			"templates/base.html",
-		),
-	)
-	err = h.tmpTree["user"].ExecuteTemplate(w, "base", data)
+	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		h.log.Error(err)
 	}
