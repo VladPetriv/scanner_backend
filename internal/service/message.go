@@ -35,6 +35,7 @@ func (s *MessageDBService) GetFullMessages(page int) ([]model.FullMessage, error
 		page = 0
 	} else if page != 0 {
 		page *= 10
+		page -= 10
 	}
 
 	messages, err := s.store.Message.GetFullMessages(page)
@@ -54,6 +55,7 @@ func (s *MessageDBService) GetFullMessagesByChannelID(ID, limit, page int) ([]mo
 		page = 0
 	} else if page != 0 {
 		page *= 10
+		page -= 10
 	}
 
 	messages, err := s.store.Message.GetFullMessagesByChannelID(ID, limit, page)
