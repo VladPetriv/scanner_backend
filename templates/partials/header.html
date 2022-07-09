@@ -19,14 +19,14 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link" href="/channel">Channel</a>
+          <a class="nav-link" href="/channel/">Channel</a>
         </li>
       </ul>
 
       <div class="d-flex">
         {{ if eq .UserEmail "" }}
-        <a class="btn btn-link" href="/login">Login</a>
-        <a class="btn btn-link" href="/registration">Registration</a>
+        <a class="btn btn-link" href="/auth/login">Login</a>
+        <a class="btn btn-link" href="/auth/registration">Registration</a>
         {{ else }}
         <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
           <ul class="navbar-nav">
@@ -50,7 +50,7 @@
                   >
                 </li>
                 <li>
-                  <form action="/logout" method="POST">
+                  <form action="/auth/logout" method="POST">
                     <button class="dropdown-item" type="submit">Logout</button>
                   </form>
                 </li>

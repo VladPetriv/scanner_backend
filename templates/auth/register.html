@@ -32,14 +32,14 @@
                   Please enter your email and password!
                 </p>
 
-                <form action="/registration" method="POST"> 
+                <form action="/auth/registration" method="POST"> 
                   <div class="form-outline form-white mb-4">
                     <input  
                       name="email"
                       type="email"
                       id="typeEmailX"
                       class="form-control form-control-lg"
-                      placeholder="Enter your email"
+                      placeholder="Your email"
                     />
                   </div>
 
@@ -49,12 +49,12 @@
                       type="password"
                       id="typePasswordX"
                       class="form-control form-control-lg"
-                      placeholder="Enter your password"
+                      placeholder="Your password"
                     />
                   </div>
 
                   <button class="btn btn-outline-light btn-lg px-5" type="submit">
-                    Signup
+                    Sign Up
                   </button>
                 </form>
                 {{ if .Message  }}
@@ -81,8 +81,8 @@
                 {{ end }}
               </div>
               <div>
-                <p class="mb-0">Have an account? <a href="/login" class="text-white-50 fw-bold">Sign In</a>
-              </p>
+                <p class="mb-0">Have an account?</p>
+                <a href="/auth/login">Sign In</a>
             </div>
             </div>
           </div>
