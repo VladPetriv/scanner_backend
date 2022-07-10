@@ -24,9 +24,9 @@
       </ul>
 
       <div class="d-flex">
-        {{ if eq .UserEmail "" }}
-        <a class="btn btn-link" href="/auth/login">Login</a>
-        <a class="btn btn-link" href="/auth/registration">Registration</a>
+        {{ if eq .DefaultPageData.WebUserEmail "" }}
+          <a class="btn btn-link" href="/auth/login">Login</a>
+          <a class="btn btn-link" href="/auth/registration">Registration</a>
         {{ else }}
         <div class="collapse navbar-collapse" id="navbarNavDarkDropdown">
           <ul class="navbar-nav">
@@ -38,16 +38,14 @@
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                {{ .UserEmail }}
+                {{ .DefaultPageData.WebUserEmail }}
               </a>
               <ul
                 class="dropdown-menu dropdown-menu"
                 aria-labelledby="navbarDarkDropdownMenuLink"
               >
                 <li>
-                  <a class="dropdown-item" href="/saved/{{ .WebUserID }}"
-                    >Saved</a
-                  >
+                  <a class="dropdown-item" href="/saved/{{ .DefaultPageData.WebUserID }}">Saved</a>
                 </li>
                 <li>
                   <form action="/auth/logout" method="POST">

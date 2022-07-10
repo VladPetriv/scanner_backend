@@ -9,7 +9,7 @@
       integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
       crossorigin="anonymous"
     />
-    <title>{{ .Title }}</title>
+    <title>{{ .DefaultPageData.Title }}</title>
   <body class="bg-light">
     <!-- Navbar start -->
       {{ template "header" . }}
@@ -20,15 +20,15 @@
       <div class="row">
         {{ template "navbar" . }}  
         
-        {{ if eq .Type "messages" }}
+        {{ if eq .DefaultPageData.Type "messages" }}
           {{ template "messages" . }}
-        {{ else if eq .Type "channel"}}
+        {{ else if eq .DefaultPageData.Type "channel"}}
           {{ template "channel" . }}
-        {{ else if eq .Type "user"}}
+        {{ else if eq .DefaultPageData.Type "user"}}
           {{ template "user" . }}
-        {{ else if eq .Type "message"}}
+        {{ else if eq .DefaultPageData.Type "message"}}
           {{ template "message" . }}
-        {{ else if eq .Type "saved" }}
+        {{ else if eq .DefaultPageData.Type "saved" }}
           {{ template "saved" . }}
         {{ else }}
           {{ template "channels" . }}

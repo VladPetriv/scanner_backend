@@ -13,8 +13,10 @@
     messages
   </h1>
   <!-- Message count end -->
-  {{$userID := .WebUserID}} 
-  {{$userEmail := .UserEmail}} 
+
+  {{$userID := .DefaultPageData.WebUserID}} 
+  {{$userEmail := .DefaultPageData.WebUserEmail}} 
+
   {{ range .Messages }}
   <div class="card mt-4 border-light">
     <!--Channel and user info start-->

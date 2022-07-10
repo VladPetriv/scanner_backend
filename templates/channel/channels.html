@@ -1,16 +1,16 @@
 {{ define "channels" }}
 <div class="col-xl-6 col-xxl-4">
-  {{ if eq .ChannelsLength 0 }}
+  {{ if eq .DefaultPageData.ChannelsLength 0 }}
   <h1 class="mt-5 h2">
     <span class="text-muted"> No channels found </span>
   </h1>
   {{ else }}
   <h1 class="mt-5 h2">
-    <span class="text-muted"> {{ .ChannelsLength }} </span>
+    <span class="text-muted"> {{ .DefaultPageData.ChannelsLength }} </span>
     channels
   </h1>
 
-  {{ range .MainChannels }}
+  {{ range .Channels }}
   <div class="card border-light mt-3" id="to-0">
     <a
       class="text-decoration-none text-dark stretched-link"
