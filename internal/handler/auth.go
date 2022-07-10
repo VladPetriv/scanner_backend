@@ -8,13 +8,13 @@ import (
 	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
-type PageData struct {
+type AuthPageData struct {
 	Title   string
 	Message string
 }
 
 func (h *Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
-	data := PageData{
+	data := AuthPageData{
 		Title: "Registration",
 	}
 
@@ -26,7 +26,7 @@ func (h *Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) loginPage(w http.ResponseWriter, r *http.Request) {
-	data := PageData{
+	data := AuthPageData{
 		Title: "login",
 	}
 
@@ -44,7 +44,7 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 	if candidate != nil && err == nil {
 		h.tmpTree["register"].Execute(
 			w,
-			PageData{Title: "Registration", Message: fmt.Sprintf("User with email %s is exist", u.Email)},
+			AuthPageData{Title: "Registration", Message: fmt.Sprintf("User with email %s is exist", u.Email)},
 		)
 	}
 
@@ -56,7 +56,7 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.tmpTree["register"].Execute(
 			w,
-			PageData{Title: "Registration", Message: "Error while creating user. Please try again later!"},
+			AuthPageData{Title: "Registration", Message: "Error while creating user. Please try again later!"},
 		)
 		h.log.Error(err)
 	}
@@ -75,7 +75,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	if candidate == nil {
 		h.tmpTree["login"].Execute(
 			w,
-			PageData{Title: "Login", Message: fmt.Sprintf("User with email %s not found", u.Email)},
+			AuthPageData{Title: "Login", Message: fmt.Sprintf("User with email %s not found", u.Email)},
 		)
 	}
 
@@ -88,7 +88,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 
 	h.tmpTree["login"].Execute(
 		w,
-		PageData{Title: "Login", Message: "User password is incorrect!"},
+		AuthPageData{Title: "Login", Message: "User password is incorrect!"},
 	)
 }
 

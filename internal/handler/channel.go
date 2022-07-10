@@ -13,46 +13,23 @@ import (
 )
 
 type ChannelPageData struct {
-	Type           string
-	Title          string
-	Channels       []model.Channel
-	ChannelsLength int
-	MainChannels   []model.Channel
-	Pager          *pagination.Pagination
-	UserEmail      interface{}
-	WebUserID      int
-}
-
-type SingleChannelPageData struct {
-	Type           string
-	Title          string
-	Channel        model.Channel
-	Channels       []model.Channel
-	ChannelsLength int
-	Messages       []model.FullMessage
-	MessagesLength int
-	Pager          *pagination.Pagination
-	UserEmail      interface{}
-	WebUserID      int
+	DefaultPageData PageData
+	Channel         model.Channel
+	Channels        []model.Channel
+	Messages        []model.FullMessage
+	MessagesLength  int
+	Pager           *pagination.Pagination
 }
 
 func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
-	page := r.URL.Query().Get("page")
-	iPage, _ := strconv.Atoi(page)
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 
-	data := ChannelPageData{
-		Title: "Telegram channels",
-		Type:  "channels",
-	}
-
-	result := make([]model.Channel, 0)
-
-	channels, err := h.service.Channel.GetChannels()
+	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
 	}
 
-	mainChannels, err := h.service.Channel.GetChannelsByPage(iPage)
+	channels, err := h.service.Channel.GetChannelsByPage(page)
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -62,24 +39,29 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	for _, channel := range mainChannels {
+	for index, channel := range channels {
 		stat, err := h.service.Channel.GetChannelStats(channel.ID)
 		if err != nil {
 			h.log.Error(err)
 		}
 
-		channel.Stats = *stat
-
-		result = append(result, channel)
+		channels[index].Stats = *stat
 	}
 
-	pager := pagination.New(len(channels), 10, iPage, "/channel?=0")
+	webUserID, webUserEmail := util.ProcessWebUserData(user)
 
-	data.Channels = util.ProcessChannels(channels)
-	data.ChannelsLength = len(channels)
-	data.MainChannels = result
-	data.Pager = pager
-	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
+	data := ChannelPageData{
+		DefaultPageData: PageData{
+			Title:          "Telegram channels",
+			Type:           "channels",
+			Channels:       util.ProcessChannels(navBarChannels),
+			ChannelsLength: len(navBarChannels),
+			WebUserEmail:   webUserEmail,
+			WebUserID:      webUserID,
+		},
+		Channels: channels,
+		Pager:    pagination.New(len(navBarChannels), 10, page, "/channel/?page=2"),
+	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
@@ -88,23 +70,15 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	channelName := vars["channel_name"]
+	name := mux.Vars(r)["channel_name"]
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 
-	page := r.URL.Query().Get("page")
-	iPage, _ := strconv.Atoi(page)
-
-	data := SingleChannelPageData{
-		Type:  "channel",
-		Title: "Telegram channel",
-	}
-
-	channels, err := h.service.Channel.GetChannels()
+	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
 	}
 
-	channel, err := h.service.Channel.GetChannelByName(channelName)
+	channel, err := h.service.Channel.GetChannelByName(name)
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -114,7 +88,7 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	fullMessages, err := h.service.Message.GetFullMessagesByChannelID(channel.ID, 10, iPage)
+	messages, err := h.service.Message.GetFullMessagesByChannelID(channel.ID, 10, page)
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -124,15 +98,22 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err.Error())
 	}
 
-	pager := pagination.New(length, 10, iPage, "/channel/ru_python?page=0")
+	webUserID, webUserEmail := util.ProcessWebUserData(user)
 
-	data.Channel = *channel
-	data.Channels = util.ProcessChannels(channels)
-	data.Messages = fullMessages
-	data.ChannelsLength = len(channels)
-	data.MessagesLength = length
-	data.Pager = pager
-	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
+	data := ChannelPageData{
+		DefaultPageData: PageData{
+			Type:           "channel",
+			Title:          "Telegram channel",
+			Channels:       util.ProcessChannels(navBarChannels),
+			ChannelsLength: len(navBarChannels),
+			WebUserEmail:   webUserEmail,
+			WebUserID:      webUserID,
+		},
+		Channel:        *channel,
+		Messages:       messages,
+		MessagesLength: length,
+		Pager:          pagination.New(length, 10, page, "/channel/ru_python/?page=0"),
+	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {

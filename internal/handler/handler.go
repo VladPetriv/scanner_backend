@@ -20,6 +20,15 @@ type Handler struct {
 	templates *template.Template
 }
 
+type PageData struct {
+	Type           string
+	Title          string
+	Channels       []model.Channel
+	ChannelsLength int
+	WebUserEmail   interface{}
+	WebUserID      int
+}
+
 func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
 	return &Handler{
 		store:   sessions.NewCookieStore([]byte("secret")),

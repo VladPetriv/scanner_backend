@@ -12,32 +12,19 @@ import (
 )
 
 type MessagePageData struct {
-	Type           string
-	Title          string
-	Channels       []model.Channel
-	ChannelsLength int
-	Message        model.FullMessage
-	UserEmail      interface{}
-	WebUserID      int
+	DefaultPageData PageData
+	Message         model.FullMessage
 }
 
 func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	messageID := vars["message_id"]
+	messageID, _ := strconv.Atoi(mux.Vars(r)["message_id"])
 
-	data := MessagePageData{
-		Type:  "message",
-		Title: "Telegram message",
-	}
-
-	channels, err := h.service.Channel.GetChannels()
+	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
 	}
 
-	ID, _ := strconv.Atoi(messageID)
-
-	message, err := h.service.Message.GetFullMessageByMessageID(ID)
+	message, err := h.service.Message.GetFullMessageByMessageID(messageID)
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -54,10 +41,19 @@ func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 
 	message.Replies = replies
 
-	data.Channels = util.ProcessChannels(channels)
-	data.ChannelsLength = len(channels)
-	data.Message = *message
-	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
+	webUserID, webUserEmail := util.ProcessWebUserData(user)
+
+	data := MessagePageData{
+		DefaultPageData: PageData{
+			Type:           "message",
+			Title:          "Telegram message",
+			Channels:       util.ProcessChannels(navBarChannels),
+			ChannelsLength: len(navBarChannels),
+			WebUserEmail:   webUserEmail,
+			WebUserID:      webUserID,
+		},
+		Message: *message,
+	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {

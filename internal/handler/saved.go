@@ -12,34 +12,22 @@ import (
 )
 
 type SavedPageData struct {
-	Type           string
-	Title          string
-	UserEmail      string
-	WebUserID      int
-	Messages       []model.FullMessage
-	MessagesLength int
-	Channels       []model.Channel
-	ChannelsLength int
+	DefaultPageData PageData
+	Messages        []model.FullMessage
+	MessagesLength  int
 }
 
 func (h *Handler) savedPage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID := vars["user_id"]
-	userID, _ := strconv.Atoi(ID)
+	userID, _ := strconv.Atoi(mux.Vars(r)["user_id"])
 
-	data := SavedPageData{
-		Title: "Saved user messages",
-		Type:  "saved",
-	}
-
-	fullMessages := make([]model.FullMessage, 0)
+	messages := make([]model.FullMessage, 0)
 
 	savedMessages, err := h.service.Saved.GetSavedMessages(userID)
 	if err != nil {
 		h.log.Error(err)
 	}
 
-	channels, err := h.service.Channel.GetChannels()
+	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -54,28 +42,54 @@ func (h *Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			h.log.Error(err)
 		}
+
 		fullMessage.SavedID = msg.ID
 
-		fullMessages = append(fullMessages, *fullMessage)
+		messages = append(messages, *fullMessage)
 	}
 
-	data.Channels = util.ProcessChannels(channels)
-	data.ChannelsLength = len(channels)
-	data.Messages = fullMessages
-	data.MessagesLength = len(fullMessages)
-	data.WebUserID, data.UserEmail = util.ProcessWebUserData(user)
+	webUserID, webUserEmail := util.ProcessWebUserData(user)
+
+	data := SavedPageData{
+		DefaultPageData: PageData{
+			Type:           "saved",
+			Title:          "Saved user messages",
+			Channels:       util.ProcessChannels(navBarChannels),
+			ChannelsLength: len(navBarChannels),
+			WebUserEmail:   webUserEmail,
+			WebUserID:      webUserID,
+		},
+		Messages:       messages,
+		MessagesLength: len(messages),
+	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		h.log.Error(err)
 	}
 }
+func (h *Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
+	userID, _ := strconv.Atoi(mux.Vars(r)["user_id"])
+	messageID, _ := strconv.Atoi(mux.Vars(r)["message_id"])
+
+	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	if err != nil {
+		h.log.Error(err)
+	}
+
+	err = h.service.Saved.CreateSavedMessage(&model.Saved{WebUserID: userID, MessageID: messageID})
+	if err != nil {
+		h.log.Error(err)
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/saved/%d", user.ID), http.StatusFound)
+}
 
 func (h *Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID := vars["saved_id"]
-
-	savedID, _ := strconv.Atoi(ID)
+	savedID, _ := strconv.Atoi(mux.Vars(r)["saved_id"])
 
 	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
 	if err != nil {
@@ -87,29 +101,5 @@ func (h *Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/saved/%d", user.ID), http.StatusFound)
-}
-
-func (h *Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	uID := vars["user_id"]
-	mID := vars["message_id"]
-
-	userID, _ := strconv.Atoi(uID)
-	messageID, _ := strconv.Atoi(mID)
-
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
-	if err != nil {
-		h.log.Error(err)
-	}
-
-	err = h.service.Saved.CreateSavedMessage(&model.Saved{WebUserID: userID, MessageID: messageID})
-	if err != nil {
-		h.log.Error(err)
-
-		http.Redirect(w, r, "/home", http.StatusBadRequest)
-		return
-	}
-
-	http.Redirect(w, r, fmt.Sprintf("/saved/%d", user.ID), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/saved/%d", user.ID), http.StatusMovedPermanently)
 }

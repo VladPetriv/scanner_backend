@@ -12,34 +12,21 @@ import (
 )
 
 type UserPageData struct {
-	Type           string
-	Title          string
-	User           model.User
-	Channels       []model.Channel
-	ChannelsLength int
-	Messages       []model.FullMessage
-	MessagesLength int
-	WebUserID      int
-	UserEmail      string
+	DefaultPageData PageData
+	User            model.User
+	Messages        []model.FullMessage
+	MessagesLength  int
 }
 
 func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userID := vars["user_id"]
+	userID, _ := strconv.Atoi(mux.Vars(r)["user_id"])
 
-	data := UserPageData{
-		Type:  "user",
-		Title: "Telegram User",
-	}
-
-	ID, _ := strconv.Atoi(userID)
-
-	user, err := h.service.User.GetUserByID(ID)
+	user, err := h.service.User.GetUserByID(userID)
 	if err != nil {
 		h.log.Error(err)
 	}
 
-	channels, err := h.service.Channel.GetChannels()
+	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -54,12 +41,21 @@ func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	data.User = *user
-	data.Channels = util.ProcessChannels(channels)
-	data.ChannelsLength = len(channels)
-	data.Messages = messages
-	data.MessagesLength = len(messages)
-	data.WebUserID, data.UserEmail = util.ProcessWebUserData(webUser)
+	webUserID, webUserEmail := util.ProcessWebUserData(webUser)
+
+	data := UserPageData{
+		DefaultPageData: PageData{
+			Type:           "user",
+			Title:          "Telegram User",
+			Channels:       util.ProcessChannels(navBarChannels),
+			ChannelsLength: len(navBarChannels),
+			WebUserEmail:   webUserEmail,
+			WebUserID:      webUserID,
+		},
+		User:           *user,
+		Messages:       messages,
+		MessagesLength: len(messages),
+	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
