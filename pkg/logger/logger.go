@@ -8,46 +8,57 @@ import (
 	"runtime"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/VladPetriv/scanner_backend/pkg/config"
 )
 
-var e *logrus.Entry // nolint
+var e *logrus.Entry
 
 type Logger struct {
 	*logrus.Entry
 }
 
 func Get() *Logger {
-	Init()
+	cfg, err := config.Get()
+	if err != nil {
+		panic(err)
+	}
+
+	Init(cfg.LogLevel)
 
 	return &Logger{e}
 }
 
-func Init() {
+func Init(logLevel string) {
+	level, err := logrus.ParseLevel(logLevel)
+	if err != nil {
+		panic(err)
+	}
 	log := logrus.New()
+
 	log.SetReportCaller(true)
-	log.Formatter = &logrus.TextFormatter{ // nolint
+
+	log.Formatter = &logrus.JSONFormatter{
 		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
 			filename := path.Base(f.File)
 
 			return fmt.Sprintf("%s:%d", filename, f.Line), fmt.Sprintf("%s()", f.Function)
 		},
-		DisableColors: false,
-		FullTimestamp: true,
 	}
 
-	err := os.Mkdir("logs", 0o755) // nolint
+	err = os.Mkdir("logs", 0o755)
 	if os.IsNotExist(err) {
 		panic(err)
 	}
 
-	allFile, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+	file, err := os.OpenFile("logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 	if err != nil {
 		panic(fmt.Sprintf("[Error]: %s", err))
 	}
 
-	log.SetOutput(io.MultiWriter(allFile, os.Stdout)) // Send all logs to nowhere by default
+	log.SetOutput(io.MultiWriter(file, os.Stdout))
 
-	log.SetLevel(logrus.TraceLevel)
+	log.SetLevel(level)
 
 	e = logrus.NewEntry(log)
 }
