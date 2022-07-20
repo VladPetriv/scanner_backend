@@ -32,8 +32,9 @@ Please create .env file with this fields:
 - POSTGRES_PASSWORD = PostgreSQL user password
 - POSTGRES_HOST = PostgreSQL host
 - POSTGRES_DB = PostgreSQL database name
-- MIGRATIONS_PATH = Path to migrations for example:"file://./internal/store/migrations" 
+- MIGRATIONS_PATH = Path to migrations for example:"file://./db/migrations" 
 - PORT = Bind address which server going to use
+- DATABASE_URL = this field you can use if you don't want to create Postgres field
 
 ## Usage
 
