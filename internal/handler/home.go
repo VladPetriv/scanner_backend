@@ -8,6 +8,7 @@ import (
 	"github.com/VladPetriv/go-pagination-bootstrap"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
@@ -41,7 +42,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	messages = util.CheckMessagesStatus(messages, h.service)
+	messages = checkMessagesStatus(messages, h.service)
 
 	webUserID, webUserEmail := util.ProcessWebUserData(user)
 
@@ -63,4 +64,22 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error(err)
 	}
+}
+
+func checkMessagesStatus(messages []model.FullMessage, manager *service.Manager) []model.FullMessage {
+	result := make([]model.FullMessage, 0)
+
+	for _, message := range messages {
+		saved, err := manager.Saved.GetSavedMessageByMessageID(message.ID)
+		if err == nil && saved != nil {
+			message.Status = true
+			result = append(result, message)
+			continue
+		}
+
+		message.Status = false
+		result = append(result, message)
+	}
+
+	return result
 }

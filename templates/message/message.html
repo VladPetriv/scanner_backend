@@ -11,7 +11,7 @@
               href="/channel/{{ .Message.ChannelName }}"
             >
               <img
-                alt="Binance Russian"
+                alt="{{ .Message.ChannelName  }}"
                 class="rounded me-1"
                 height="25"
                 src="{{ .Message.ChannelImageURL }}"
@@ -84,8 +84,7 @@
     {{ else }}
     <h4 class="mt-4">
       <span class="text-muted" itemprop="answerCount">
-        {{ .Message.ReplieCount }}
-      </span>
+        {{ .Message.ReplieCount }} </span>
       replies
     </h4>
     {{ $author := .Message.FullName }}
@@ -132,9 +131,24 @@
         </div>
       </div>
 
+      {{ if or ( eq .ImageURL "" ) (eq .ImageURL "https://firebasestorage.googleapis.com/v0/b/tg-scanner.appspot.com/o/default.jpg?alt=media") }}
       <div class="card-body">
-        <p class="card-text" itemprop="text">{{ .Title }}</p>
+          <p class="card-text" itemprop="text">{{ .Title }}</p>
       </div>
+      {{ else }}
+      <div class="row card-body">
+        <div class="col-3">
+          <a href="{{ .ImageURL }}" target="_blank">
+            <img alt="screenshot" class="rounded img-fluid" height="100" src="{{ .ImageURL }}">
+          </a>
+        </div>
+        <div class="col-9">
+          <p class="card-text" itemprop="text">
+            {{ .Title }} 
+          </p>      
+        </div>
+      </div>
+      {{ end }} 
     </div>
     {{ end }}
     <!-- Replies info end -->
