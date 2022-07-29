@@ -16,6 +16,7 @@ type Config struct {
 	Port           string
 	DatabaseURL    string
 	LogLevel       string
+	KafkaAddr      string
 }
 
 func Get() (*Config, error) {
@@ -32,5 +33,6 @@ func Get() (*Config, error) {
 		Port:           os.Getenv("PORT"),
 		DatabaseURL:    os.Getenv("DATABASE_URL"),
 		LogLevel:       os.Getenv("LOG_LEVEL"),
+		KafkaAddr:      os.Getenv("KAFKA_ADDR"),
 	}, nil
 }
