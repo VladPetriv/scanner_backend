@@ -10,8 +10,8 @@ import (
 )
 
 type Store struct {
-	Pg     *pg.DB
-	Logger *logger.Logger
+	pg     *pg.DB
+	logger *logger.Logger
 
 	Channel ChannelRepo
 	Message MessageRepo
@@ -35,9 +35,10 @@ func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
 	}
 
 	var store Store
-	store.Logger = log
+	store.logger = log
+
 	if pgDB != nil {
-		store.Pg = pgDB
+		store.pg = pgDB
 		store.Channel = pg.NewChannelRepo(pgDB)
 		store.Message = pg.NewMessageRepo(pgDB)
 		store.Replie = pg.NewReplieRepo(pgDB)
@@ -58,9 +59,9 @@ func (s *Store) KeepAliveDB(cfg *config.Config) {
 		time.Sleep(time.Second * 5)
 
 		lostConnection := false
-		if s.Pg == nil {
+		if s.pg == nil {
 			lostConnection = true
-		} else if _, err := s.Pg.Exec("SELECT 1;"); err != nil {
+		} else if _, err := s.pg.Exec("SELECT 1;"); err != nil {
 			lostConnection = true
 		}
 
@@ -68,15 +69,15 @@ func (s *Store) KeepAliveDB(cfg *config.Config) {
 			continue
 		}
 
-		s.Logger.Debug("[store.KeepAliveDB] Lost db connection. Restoring...")
+		s.logger.Debug("[store.KeepAliveDB] Lost db connection. Restoring...")
 
-		s.Pg, err = pg.Dial(cfg)
+		s.pg, err = pg.Dial(cfg)
 		if err != nil {
-			s.Logger.Error(err)
+			s.logger.Error(err)
 
 			continue
 		}
 
-		s.Logger.Debug("[store.KeepAliveDB] DB reconnected")
+		s.logger.Debug("[store.KeepAliveDB] DB reconnected")
 	}
 }
