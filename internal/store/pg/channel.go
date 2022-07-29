@@ -14,6 +14,21 @@ func NewChannelRepo(db *DB) *ChannelPgRepo {
 	return &ChannelPgRepo{db}
 }
 
+func (repo *ChannelPgRepo) CreateChannel(channel *model.DBChannel) error {
+	var id int
+
+	row := repo.db.QueryRow(`
+		INSERT INTO channel(name, title, imageurl) 
+		VALUES ($1, $2, $3) RETURNING id;`,
+		channel.Name, channel.Title, channel.ImageURL,
+	)
+	if err := row.Scan(&id); err != nil {
+		return fmt.Errorf("failed to create channel: %w", err)
+	}
+
+	return nil
+}
+
 func (repo *ChannelPgRepo) GetChannels() ([]model.Channel, error) {
 	channels := make([]model.Channel, 0)
 

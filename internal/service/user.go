@@ -15,6 +15,15 @@ func NewUserDBService(store *store.Store) *UserDBService {
 	return &UserDBService{store: store}
 }
 
+func (s *UserDBService) CreateUser(user *model.User) (int, error) {
+	id, err := s.store.User.CreateUser(user)
+	if err != nil {
+		return id, fmt.Errorf("[User] Service.CreateUser error: %w", err)
+	}
+
+	return id, nil
+}
+
 func (s *UserDBService) GetUsers() ([]model.User, error) {
 	users, err := s.store.User.GetUsers()
 	if err != nil {

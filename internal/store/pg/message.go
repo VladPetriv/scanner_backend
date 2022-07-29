@@ -14,6 +14,22 @@ func NewMessageRepo(db *DB) *MessageRepo {
 	return &MessageRepo{db: db}
 }
 
+func (repo *MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
+	var id int
+
+	row := repo.db.QueryRow(`
+		INSERT INTO message(channel_id, user_id, title, message_url, imageurl) 
+		VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+		message.ChannelID, message.UserID, message.Title,
+		message.MessageURL, message.ImageURL,
+	)
+	if err := row.Scan(&id); err != nil {
+		return id, fmt.Errorf("failed to create message: %w", err)
+	}
+
+	return id, nil
+}
+
 func (repo *MessageRepo) GetMessagesLength() (int, error) {
 	var count int
 
