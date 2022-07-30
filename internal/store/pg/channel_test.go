@@ -1,14 +1,74 @@
 package pg_test
 
 import (
+	"fmt"
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 	"github.com/VladPetriv/scanner_backend/pkg/util"
-	"github.com/stretchr/testify/assert"
 )
+
+func TestChannelPg_CreateChannel(t *testing.T) {
+	db, mock, err := util.CreateMock()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	r := pg.NewChannelRepo(&pg.DB{DB: db})
+
+	tests := []struct {
+		name    string
+		mock    func()
+		input   *model.DBChannel
+		wantErr bool
+	}{
+		{
+			name: "Ok: [channel created]",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id"}).
+					AddRow(1)
+
+				mock.ExpectQuery(`
+					INSERT INTO channel(name, title, imageurl) 
+					VALUES ($1, $2, $3) RETURNING id;`,
+				).WithArgs("test", "test T", "test.jpg").WillReturnRows(rows)
+			},
+			input: &model.DBChannel{Name: "test", Title: "test T", ImageURL: "test.jpg"},
+		},
+		{
+			name: "Error: [some sql error]",
+			mock: func() {
+				mock.ExpectQuery(`
+					INSERT INTO channel(name, title, imageurl) 
+					VALUES ($1, $2, $3) RETURNING id;`,
+				).WithArgs("test", "test T", "test.jpg").WillReturnError(fmt.Errorf("some sql error"))
+			},
+			input:   &model.DBChannel{Name: "test", Title: "test T", ImageURL: "test.jpg"},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock()
+
+			err := r.CreateChannel(tt.input)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+}
 
 func TestChannelPg_GetChannels(t *testing.T) {
 	db, mock, err := util.CreateMock()

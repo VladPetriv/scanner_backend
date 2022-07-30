@@ -4,12 +4,60 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
-	"github.com/stretchr/testify/assert"
 )
+
+func TestReplieService_CreateReplie(t *testing.T) {
+	replieInput := &model.DBReplie{UserID: 1, MessageID: 1, Title: "test", ImageURL: "test.jpg"}
+
+	tests := []struct {
+		name    string
+		mock    func(replieRepo *mocks.ReplieRepo)
+		input   *model.DBReplie
+		wantErr bool
+		err     error
+	}{
+		{
+			name: "Ok: [Replie created]",
+			mock: func(replieRepo *mocks.ReplieRepo) {
+				replieRepo.On("CreateReplie", replieInput).Return(nil)
+			},
+			input: replieInput,
+		},
+		{
+			name: "Error: [Store error]",
+			mock: func(replieRepo *mocks.ReplieRepo) {
+				replieRepo.On("CreateReplie", replieInput).Return(errors.New("failed to create replie: some error"))
+			},
+			input:   replieInput,
+			wantErr: true,
+			err:     errors.New("[Replie] Service.CreateReplie error: failed to create replie: some error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Logf("running: %s", tt.name)
+
+		replieRepo := &mocks.ReplieRepo{}
+		replieService := service.NewReplieDBService(&store.Store{Replie: replieRepo})
+		tt.mock(replieRepo)
+
+		err := replieService.CreateReplie(tt.input)
+		if tt.wantErr {
+			assert.Error(t, err)
+			assert.EqualValues(t, tt.err.Error(), err.Error())
+		} else {
+			assert.NoError(t, err)
+		}
+
+		replieRepo.AssertExpectations(t)
+	}
+}
 
 func TestReplieService_GetFullRepliesByMessageID(t *testing.T) {
 	replies := []model.FullReplie{

@@ -4,12 +4,60 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
-	"github.com/stretchr/testify/assert"
 )
+
+func TestChannelService_CreateChannel(t *testing.T) {
+	channelInput := &model.DBChannel{Name: "test", Title: "test T", ImageURL: "test.jpg"}
+
+	tests := []struct {
+		name    string
+		mock    func(channelRepo *mocks.ChannelRepo)
+		input   *model.DBChannel
+		wantErr bool
+		err     error
+	}{
+		{
+			name: "Ok: [Channel  created]",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("CreateChannel", channelInput).Return(nil)
+			},
+			input: channelInput,
+		},
+		{
+			name: "Error: [Store error]",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("CreateChannel", channelInput).Return(errors.New("failed to create channel: some error"))
+			},
+			input:   channelInput,
+			wantErr: true,
+			err:     errors.New("[Channel] Service.CreateChannel error: failed to create channel: some error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Logf("running: %s", tt.name)
+
+		channelRepo := &mocks.ChannelRepo{}
+		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		tt.mock(channelRepo)
+
+		err := channelService.CreateChannel(tt.input)
+		if tt.wantErr {
+			assert.Error(t, err)
+			assert.EqualValues(t, tt.err.Error(), err.Error())
+		} else {
+			assert.NoError(t, err)
+		}
+
+		channelRepo.AssertExpectations(t)
+	}
+}
 
 func TestChannelService_GetChannels(t *testing.T) {
 	data := []model.Channel{

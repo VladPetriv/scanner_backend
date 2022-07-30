@@ -1,13 +1,78 @@
-package pg
+package pg_test
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 	"github.com/VladPetriv/scanner_backend/pkg/util"
-	"github.com/stretchr/testify/assert"
 )
+
+func TestMesasgePg_CreateMessage(t *testing.T) {
+	db, mock, err := util.CreateMock()
+	if err != nil {
+		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	defer db.Close()
+
+	r := pg.NewMessageRepo(&pg.DB{DB: db})
+
+	tests := []struct {
+		name    string
+		mock    func()
+		input   *model.DBMessage
+		want    int
+		wantErr bool
+	}{
+		{
+			name: "Ok: [message created]",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id"}).
+					AddRow(1)
+
+				mock.ExpectQuery(`
+					INSERT INTO message(channel_id, user_id, title, message_url, imageurl) 
+					VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+				).WithArgs(1, 1, "test", "test.url", "test.jpg").WillReturnRows(rows)
+			},
+			input: &model.DBMessage{ChannelID: 1, UserID: 1, Title: "test", MessageURL: "test.url", ImageURL: "test.jpg"},
+			want:  1,
+		},
+		{
+			name: "Error: [some sql error]",
+			mock: func() {
+				mock.ExpectQuery(`
+					INSERT INTO message(channel_id, user_id, title, message_url, imageurl) 
+					VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+				).WithArgs(1, 1, "test", "test.url", "test.jpg").WillReturnError(fmt.Errorf("some sql error"))
+			},
+			input:   &model.DBMessage{ChannelID: 1, UserID: 1, Title: "test", MessageURL: "test.url", ImageURL: "test.jpg"},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock()
+
+			got, err := r.CreateMessage(tt.input)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.EqualValues(t, tt.want, got)
+			}
+
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+
+}
 
 func TestMessagePg_GetMessagesLength(t *testing.T) {
 	db, mock, err := util.CreateMock()
@@ -17,7 +82,7 @@ func TestMessagePg_GetMessagesLength(t *testing.T) {
 
 	defer db.Close()
 
-	r := NewMessageRepo(&DB{DB: db})
+	r := pg.NewMessageRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
@@ -73,7 +138,7 @@ func TestMessagePg_GetFullMessages(t *testing.T) {
 
 	defer db.Close()
 
-	r := NewMessageRepo(&DB{DB: db})
+	r := pg.NewMessageRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name  string
@@ -166,7 +231,7 @@ func TestMessagePg_GetFullMessagesByChannelID(t *testing.T) {
 
 	defer db.Close()
 
-	r := NewMessageRepo(&DB{DB: db})
+	r := pg.NewMessageRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
@@ -278,7 +343,7 @@ func TestMessagePg_GetFullMessagesByUserID(t *testing.T) {
 
 	defer db.Close()
 
-	r := NewMessageRepo(&DB{DB: db})
+	r := pg.NewMessageRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name  string
@@ -373,7 +438,7 @@ func TestMessagePg_GetFullMessageByMessageID(t *testing.T) {
 
 	defer db.Close()
 
-	r := NewMessageRepo(&DB{DB: db})
+	r := pg.NewMessageRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
@@ -467,7 +532,7 @@ func TestMessagePg_GetMessagesLengthByChannelID(t *testing.T) {
 
 	defer db.Close()
 
-	r := NewMessageRepo(&DB{DB: db})
+	r := pg.NewMessageRepo(&pg.DB{DB: db})
 
 	tests := []struct {
 		name    string
