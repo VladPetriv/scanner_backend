@@ -7,6 +7,7 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/server"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
+	"github.com/VladPetriv/scanner_backend/internal/store/kafka"
 	"github.com/VladPetriv/scanner_backend/pkg/config"
 	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
@@ -28,6 +29,8 @@ func main() {
 	if err != nil {
 		log.Errorf("error while creating service manager: %v", err)
 	}
+
+	go kafka.SaveChannelsFromQueueToDB(serviceManger, cfg, log)
 
 	srv := new(server.Server)
 
