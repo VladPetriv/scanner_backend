@@ -14,6 +14,21 @@ func NewUserRepo(db *DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
+func (repo *UserRepo) CreateUser(user *model.User) (int, error) {
+	var id int
+
+	row := repo.db.QueryRow(`
+		INSERT INTO tg_user(username, fullname, imageurl) 
+		VALUES ($1, $2, $3) RETURNING id;`,
+		user.Username, user.FullName, user.ImageURL,
+	)
+	if err := row.Scan(&id); err != nil {
+		return id, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	return id, nil
+}
+
 func (repo *UserRepo) GetUsers() ([]model.User, error) {
 	users := make([]model.User, 0)
 	rows, err := repo.db.Query("SELECT * FROM tg_user;")

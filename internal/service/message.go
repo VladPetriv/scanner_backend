@@ -17,6 +17,15 @@ func NewMessageDBService(store *store.Store) *MessageDBService {
 	}
 }
 
+func (s *MessageDBService) CreateMessage(message *model.DBMessage) (int, error) {
+	id, err := s.store.Message.CreateMessage(message)
+	if err != nil {
+		return id, fmt.Errorf("[Message] Service.CreateMessage error: %w", err)
+	}
+
+	return id, nil
+}
+
 func (s *MessageDBService) GetMessagesLength() (int, error) {
 	length, err := s.store.Message.GetMessagesLength()
 	if err != nil {

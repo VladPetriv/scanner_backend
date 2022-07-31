@@ -7,7 +7,7 @@ services:
       - ./.env
     build:
       context: .
-    command: sh -c "./wait-for-postgres.sh postgres; /scanner-backend"
+    command: ./scanner-backend
     ports:
       - 3000:3000
       - 9229:9229
@@ -17,7 +17,7 @@ services:
 
   postgres:
     container_name: postgres
-    image: postgres:12
+    image: postgres:14
     env_file:
       - ./.env
     environment:

@@ -10,6 +10,27 @@ type UserRepo struct {
 	mock.Mock
 }
 
+// CreateUser provides a mock function with given fields: user
+func (_m *UserRepo) CreateUser(user *model.User) (int, error) {
+	ret := _m.Called(user)
+
+	var r0 int
+	if rf, ok := ret.Get(0).(func(*model.User) int); ok {
+		r0 = rf(user)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*model.User) error); ok {
+		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetUserByID provides a mock function with given fields: ID
 func (_m *UserRepo) GetUserByID(ID int) (*model.User, error) {
 	ret := _m.Called(ID)

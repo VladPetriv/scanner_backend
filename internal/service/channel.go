@@ -1,11 +1,14 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 )
+
+var ErrChannelNotFound = errors.New("channel not found")
 
 type ChannelDBService struct {
 	store *store.Store
@@ -15,6 +18,15 @@ func NewChannelDBService(store *store.Store) *ChannelDBService {
 	return &ChannelDBService{
 		store: store,
 	}
+}
+
+func (s *ChannelDBService) CreateChannel(channel *model.DBChannel) error {
+	err := s.store.Channel.CreateChannel(channel)
+	if err != nil {
+		return fmt.Errorf("[Channel] Service.CreateChannel error: %w", err)
+	}
+
+	return nil
 }
 
 func (s *ChannelDBService) GetChannels() ([]model.Channel, error) {
@@ -58,7 +70,7 @@ func (s *ChannelDBService) GetChannelByName(name string) (*model.Channel, error)
 	}
 
 	if channel == nil {
-		return nil, fmt.Errorf("channel not found")
+		return nil, ErrChannelNotFound
 	}
 
 	return channel, nil

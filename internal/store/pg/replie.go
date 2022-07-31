@@ -14,6 +14,21 @@ func NewReplieRepo(db *DB) *ReplieRepo {
 	return &ReplieRepo{db: db}
 }
 
+func (repo *ReplieRepo) CreateReplie(replie *model.DBReplie) error {
+	var id int
+
+	row := repo.db.QueryRow(`
+		INSERT INTO replie(user_id, message_id, title, imageurl) 
+		VALUES ($1, $2, $3, $4) RETURNING id;`,
+		replie.UserID, replie.MessageID, replie.Title, replie.ImageURL,
+	)
+	if err := row.Scan(&id); err != nil {
+		return fmt.Errorf("failed to create replie: %w", err)
+	}
+
+	return nil
+}
+
 func (repo *ReplieRepo) GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error) {
 	replies := make([]model.FullReplie, 0)
 
