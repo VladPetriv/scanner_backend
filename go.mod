@@ -15,6 +15,8 @@ require (
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 )
 
+require github.com/jmoiron/sqlx v1.3.5 // indirect
+
 require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
