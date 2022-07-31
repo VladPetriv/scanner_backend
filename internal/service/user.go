@@ -16,6 +16,12 @@ func NewUserDBService(store *store.Store) *UserDBService {
 }
 
 func (s *UserDBService) CreateUser(user *model.User) (int, error) {
+	candidate, err := s.GetUserByUsername(user.Username)
+	fmt.Println(err)
+	if candidate != nil {
+		return candidate.ID, nil
+	}
+
 	id, err := s.store.User.CreateUser(user)
 	if err != nil {
 		return id, fmt.Errorf("[User] Service.CreateUser error: %w", err)

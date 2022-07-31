@@ -65,3 +65,76 @@ func SaveChannelsFromQueueToDB(srvManager *service.Manager, cfg *config.Config, 
 		}
 	}()
 }
+
+func SaveDataFromQueueToDB(srvManager *service.Manager, cfg *config.Config, log *logger.Logger) {
+	worker, err := connectAsConsumer(cfg.KafkaAddr)
+	if err != nil {
+		log.Error(err)
+	}
+
+	consumer, err := worker.ConsumePartition("messages.get", 0, sarama.OffsetOldest)
+	if err != nil {
+		log.Error(err)
+	}
+
+	go func() {
+		for {
+			select {
+			case err := <-consumer.Errors():
+				log.Error(err)
+
+				return
+			case messages := <-consumer.Messages():
+				telegramMessage := model.TgMessage{}
+
+				json.Unmarshal(messages.Value, &telegramMessage)
+
+				channel, err := srvManager.Channel.GetChannelByName(telegramMessage.PeerID.Username)
+				if err != nil {
+					log.Error(err)
+				}
+
+				userID, err := srvManager.User.CreateUser(&model.User{
+					Username: telegramMessage.FromID.Username,
+					FullName: telegramMessage.FromID.Fullname,
+					ImageURL: telegramMessage.FromID.ImageURL,
+				})
+				if err != nil {
+					log.Error(err)
+				}
+
+				messageID, err := srvManager.Message.CreateMessage(&model.DBMessage{
+					ChannelID:  channel.ID,
+					UserID:     userID,
+					Title:      telegramMessage.Message,
+					MessageURL: telegramMessage.MessageURL,
+					ImageURL:   telegramMessage.ImageURL,
+				})
+				if err != nil {
+					log.Error(err)
+				}
+
+				for _, replie := range telegramMessage.Replies.Messages {
+					userID, err := srvManager.User.CreateUser(&model.User{
+						Username: replie.FromID.Username,
+						FullName: replie.FromID.Fullname,
+						ImageURL: replie.FromID.ImageURL,
+					})
+					if err != nil {
+						log.Error(err)
+					}
+
+					err = srvManager.Replie.CreateReplie(&model.DBReplie{
+						MessageID: messageID,
+						UserID:    userID,
+						Title:     replie.Message,
+						ImageURL:  replie.ImageURL,
+					})
+					if err != nil {
+						log.Error(err)
+					}
+				}
+			}
+		}
+	}()
+}

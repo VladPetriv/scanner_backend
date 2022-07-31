@@ -31,6 +31,7 @@ func main() {
 	}
 
 	go kafka.SaveChannelsFromQueueToDB(serviceManger, cfg, log)
+	go kafka.SaveDataFromQueueToDB(serviceManger, cfg, log)
 
 	srv := new(server.Server)
 
