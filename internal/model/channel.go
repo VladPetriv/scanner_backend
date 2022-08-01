@@ -1,17 +1,17 @@
 package model
 
 type DBChannel struct {
-	ID       int    `json:"ID"`
-	Name     string `json:"Username"`
-	Title    string `json:"Title"`
-	ImageURL string `json:"ImageURL"`
+	ID       int    `json:"ID" db:"id"`
+	Name     string `json:"Username" db:"name"`
+	Title    string `json:"Title" db:"title"`
+	ImageURL string `json:"ImageURL" db:"imageurl"`
 }
 
 type Channel struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Title    string `json:"title"`
-	ImageURL string `json:"imageUrl"`
+	ID       int    `json:"id" db:"id"`
+	Name     string `json:"name" db:"name"`
+	Title    string `json:"title" db:"title"`
+	ImageURL string `json:"imageUrl" db:"imageurl"`
 	Stats    Stat
 }
 

@@ -14,10 +14,11 @@ type ChannelRepo interface {
 //go:generate mockery --dir . --name MessageRepo --output ./mocks
 type MessageRepo interface {
 	CreateMessage(message *model.DBMessage) (int, error)
-	GetMessagesLength() (int, error)
-	GetFullMessages(page int) ([]model.FullMessage, error)
-	GetFullMessagesByChannelID(ID, limit, page int) ([]model.FullMessage, error)
-	GetMessagesLengthByChannelID(ID int) (int, error)
+	GetMessageByTitle(title string) (*model.DBMessage, error)
+	GetMessagesCount() (int, error)
+	GetMessagesCountByChannelID(ID int) (int, error)
+	GetFullMessagesByPage(page int) ([]model.FullMessage, error)
+	GetFullMessagesByChannelIDAndPage(ID, page int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
@@ -31,14 +32,13 @@ type ReplieRepo interface {
 //go:generate mockery --dir . --name UserRepo --output ./mocks
 type UserRepo interface {
 	CreateUser(user *model.User) (int, error)
-	GetUsers() ([]model.User, error)
 	GetUserByUsername(username string) (*model.User, error)
 	GetUserByID(ID int) (*model.User, error)
 }
 
 //go:generate mockery --dir . --name WebUserRepo --output ./mocks
 type WebUserRepo interface {
-	GetWebUser(userID int) (*model.WebUser, error)
+	GetWebUserByID(userID int) (*model.WebUser, error)
 	GetWebUserByEmail(email string) (*model.WebUser, error)
 	CreateWebUser(user *model.WebUser) (int, error)
 }

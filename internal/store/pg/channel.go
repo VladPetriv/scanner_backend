@@ -1,9 +1,16 @@
 package pg
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+)
+
+var (
+	ErrChannelNotFound  = errors.New("channel not found")
+	ErrChannelsNotFound = errors.New("channels not found")
 )
 
 type ChannelPgRepo struct {
@@ -30,88 +37,63 @@ func (repo *ChannelPgRepo) CreateChannel(channel *model.DBChannel) error {
 }
 
 func (repo *ChannelPgRepo) GetChannels() ([]model.Channel, error) {
-	channels := make([]model.Channel, 0)
+	channels := make([]model.Channel, 0, 10)
 
-	rows, err := repo.db.Query("SELECT * FROM channel;")
+	err := repo.db.Select(&channels, "SELECT * FROM channel;")
 	if err != nil {
 		return nil, fmt.Errorf("error while getting channels: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		channel := model.Channel{}
-		err := rows.Scan(&channel.ID, &channel.Name, &channel.Title, &channel.ImageURL)
-		if err != nil {
-			continue
-		}
-
-		channels = append(channels, channel)
-	}
-
 	if len(channels) == 0 {
-		return nil, nil
+		return nil, ErrChannelsNotFound
 	}
 
 	return channels, nil
 }
 
 func (repo *ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) {
-	channels := make([]model.Channel, 0)
+	channels := make([]model.Channel, 0, 10)
 
-	rows, err := repo.db.Query("SELECT * FROM channel LIMIT 10 OFFSET $1;", page)
+	err := repo.db.Select(&channels, "SELECT * FROM channel LIMIT 10 OFFSET $1;", page)
 	if err != nil {
-		return nil, fmt.Errorf("error while getting channels: %w", err)
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-		channel := model.Channel{}
-		err := rows.Scan(&channel.ID, &channel.Name, &channel.Title, &channel.ImageURL)
-		if err != nil {
-			continue
-		}
-
-		channels = append(channels, channel)
+		return nil, fmt.Errorf("error while getting channels by page: %w", err)
 	}
 
 	if len(channels) == 0 {
-		return nil, nil
+		return nil, ErrChannelsNotFound
 	}
 
 	return channels, nil
 }
 
 func (repo *ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error) {
-	channel := &model.Channel{}
+	var channel model.Channel
 
-	rows, err := repo.db.Query("SELECT * FROM channel WHERE name=$1;", name)
+	err := repo.db.Get(&channel, "SELECT * FROM channel WHERE name=$1;", name)
+	if err == sql.ErrNoRows {
+		return nil, ErrChannelNotFound
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("error while getting channel: %w", err)
+		return nil, fmt.Errorf("error while getting channel by name: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&channel.ID, &channel.Name, &channel.Title, &channel.ImageURL)
-		if err != nil {
-			continue
-		}
-	}
-
-	if channel.Name == "" {
-		return nil, nil
-	}
-
-	return channel, nil
+	return &channel, nil
 }
 
 func (repo *ChannelPgRepo) GetChannelStats(channelID int) (*model.Stat, error) {
 	var sum int
+
 	stat := &model.Stat{}
+
 	messageCount := make([]int, 0)
 	replieCount := make([]int, 0)
 
 	rows, err := repo.db.Query(
-		"SELECT m.id, COUNT(r.id) FROM channel c LEFT JOIN message m ON m.channel_id = c.id LEFT JOIN replie r ON r.message_id = m.id WHERE c.id = $1 GROUP BY m.id;",
+		`SELECT m.id, COUNT(r.id) 
+		 FROM channel c LEFT JOIN message m ON m.channel_id = c.id 
+		 LEFT JOIN replie r ON r.message_id = m.id 
+		 WHERE c.id = $1 GROUP BY m.id;`,
 		channelID,
 	)
 	if err != nil {
@@ -119,6 +101,7 @@ func (repo *ChannelPgRepo) GetChannelStats(channelID int) (*model.Stat, error) {
 	}
 
 	defer rows.Close()
+
 	for rows.Next() {
 		var mC int
 		var rC int

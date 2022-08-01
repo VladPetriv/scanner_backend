@@ -27,27 +27,27 @@ type TgMessage struct {
 }
 
 type DBMessage struct {
-	ID         int
-	ChannelID  int
-	UserID     int
-	Title      string
-	MessageURL string
-	ImageURL   string
+	ID         int    `db:"id"`
+	ChannelID  int    `db:"channel_id"`
+	UserID     int    `db:"user_id"`
+	Title      string `db:"title"`
+	MessageURL string `db:"message_url"`
+	ImageURL   string `db:"imageurl"`
 }
 
 type FullMessage struct {
-	ID              int    `json:"id"`
-	MessageURL      string `json:"messageURL"`
-	Title           string `json:"title"`
-	ImageURL        string `json:"imageUrl"`
-	ChannelID       int    `json:"channelId"`
-	ChannelName     string `json:"chanellName"`
-	ChannelTitle    string `json:"channelTitle"`
-	ChannelImageURL string `json:"channelImageUrl"`
-	UserID          int    `json:"userId"`
-	FullName        string `json:"fullName"`
-	UserImageURL    string `json:"userImageUrl"`
-	ReplieCount     int    `json:"replieCount"`
+	ID              int    `db:"id"`
+	MessageURL      string `db:"message_url"`
+	Title           string `db:"title"`
+	ImageURL        string `db:"imageurl"`
+	ChannelID       int    `db:"channelid"`
+	ChannelName     string `db:"channelname"`
+	ChannelTitle    string `db:"channeltitle"`
+	ChannelImageURL string `db:"channelimageurl"`
+	UserID          int    `db:"userid"`
+	FullName        string `db:"fullname"`
+	UserImageURL    string `db:"userimageurl"`
+	ReplieCount     int    `db:"count"`
 	Replies         []FullReplie
 	SavedID         int
 	Status          bool

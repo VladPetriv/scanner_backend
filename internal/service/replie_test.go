@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,9 +11,10 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 )
 
-func TestReplieService_CreateReplie(t *testing.T) {
+func Test_CreateReplie(t *testing.T) {
 	replieInput := &model.DBReplie{UserID: 1, MessageID: 1, Title: "test", ImageURL: "test.jpg"}
 
 	tests := []struct {
@@ -59,7 +61,7 @@ func TestReplieService_CreateReplie(t *testing.T) {
 	}
 }
 
-func TestReplieService_GetFullRepliesByMessageID(t *testing.T) {
+func Test_GetFullRepliesByMessageID(t *testing.T) {
 	replies := []model.FullReplie{
 		{ID: 1, UserID: 1, Title: "test1", FullName: "test test1", UserImageURL: "test1.jpg"},
 		{ID: 2, UserID: 2, Title: "test2", FullName: "test test2", UserImageURL: "test2.jpg"},
@@ -84,11 +86,11 @@ func TestReplieService_GetFullRepliesByMessageID(t *testing.T) {
 		{
 			name: "Error: [Replies not found]",
 			mock: func(replieRepo *mocks.ReplieRepo) {
-				replieRepo.On("GetFullRepliesByMessageID", 1).Return(nil, nil)
+				replieRepo.On("GetFullRepliesByMessageID", 1).Return(nil, pg.ErrRepliesNotFound)
 			},
 			input:   1,
 			wantErr: true,
-			err:     errors.New("replies not found"),
+			err:     fmt.Errorf("[Replie] Service.GetFullRepliesByMessageID error: %w", pg.ErrRepliesNotFound),
 		},
 		{
 			name: "Error: [Store error]",

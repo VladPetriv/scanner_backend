@@ -68,6 +68,7 @@ func (h *Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 }
+
 func (h *Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	userID, _ := strconv.Atoi(mux.Vars(r)["user_id"])
 	messageID, _ := strconv.Atoi(mux.Vars(r)["message_id"])

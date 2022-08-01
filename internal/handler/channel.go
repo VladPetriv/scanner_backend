@@ -83,12 +83,12 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	length, err := h.service.Message.GetMessagesLengthByChannelID(channel.ID)
+	count, err := h.service.Message.GetMessagesCountByChannelID(channel.ID)
 	if err != nil {
 		h.log.Error(err)
 	}
 
-	messages, err := h.service.Message.GetFullMessagesByChannelID(channel.ID, 10, page)
+	messages, err := h.service.Message.GetFullMessagesByChannelIDAndPage(channel.ID, page)
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -111,8 +111,8 @@ func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		},
 		Channel:        *channel,
 		Messages:       messages,
-		MessagesLength: length,
-		Pager:          pagination.New(length, 10, page, "/channel/ru_python/?page=0"),
+		MessagesLength: count,
+		Pager:          pagination.New(count, 10, page, "/channel/ru_python/?page=0"),
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)

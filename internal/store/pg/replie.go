@@ -1,10 +1,13 @@
 package pg
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
+
+var ErrRepliesNotFound = errors.New("replies not found")
 
 type ReplieRepo struct {
 	db *DB
@@ -30,28 +33,24 @@ func (repo *ReplieRepo) CreateReplie(replie *model.DBReplie) error {
 }
 
 func (repo *ReplieRepo) GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error) {
-	replies := make([]model.FullReplie, 0)
+	replies := make([]model.FullReplie, 0, 5)
 
-	rows, err := repo.db.Query(
-		"SELECT r.id, r.title, r.imageurl, u.id, u.fullname, u.imageurl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;", ID,
+	err := repo.db.Select(
+		&replies,
+		`SELECT r.id, r.title, r.imageurl, 
+		 u.id as user_id, u.fullname, u.imageurl as userimageurl
+		 FROM replie r 
+		 LEFT JOIN tg_user u ON r.user_id = u.id 
+		 WHERE r.message_id = $1 
+		 ORDER BY r.id DESC NULLS LAST;`,
+		ID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting full replies by message ID: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		replie := model.FullReplie{}
-		err := rows.Scan(&replie.ID, &replie.Title, &replie.ImageURL, &replie.UserID, &replie.FullName, &replie.UserImageURL)
-		if err != nil {
-			continue
-		}
-
-		replies = append(replies, replie)
-	}
-
 	if len(replies) == 0 {
-		return nil, nil
+		return nil, ErrRepliesNotFound
 	}
 
 	return replies, nil

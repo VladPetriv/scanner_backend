@@ -54,8 +54,31 @@ func (_m *MessageRepo) GetFullMessageByMessageID(ID int) (*model.FullMessage, er
 	return r0, r1
 }
 
-// GetFullMessages provides a mock function with given fields: page
-func (_m *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) {
+// GetFullMessagesByChannelIDAndPage provides a mock function with given fields: ID, page
+func (_m *MessageRepo) GetFullMessagesByChannelIDAndPage(ID int, page int) ([]model.FullMessage, error) {
+	ret := _m.Called(ID, page)
+
+	var r0 []model.FullMessage
+	if rf, ok := ret.Get(0).(func(int, int) []model.FullMessage); ok {
+		r0 = rf(ID, page)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]model.FullMessage)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(ID, page)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetFullMessagesByPage provides a mock function with given fields: page
+func (_m *MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
 	ret := _m.Called(page)
 
 	var r0 []model.FullMessage
@@ -70,29 +93,6 @@ func (_m *MessageRepo) GetFullMessages(page int) ([]model.FullMessage, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int) error); ok {
 		r1 = rf(page)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetFullMessagesByChannelID provides a mock function with given fields: ID, limit, page
-func (_m *MessageRepo) GetFullMessagesByChannelID(ID int, limit int, page int) ([]model.FullMessage, error) {
-	ret := _m.Called(ID, limit, page)
-
-	var r0 []model.FullMessage
-	if rf, ok := ret.Get(0).(func(int, int, int) []model.FullMessage); ok {
-		r0 = rf(ID, limit, page)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]model.FullMessage)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int, int, int) error); ok {
-		r1 = rf(ID, limit, page)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -123,8 +123,31 @@ func (_m *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, err
 	return r0, r1
 }
 
-// GetMessagesLength provides a mock function with given fields:
-func (_m *MessageRepo) GetMessagesLength() (int, error) {
+// GetMessageByTitle provides a mock function with given fields: title
+func (_m *MessageRepo) GetMessageByTitle(title string) (*model.DBMessage, error) {
+	ret := _m.Called(title)
+
+	var r0 *model.DBMessage
+	if rf, ok := ret.Get(0).(func(string) *model.DBMessage); ok {
+		r0 = rf(title)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.DBMessage)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(title)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetMessagesCount provides a mock function with given fields:
+func (_m *MessageRepo) GetMessagesCount() (int, error) {
 	ret := _m.Called()
 
 	var r0 int
@@ -144,8 +167,8 @@ func (_m *MessageRepo) GetMessagesLength() (int, error) {
 	return r0, r1
 }
 
-// GetMessagesLengthByChannelID provides a mock function with given fields: ID
-func (_m *MessageRepo) GetMessagesLengthByChannelID(ID int) (int, error) {
+// GetMessagesCountByChannelID provides a mock function with given fields: ID
+func (_m *MessageRepo) GetMessagesCountByChannelID(ID int) (int, error) {
 	ret := _m.Called(ID)
 
 	var r0 int

@@ -15,14 +15,10 @@ func NewWebUserDbService(store *store.Store) *WebUserDbService {
 	return &WebUserDbService{store: store}
 }
 
-func (s *WebUserDbService) GetWebUser(userID int) (*model.WebUser, error) {
-	user, err := s.store.WebUser.GetWebUser(userID)
+func (s *WebUserDbService) GetWebUserByID(userID int) (*model.WebUser, error) {
+	user, err := s.store.WebUser.GetWebUserByID(userID)
 	if err != nil {
-		return nil, fmt.Errorf("[WebUser] Service.GetWebUser error: %w", err)
-	}
-
-	if user == nil {
-		return nil, fmt.Errorf("web user not found")
+		return nil, fmt.Errorf("[WebUser] Service.GetWebUserByID error: %w", err)
 	}
 
 	return user, nil
@@ -32,10 +28,6 @@ func (s *WebUserDbService) GetWebUserByEmail(email string) (*model.WebUser, erro
 	user, err := s.store.WebUser.GetWebUserByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("[WebUser] Service.GetWebUserByEmail error: %w", err)
-	}
-
-	if user == nil {
-		return nil, fmt.Errorf("web user not found")
 	}
 
 	return user, nil

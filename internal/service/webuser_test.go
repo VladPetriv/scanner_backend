@@ -2,16 +2,18 @@ package service_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWebUserService_GetWebUser(t *testing.T) {
+func Test_GetWebUserByID(t *testing.T) {
 	user := &model.WebUser{ID: 1, Email: "test@test.com", Password: "test"}
 
 	tests := []struct {
@@ -25,7 +27,7 @@ func TestWebUserService_GetWebUser(t *testing.T) {
 		{
 			name: "Ok: [User found]",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUser", 1).Return(user, nil)
+				webUserRepo.On("GetWebUserByID", 1).Return(user, nil)
 			},
 			input: 1,
 			want:  user,
@@ -33,20 +35,20 @@ func TestWebUserService_GetWebUser(t *testing.T) {
 		{
 			name: "Error: [User not found]",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUser", 1).Return(nil, nil)
+				webUserRepo.On("GetWebUserByID", 1).Return(nil, pg.ErrWebUserNotFound)
 			},
 			input:   1,
 			wantErr: true,
-			err:     errors.New("web user not found"),
+			err:     fmt.Errorf("[WebUser] Service.GetWebUserByID error: %w", pg.ErrWebUserNotFound),
 		},
 		{
 			name: "Error: [Store error]",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUser", 1).Return(nil, errors.New("error while getting web user: some error"))
+				webUserRepo.On("GetWebUserByID", 1).Return(nil, errors.New("error while getting web user: some error"))
 			},
 			input:   1,
 			wantErr: true,
-			err:     errors.New("[WebUser] Service.GetWebUser error: error while getting web user: some error"),
+			err:     errors.New("[WebUser] Service.GetWebUserByID error: error while getting web user: some error"),
 		},
 	}
 
@@ -57,7 +59,7 @@ func TestWebUserService_GetWebUser(t *testing.T) {
 		webUserService := service.NewWebUserDbService(&store.Store{WebUser: webUserRepo})
 		tt.mock(webUserRepo)
 
-		got, err := webUserService.GetWebUser(tt.input)
+		got, err := webUserService.GetWebUserByID(tt.input)
 		if tt.wantErr {
 			assert.Error(t, err)
 			assert.Equal(t, tt.err.Error(), err.Error())
@@ -70,7 +72,7 @@ func TestWebUserService_GetWebUser(t *testing.T) {
 	}
 }
 
-func TestWebUserService_GetWebUserByEmail(t *testing.T) {
+func Test_GetWebUserByEmail(t *testing.T) {
 	user := &model.WebUser{ID: 1, Email: "test@test.com", Password: "test"}
 
 	tests := []struct {
@@ -92,11 +94,11 @@ func TestWebUserService_GetWebUserByEmail(t *testing.T) {
 		{
 			name: "Error: [User not found]",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(nil, nil)
+				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(nil, pg.ErrWebUserNotFound)
 			},
 			input:   "test@test.com",
 			wantErr: true,
-			err:     errors.New("web user not found"),
+			err:     fmt.Errorf("[WebUser] Service.GetWebUserByEmail error: %w", pg.ErrWebUserNotFound),
 		},
 		{
 			name: "Error: [Store error]",
@@ -129,7 +131,7 @@ func TestWebUserService_GetWebUserByEmail(t *testing.T) {
 	}
 }
 
-func TestWebUserService_CreateWebUser(t *testing.T) {
+func Test_CreateWebUser(t *testing.T) {
 	input := &model.WebUser{Email: "test@test.com", Password: "test"}
 
 	tests := []struct {

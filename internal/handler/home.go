@@ -27,12 +27,12 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error(err)
 	}
 
-	messagesLength, err := h.service.Message.GetMessagesLength()
+	messagesCount, err := h.service.Message.GetMessagesCount()
 	if err != nil {
 		h.log.Error(err)
 	}
 
-	messages, err := h.service.Message.GetFullMessages(page)
+	messages, err := h.service.Message.GetFullMessagesByPage(page)
 	if err != nil {
 		h.log.Error(err)
 	}
@@ -56,8 +56,8 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 			WebUserID:      webUserID,
 		},
 		Messages:       messages,
-		MessagesLength: messagesLength,
-		Pager:          pagination.New(messagesLength, 10, page, "/home/?page=0"),
+		MessagesLength: messagesCount,
+		Pager:          pagination.New(messagesCount, 10, page, "/home/?page=0"),
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
@@ -73,11 +73,14 @@ func checkMessagesStatus(messages []model.FullMessage, manager *service.Manager)
 		saved, err := manager.Saved.GetSavedMessageByMessageID(message.ID)
 		if err == nil && saved != nil {
 			message.Status = true
+
 			result = append(result, message)
+
 			continue
 		}
 
 		message.Status = false
+
 		result = append(result, message)
 	}
 
