@@ -30,9 +30,5 @@ func (s *ReplieDBService) GetFullRepliesByMessageID(ID int) ([]model.FullReplie,
 		return nil, fmt.Errorf("[Replie] Service.GetFullRepliesByMessageID error: %w", err)
 	}
 
-	if len(replies) == 0 {
-		return nil, fmt.Errorf("replies not found")
-	}
-
 	return replies, nil
 }

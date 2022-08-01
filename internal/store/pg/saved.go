@@ -1,9 +1,16 @@
 package pg
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+)
+
+var (
+	ErrSavedMessagesNotFound = errors.New("saved messages not found")
+	ErrSavedMessageNotFound  = errors.New("saved message not found")
 )
 
 type SavedRepo struct {
@@ -14,53 +21,34 @@ func NewSavedRepo(db *DB) *SavedRepo {
 	return &SavedRepo{db: db}
 }
 
-func (repo *SavedRepo) GetSavedMessages(UserID int) ([]model.Saved, error) {
-	savedMessages := make([]model.Saved, 0)
+func (repo *SavedRepo) GetSavedMessages(userID int) ([]model.Saved, error) {
+	savedMessages := make([]model.Saved, 0, 5)
 
-	rows, err := repo.db.Query("SELECT * FROM saved WHERE user_id=$1;", UserID)
+	err := repo.db.Select(&savedMessages, "SELECT * FROM saved WHERE user_id = $1;", userID)
 	if err != nil {
 		return nil, fmt.Errorf("error while getting saved messages: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		savedMessage := model.Saved{}
-		err := rows.Scan(&savedMessage.ID, &savedMessage.WebUserID, &savedMessage.MessageID)
-		if err != nil {
-			continue
-		}
-
-		savedMessages = append(savedMessages, savedMessage)
-	}
-
 	if len(savedMessages) == 0 {
-		return nil, nil
+		return nil, ErrSavedMessagesNotFound
 	}
 
 	return savedMessages, nil
 }
 
-func (repo *SavedRepo) GetSavedMessageByMessageID(ID int) (*model.Saved, error) {
-	savedMessage := &model.Saved{}
+func (repo *SavedRepo) GetSavedMessageByMessageID(messageID int) (*model.Saved, error) {
+	var savedMessage model.Saved
 
-	rows, err := repo.db.Query("SELECT * FROM saved WHERE message_id=$1;", ID)
+	err := repo.db.Get(&savedMessage, "SELECT * FROM saved WHERE message_id = $1;", messageID)
+	if err == sql.ErrNoRows {
+		return nil, ErrSavedMessageNotFound
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("error while getting saved message: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&savedMessage.ID, &savedMessage.WebUserID, &savedMessage.MessageID)
-		if err != nil {
-			continue
-		}
-	}
-
-	if savedMessage.WebUserID == 0 || savedMessage.MessageID == 0 {
-		return nil, nil
-	}
-
-	return savedMessage, nil
+	return &savedMessage, nil
 }
 
 func (repo *SavedRepo) CreateSavedMessage(saved *model.Saved) (int, error) {
@@ -71,7 +59,7 @@ func (repo *SavedRepo) CreateSavedMessage(saved *model.Saved) (int, error) {
 		return 0, fmt.Errorf("error while creating saved message: %w", err)
 	}
 
-	return 1, nil
+	return id, nil
 }
 
 func (repo *SavedRepo) DeleteSavedMessage(ID int) (int, error) {
@@ -82,5 +70,5 @@ func (repo *SavedRepo) DeleteSavedMessage(ID int) (int, error) {
 		return 0, fmt.Errorf("error while deleting saved message: %w", err)
 	}
 
-	return 1, nil
+	return id, nil
 }

@@ -1,10 +1,14 @@
 package pg
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
+
+var ErrWebUserNotFound = errors.New("web user not found")
 
 type WebUserRepo struct {
 	db *DB
@@ -14,48 +18,33 @@ func NewWebUserRepo(db *DB) *WebUserRepo {
 	return &WebUserRepo{db: db}
 }
 
-func (repo *WebUserRepo) GetWebUser(userID int) (*model.WebUser, error) {
-	user := &model.WebUser{}
+func (repo *WebUserRepo) GetWebUserByID(userID int) (*model.WebUser, error) {
+	var user model.WebUser
 
-	rows, err := repo.db.Query("SELECT * FROM web_user WHERE id=$1;", userID)
+	err := repo.db.Get(&user, "SELECT * FROM web_user WHERE id = $1;", userID)
+	if err == sql.ErrNoRows {
+		return nil, ErrWebUserNotFound
+	}
+
 	if err != nil {
-		return nil, fmt.Errorf("error while getting web user: %w", err)
+		return nil, fmt.Errorf("error while getting web user by id: %w", err)
 	}
 
-	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Email, &user.Password)
-		if err != nil {
-			continue
-		}
-	}
-
-	if user.Email == "" || user.Password == "" {
-		return nil, nil
-	}
-
-	return user, nil
+	return &user, nil
 }
 
 func (repo *WebUserRepo) GetWebUserByEmail(email string) (*model.WebUser, error) {
-	user := &model.WebUser{}
+	var user model.WebUser
 
-	rows, err := repo.db.Query("SELECT * FROM web_user WHERE email=$1;", email)
+	err := repo.db.Get(&user, "SELECT * FROM web_user WHERE email = $1;", email)
+	if err == sql.ErrNoRows {
+		return nil, ErrWebUserNotFound
+	}
 	if err != nil {
 		return nil, fmt.Errorf("error while getting web user by email: %w", err)
 	}
 
-	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Email, &user.Password)
-		if err != nil {
-			continue
-		}
-	}
-
-	if user.Email == "" || user.Password == "" {
-		return nil, nil
-	}
-
-	return user, nil
+	return &user, nil
 }
 
 func (repo *WebUserRepo) CreateWebUser(user *model.WebUser) (int, error) {

@@ -26,20 +26,34 @@ func (s *MessageDBService) CreateMessage(message *model.DBMessage) (int, error) 
 	return id, nil
 }
 
-func (s *MessageDBService) GetMessagesLength() (int, error) {
-	length, err := s.store.Message.GetMessagesLength()
+func (s *MessageDBService) GetMessageByTitle(title string) (*model.DBMessage, error) {
+	message, err := s.store.Message.GetMessageByTitle(title)
 	if err != nil {
-		return 0, fmt.Errorf("[Message] Service.GetMessagesLength error: %w", err)
+		return nil, fmt.Errorf("[Message] Service.GetMessageByTitle error: %w", err)
 	}
 
-	if length == 0 {
-		return 0, fmt.Errorf("messages not found")
-	}
-
-	return length, nil
+	return message, nil
 }
 
-func (s *MessageDBService) GetFullMessages(page int) ([]model.FullMessage, error) {
+func (s *MessageDBService) GetMessagesCount() (int, error) {
+	count, err := s.store.Message.GetMessagesCount()
+	if err != nil {
+		return 0, fmt.Errorf("[Message] Service.GetMessagesCount error: %w", err)
+	}
+
+	return count, nil
+}
+
+func (s *MessageDBService) GetMessagesCountByChannelID(ID int) (int, error) {
+	count, err := s.store.Message.GetMessagesCountByChannelID(ID)
+	if err != nil {
+		return 0, fmt.Errorf("[Message] Service.GetMessagesCountByChannelID error: %w", err)
+	}
+
+	return count, nil
+}
+
+func (s *MessageDBService) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
 	if page == 1 || page == 0 {
 		page = 0
 	} else if page != 0 {
@@ -47,19 +61,15 @@ func (s *MessageDBService) GetFullMessages(page int) ([]model.FullMessage, error
 		page -= 10
 	}
 
-	messages, err := s.store.Message.GetFullMessages(page)
+	messages, err := s.store.Message.GetFullMessagesByPage(page)
 	if err != nil {
-		return nil, fmt.Errorf("[Message] Service.GetFullMessages error: %w", err)
-	}
-
-	if messages == nil {
-		return nil, fmt.Errorf("messages not found")
+		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByPage error: %w", err)
 	}
 
 	return messages, nil
 }
 
-func (s *MessageDBService) GetFullMessagesByChannelID(ID, limit, page int) ([]model.FullMessage, error) {
+func (s *MessageDBService) GetFullMessagesByChannelIDAndPage(ID, page int) ([]model.FullMessage, error) {
 	if page == 1 || page == 0 {
 		page = 0
 	} else if page != 0 {
@@ -67,13 +77,9 @@ func (s *MessageDBService) GetFullMessagesByChannelID(ID, limit, page int) ([]mo
 		page -= 10
 	}
 
-	messages, err := s.store.Message.GetFullMessagesByChannelID(ID, limit, page)
+	messages, err := s.store.Message.GetFullMessagesByChannelIDAndPage(ID, page)
 	if err != nil {
-		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByChannelID error: %w", err)
-	}
-
-	if messages == nil {
-		return nil, fmt.Errorf("messages not found")
+		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByChannelIDAndPage error: %w", err)
 	}
 
 	return messages, nil
@@ -85,10 +91,6 @@ func (s *MessageDBService) GetFullMessagesByUserID(ID int) ([]model.FullMessage,
 		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByUserID error: %w", err)
 	}
 
-	if messages == nil {
-		return nil, fmt.Errorf("messages not found")
-	}
-
 	return messages, nil
 }
 
@@ -98,22 +100,5 @@ func (s *MessageDBService) GetFullMessageByMessageID(ID int) (*model.FullMessage
 		return nil, fmt.Errorf("[Message] Service.GetFullMessageByMessageID error: %w", err)
 	}
 
-	if message == nil {
-		return nil, fmt.Errorf("messages not found")
-	}
-
 	return message, nil
-}
-
-func (s *MessageDBService) GetMessagesLengthByChannelID(ID int) (int, error) {
-	length, err := s.store.Message.GetMessagesLengthByChannelID(ID)
-	if err != nil {
-		return 0, fmt.Errorf("[Message] Service.GetMessagesLengthByChannelID error: %w", err)
-	}
-
-	if length == 0 {
-		return 0, fmt.Errorf("messages not found")
-	}
-
-	return length, nil
 }

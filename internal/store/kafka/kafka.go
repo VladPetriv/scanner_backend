@@ -8,6 +8,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/service"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 	"github.com/VladPetriv/scanner_backend/pkg/config"
 	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
@@ -49,7 +50,7 @@ func SaveChannelsFromQueueToDB(srvManager *service.Manager, cfg *config.Config, 
 				json.Unmarshal(messages.Value, &channel)
 
 				candidate, err := srvManager.Channel.GetChannelByName(channel.Name)
-				if !errors.Is(err, service.ErrChannelNotFound) && err != nil {
+				if !errors.Is(err, pg.ErrChannelNotFound) && err != nil {
 					log.Error(err)
 				}
 

@@ -1,10 +1,14 @@
 package pg
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
+
+var ErrUserNotFound = errors.New("user not found")
 
 type UserRepo struct {
 	db *DB
@@ -29,73 +33,32 @@ func (repo *UserRepo) CreateUser(user *model.User) (int, error) {
 	return id, nil
 }
 
-func (repo *UserRepo) GetUsers() ([]model.User, error) {
-	users := make([]model.User, 0)
-	rows, err := repo.db.Query("SELECT * FROM tg_user;")
-	if err != nil {
-		return nil, fmt.Errorf("error while getting users: %w", err)
-	}
-
-	defer rows.Close()
-	for rows.Next() {
-		user := model.User{}
-		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.ImageURL)
-		if err != nil {
-			continue
-		}
-
-		users = append(users, user)
-	}
-
-	if len(users) == 0 {
-		return nil, fmt.Errorf("users not found")
-	}
-
-	return users, nil
-}
-
 func (repo *UserRepo) GetUserByUsername(username string) (*model.User, error) {
-	user := &model.User{}
+	var user model.User
 
-	rows, err := repo.db.Query("SELECT * FROM tg_user WHERE username=$1;", username)
+	err := repo.db.Get(&user, "SELECT * FROM tg_user WHERE username = $1;", username)
+	if err == sql.ErrNoRows {
+		return nil, ErrUserNotFound
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("error while getting user by username: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.ImageURL)
-		if err != nil {
-			continue
-		}
-	}
-
-	if user.Username == "" || user.FullName == "" {
-		return nil, nil
-	}
-
-	return user, nil
+	return &user, nil
 }
 
 func (repo *UserRepo) GetUserByID(ID int) (*model.User, error) {
-	user := &model.User{}
+	var user model.User
 
-	rows, err := repo.db.Query("SELECT * FROM tg_user WHERE id = $1;", ID)
+	err := repo.db.Get(&user, "SELECT * FROM tg_user WHERE id = $1;", ID)
+	if err == sql.ErrNoRows {
+		return nil, ErrUserNotFound
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("error while getting user by ID: %w", err)
 	}
 
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Username, &user.FullName, &user.ImageURL)
-		if err != nil {
-			continue
-		}
-	}
-
-	if user.Username == "" || user.FullName == "" {
-		return nil, nil
-	}
-
-	return user, nil
+	return &user, nil
 }
