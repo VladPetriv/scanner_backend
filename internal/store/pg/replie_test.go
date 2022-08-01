@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
@@ -20,7 +21,9 @@ func TestRepliePg_CreateReplie(t *testing.T) {
 
 	defer db.Close()
 
-	r := pg.NewReplieRepo(&pg.DB{DB: db})
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewReplieRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
 		name    string
@@ -78,23 +81,32 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 
 	defer db.Close()
 
-	r := pg.NewReplieRepo(&pg.DB{DB: db})
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewReplieRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
-		name  string
-		mock  func()
-		input int
-		want  []model.FullReplie
+		name    string
+		mock    func()
+		input   int
+		want    []model.FullReplie
+		wantErr bool
 	}{
 		{
-			name: "Ok",
+			name: "Ok: [replies found]",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "imageurl", "id", "fullname", "imageurl"}).
+				rows := sqlmock.NewRows([]string{"id", "title", "imageurl", "user_id", "fullname", "userimageurl"}).
 					AddRow(1, "test1", "testr1.jpg", 1, "test1 test", "test1.jpg").
 					AddRow(2, "test2", "testr2.jpg", 2, "test2 test", "test2.jpg")
 
-				mock.ExpectQuery("SELECT r.id, r.title, r.imageurl, u.id, u.fullname, u.imageurl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
-					WithArgs(1).WillReturnRows(rows)
+				mock.ExpectQuery(
+					`SELECT r.id, r.title, r.imageurl, 
+					u.id as user_id, u.fullname, u.imageurl as userimageurl
+					FROM replie r 
+					LEFT JOIN tg_user u ON r.user_id = u.id 
+					WHERE r.message_id = $1 
+					ORDER BY r.id DESC NULLS LAST;`,
+				).WithArgs(1).WillReturnRows(rows)
 			},
 			input: 1,
 			want: []model.FullReplie{
@@ -103,25 +115,36 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 			},
 		},
 		{
-			name: "empty field",
+			name: "Error: [replies not found]",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "imageurl", "id", "fullname", "imageurl"})
+				rows := sqlmock.NewRows([]string{"id", "title", "imageurl", "user_id", "fullname", "userimageurl"})
 
-				mock.ExpectQuery("SELECT r.id, r.title, r.imageurl, u.id, u.fullname, u.imageurl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
-					WithArgs().WillReturnRows(rows)
+				mock.ExpectQuery(
+					`SELECT r.id, r.title, r.imageurl, 
+					u.id as user_id, u.fullname, u.imageurl as userimageurl
+					FROM replie r 
+					LEFT JOIN tg_user u ON r.user_id = u.id 
+					WHERE r.message_id = $1 
+					ORDER BY r.id DESC NULLS LAST;`,
+				).WithArgs(1).WillReturnRows(rows)
 			},
-			want: nil,
+			input:   1,
+			wantErr: true,
 		},
 		{
-			name: "replies not found",
+			name: "Error: [some sql error]",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "title", "imageurl", "id", "fullname", "imageurl"})
-
-				mock.ExpectQuery("SELECT r.id, r.title, r.imageurl, u.id, u.fullname, u.imageurl FROM replie r LEFT JOIN tg_user u ON r.user_id = u.id WHERE r.message_id = $1 ORDER BY r.id DESC NULLS LAST;").
-					WithArgs(404).WillReturnRows(rows)
+				mock.ExpectQuery(
+					`SELECT r.id, r.title, r.imageurl, 
+					u.id as user_id, u.fullname, u.imageurl as userimageurl
+					FROM replie r 
+					LEFT JOIN tg_user u ON r.user_id = u.id 
+					WHERE r.message_id = $1 
+					ORDER BY r.id DESC NULLS LAST;`,
+				).WithArgs(1).WillReturnError(fmt.Errorf("some error"))
 			},
-			input: 404,
-			want:  nil,
+			input:   1,
+			wantErr: true,
 		},
 	}
 
@@ -130,9 +153,12 @@ func TestRepliePg_GetFullRepliesByMessageID(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetFullRepliesByMessageID(tt.input)
-
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})

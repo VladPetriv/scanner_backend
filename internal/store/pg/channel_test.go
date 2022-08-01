@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
@@ -12,7 +13,7 @@ import (
 	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
-func TestChannelPg_CreateChannel(t *testing.T) {
+func Test_CreateChannel(t *testing.T) {
 	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -20,7 +21,9 @@ func TestChannelPg_CreateChannel(t *testing.T) {
 
 	defer db.Close()
 
-	r := pg.NewChannelRepo(&pg.DB{DB: db})
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewChannelRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
 		name    string
@@ -70,7 +73,7 @@ func TestChannelPg_CreateChannel(t *testing.T) {
 	}
 }
 
-func TestChannelPg_GetChannels(t *testing.T) {
+func Test_GetChannels(t *testing.T) {
 	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -78,15 +81,18 @@ func TestChannelPg_GetChannels(t *testing.T) {
 
 	defer db.Close()
 
-	r := pg.NewChannelRepo(&pg.DB{DB: db})
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewChannelRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
-		name string
-		mock func()
-		want []model.Channel
+		name    string
+		mock    func()
+		want    []model.Channel
+		wantErr bool
 	}{
 		{
-			name: "Ok",
+			name: "Ok: [channels found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"}).
 					AddRow(1, "test1", "test1", "test1.jpg").
@@ -101,13 +107,22 @@ func TestChannelPg_GetChannels(t *testing.T) {
 			},
 		},
 		{
-			name: "channels not found",
+			name: "Error: channels not found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
+
 				mock.ExpectQuery("SELECT * FROM channel;").
 					WillReturnRows(rows)
 			},
-			want: nil,
+			wantErr: true,
+		},
+		{
+			name: "Error: [some sql error]",
+			mock: func() {
+				mock.ExpectQuery("SELECT * FROM channel;").
+					WillReturnError(fmt.Errorf("some error"))
+			},
+			wantErr: true,
 		},
 	}
 
@@ -117,15 +132,19 @@ func TestChannelPg_GetChannels(t *testing.T) {
 
 			got, err := r.GetChannels()
 
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestChannelPg_GetChannelsByPage(t *testing.T) {
+func Test_GetChannelsByPage(t *testing.T) {
 	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -133,16 +152,19 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 
 	defer db.Close()
 
-	r := pg.NewChannelRepo(&pg.DB{DB: db})
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewChannelRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
-		name  string
-		mock  func()
-		input int
-		want  []model.Channel
+		name    string
+		mock    func()
+		input   int
+		want    []model.Channel
+		wantErr bool
 	}{
 		{
-			name: "Ok",
+			name: "Ok: [channels found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"}).
 					AddRow(1, "test1", "test1", "test1.jpg").
@@ -158,7 +180,7 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 			input: 1,
 		},
 		{
-			name: "channels not found",
+			name: "Error: [channels not found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
 
@@ -166,18 +188,17 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 					WithArgs(1).WillReturnRows(rows)
 
 			},
-			input: 1,
-			want:  nil,
+			input:   1,
+			wantErr: true,
 		},
 		{
-			name: "empty field",
+			name: "Error: [some sql error]",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
-
 				mock.ExpectQuery("SELECT * FROM channel LIMIT 10 OFFSET $1;").
-					WithArgs().WillReturnRows(rows)
+					WithArgs(1).WillReturnError(fmt.Errorf("some error"))
 			},
-			want: nil,
+			input:   1,
+			wantErr: true,
 		},
 	}
 
@@ -186,15 +207,19 @@ func TestChannelPg_GetChannelsByPage(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetChannelsByPage(tt.input)
-
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }
-func TestChannelPg_GetByName(t *testing.T) {
+
+func Test_GetChannelByName(t *testing.T) {
 	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -202,7 +227,9 @@ func TestChannelPg_GetByName(t *testing.T) {
 
 	defer db.Close()
 
-	r := pg.NewChannelRepo(&pg.DB{DB: db})
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewChannelRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
 		name    string
@@ -212,7 +239,7 @@ func TestChannelPg_GetByName(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Ok",
+			name: "Ok: [channel found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"}).
 					AddRow(1, "test", "test", "test.jpg")
@@ -224,24 +251,24 @@ func TestChannelPg_GetByName(t *testing.T) {
 			want:  &model.Channel{ID: 1, Name: "test", Title: "test", ImageURL: "test.jpg"},
 		},
 		{
-			name: "channel not found",
+			name: "Error: [channel not found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "name", "title", "imageurl"})
 
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
-					WithArgs().WillReturnRows(rows)
+					WithArgs("test").WillReturnRows(rows)
 			},
-			want: nil,
+			input:   "test",
+			wantErr: true,
 		},
 		{
-			name: "empty field",
+			name: "Error: [some sql error]",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "tilte", "imageurl"})
-
 				mock.ExpectQuery("SELECT * FROM channel WHERE name=$1;").
-					WithArgs().WillReturnRows(rows)
+					WithArgs("test").WillReturnError(fmt.Errorf("some error"))
 			},
-			want: nil,
+			input:   "test",
+			wantErr: true,
 		},
 	}
 
@@ -262,7 +289,7 @@ func TestChannelPg_GetByName(t *testing.T) {
 	}
 }
 
-func TestChannelPg_GetChannelStats(t *testing.T) {
+func Test_GetChannelStats(t *testing.T) {
 	db, mock, err := util.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -270,23 +297,29 @@ func TestChannelPg_GetChannelStats(t *testing.T) {
 
 	defer db.Close()
 
-	r := pg.NewChannelRepo(&pg.DB{DB: db})
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewChannelRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
-		name  string
-		mock  func()
-		input int
-		want  *model.Stat
+		name    string
+		mock    func()
+		input   int
+		want    *model.Stat
+		wantErr bool
 	}{
 		{
-			name: "Ok: [Stat found]",
+			name: "Ok: [channel stat found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "count"}).
 					AddRow(1, 12).
 					AddRow(2, 0)
 
-				mock.ExpectQuery("SELECT m.id, COUNT(r.id) FROM channel c LEFT JOIN message m ON m.channel_id = c.id LEFT JOIN replie r ON r.message_id = m.id WHERE c.id = $1 GROUP BY m.id;").
-					WithArgs(1).WillReturnRows(rows)
+				mock.ExpectQuery(`SELECT m.id, COUNT(r.id) 
+					FROM channel c LEFT JOIN message m ON m.channel_id = c.id 
+					LEFT JOIN replie r ON r.message_id = m.id 
+					WHERE c.id = $1 GROUP BY m.id;`,
+				).WithArgs(1).WillReturnRows(rows)
 			},
 			input: 1,
 			want: &model.Stat{
@@ -295,18 +328,33 @@ func TestChannelPg_GetChannelStats(t *testing.T) {
 			},
 		},
 		{
-			name: "Error: [Empty field]",
+			name: "Error: [channel stat not found]",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "count"})
 
-				mock.ExpectQuery("SELECT m.id, COUNT(r.id) FROM channel c LEFT JOIN message m ON m.channel_id = c.id LEFT JOIN replie r ON r.message_id = m.id WHERE c.id = $1 GROUP BY m.id;").
-					WithArgs().WillReturnRows(rows)
+				mock.ExpectQuery(`SELECT m.id, COUNT(r.id) 
+					FROM channel c LEFT JOIN message m ON m.channel_id = c.id 
+					LEFT JOIN replie r ON r.message_id = m.id 
+					WHERE c.id = $1 GROUP BY m.id;`,
+				).WithArgs(1).WillReturnRows(rows)
 			},
 			input: 1,
 			want: &model.Stat{
 				MessagesCount: 0,
 				RepliesCount:  0,
 			},
+		},
+		{
+			name: "Error: [some sql error]",
+			mock: func() {
+				mock.ExpectQuery(`SELECT m.id, COUNT(r.id) 
+					FROM channel c LEFT JOIN message m ON m.channel_id = c.id 
+					LEFT JOIN replie r ON r.message_id = m.id 
+					WHERE c.id = $1 GROUP BY m.id;`,
+				).WithArgs(1).WillReturnError(fmt.Errorf("some error"))
+			},
+			input:   1,
+			wantErr: true,
 		},
 	}
 
@@ -315,9 +363,12 @@ func TestChannelPg_GetChannelStats(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetChannelStats(tt.input)
-
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
 
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})

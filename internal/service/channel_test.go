@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,9 +11,10 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 )
 
-func TestChannelService_CreateChannel(t *testing.T) {
+func Test_CreateChannel(t *testing.T) {
 	channelInput := &model.DBChannel{Name: "test", Title: "test T", ImageURL: "test.jpg"}
 
 	tests := []struct {
@@ -59,7 +61,7 @@ func TestChannelService_CreateChannel(t *testing.T) {
 	}
 }
 
-func TestChannelService_GetChannels(t *testing.T) {
+func Test_GetChannels(t *testing.T) {
 	data := []model.Channel{
 		{ID: 1, Name: "test1", Title: "test1", ImageURL: "test1.jpg"},
 		{ID: 2, Name: "test2", Title: "test2", ImageURL: "test2.jpg"},
@@ -82,10 +84,10 @@ func TestChannelService_GetChannels(t *testing.T) {
 		{
 			name: "Error: [Channels not found]",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannels").Return(nil, nil)
+				channelRepo.On("GetChannels").Return(nil, pg.ErrChannelsNotFound)
 			},
 			wantErr: true,
-			err:     errors.New("channels not found"),
+			err:     fmt.Errorf("[Channel] Service.GetChannels error: %w", pg.ErrChannelsNotFound),
 		},
 		{
 			name: "Error: [Store error]",
@@ -117,7 +119,7 @@ func TestChannelService_GetChannels(t *testing.T) {
 	}
 }
 
-func TestChannelService_GetChannelsByPage(t *testing.T) {
+func Test_GetChannelsByPage(t *testing.T) {
 	data := []model.Channel{
 		{ID: 1}, {ID: 2}, {ID: 3}, {ID: 4}, {ID: 5}, {ID: 6}, {ID: 7}, {ID: 8}, {ID: 9}, {ID: 10},
 		{ID: 11}, {ID: 12}, {ID: 13}, {ID: 14}, {ID: 15}, {ID: 16}, {ID: 17}, {ID: 18}, {ID: 19}, {ID: 20},
@@ -150,11 +152,11 @@ func TestChannelService_GetChannelsByPage(t *testing.T) {
 		{
 			name: "Error: [Channels not found, return page 404]",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannelsByPage", 4030).Return(nil, nil)
+				channelRepo.On("GetChannelsByPage", 4030).Return(nil, pg.ErrChannelsNotFound)
 			},
 			input:   404,
 			wantErr: true,
-			err:     errors.New("channels not found"),
+			err:     fmt.Errorf("[Channel] Service.GetChannelsByPage error: %w", pg.ErrChannelsNotFound),
 		},
 		{
 			name: "Error: [Store error]",
@@ -187,7 +189,7 @@ func TestChannelService_GetChannelsByPage(t *testing.T) {
 	}
 }
 
-func TestChannelService_GetChannelByName(t *testing.T) {
+func Test_GetChannelByName(t *testing.T) {
 	channel := &model.Channel{ID: 1, Name: "test", Title: "test", ImageURL: "test.jpg"}
 
 	tests := []struct {
@@ -209,11 +211,11 @@ func TestChannelService_GetChannelByName(t *testing.T) {
 		{
 			name: "Error: [Channel not found]",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannelByName", "test").Return(nil, nil)
+				channelRepo.On("GetChannelByName", "test").Return(nil, pg.ErrChannelNotFound)
 			},
 			input:   "test",
 			wantErr: true,
-			err:     errors.New("channel not found"),
+			err:     fmt.Errorf("[Channel] Service.GetChannelByName error: %w", pg.ErrChannelNotFound),
 		},
 		{
 			name: "Error: [Store error]",
