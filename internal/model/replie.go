@@ -9,10 +9,10 @@ type DBReplie struct {
 }
 
 type FullReplie struct {
-	ID           int    `json:"id"`
-	UserID       int    `json:"userId"`
-	Title        string `json:"title"`
-	ImageURL     string `json:"ImageUrl"`
-	FullName     string `json:"Fullname"`
-	UserImageURL string `json:"userImageUrl"`
+	ID           int    `json:"id" db:"id"`
+	UserID       int    `json:"userId" db:"user_id"`
+	Title        string `json:"title" db:"title"`
+	ImageURL     string `json:"ImageUrl" db:"imageurl"`
+	FullName     string `json:"Fullname" db:"fullname"`
+	UserImageURL string `json:"userImageUrl" db:"userimageurl"`
 }
