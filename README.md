@@ -60,9 +60,3 @@ Running test suite
 
  make test
 ```
-
-Watch demo version:
-
-[Telegram Overflow](https://telegram-overflow.herokuapp.com/)
-
-
