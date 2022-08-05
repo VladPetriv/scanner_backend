@@ -26,15 +26,6 @@ func (s *MessageDBService) CreateMessage(message *model.DBMessage) (int, error) 
 	return id, nil
 }
 
-func (s *MessageDBService) GetMessageByTitle(title string) (*model.DBMessage, error) {
-	message, err := s.store.Message.GetMessageByTitle(title)
-	if err != nil {
-		return nil, fmt.Errorf("[Message] Service.GetMessageByTitle error: %w", err)
-	}
-
-	return message, nil
-}
-
 func (s *MessageDBService) GetMessagesCount() (int, error) {
 	count, err := s.store.Message.GetMessagesCount()
 	if err != nil {

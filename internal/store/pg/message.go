@@ -38,21 +38,6 @@ func (repo *MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
 	return id, nil
 }
 
-func (repo *MessageRepo) GetMessageByTitle(title string) (*model.DBMessage, error) {
-	var message model.DBMessage
-
-	err := repo.db.Get(&message, "SELECT * FROM message WHERE title = $1;", title)
-	if err == sql.ErrNoRows {
-		return nil, ErrMessageNotFound
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("error while getting message by title: %w", err)
-	}
-
-	return &message, nil
-}
-
 func (repo *MessageRepo) GetMessagesCount() (int, error) {
 	var count int
 

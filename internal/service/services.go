@@ -12,7 +12,6 @@ type ChannelService interface {
 
 type MessageService interface {
 	CreateMessage(message *model.DBMessage) (int, error)
-	GetMessageByTitle(title string) (*model.DBMessage, error)
 	GetMessagesCount() (int, error)
 	GetMessagesCountByChannelID(ID int) (int, error)
 	GetFullMessagesByPage(page int) ([]model.FullMessage, error)

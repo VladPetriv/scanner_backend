@@ -1,12 +1,10 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
-	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 )
 
 type UserDBService struct {
@@ -18,11 +16,7 @@ func NewUserDBService(store *store.Store) *UserDBService {
 }
 
 func (s *UserDBService) CreateUser(user *model.User) (int, error) {
-	candidate, err := s.GetUserByUsername(user.Username)
-	if !errors.Is(err, pg.ErrUserNotFound) {
-		return 0, err
-	}
-
+	candidate, _ := s.GetUserByUsername(user.Username)
 	if candidate != nil {
 		return candidate.ID, nil
 	}
