@@ -1,62 +1,83 @@
 # scanner_backend
 
-## Description
-
-scanner_backend is a backend and front end side [using go templates] of tg_scanner application
-
-Application will always create a dir:
-  - logs - for logs file
-
-## Technology
-
-Go, GoTemplates, PostgreSQL, Gorilla-Mux, Logrus, Go-Sqlmock, Testify, Golang-Migrate
+scanner_backend is a backend side represented as full-stack application with go-template for processing data from tg scanner
 
 
-## Installation
+## Tech Stack
 
-```bash
-#Make sure that you have installed PostgreSQL on your machine
+**Server:** 
+- gorilla/mux
+- Apache Kafka
+- Go Templates
 
- git clone git@github.com:VladPetriv/scanner_backend.git
+**DB:**
+- PostgreSQL
+- golang-migrate/migrate
 
- cd scanner_backend 
+**Testing:**
+- stretchr/testify
+- DATA-DOG/go-sqlmock
+- mockery/mockery
 
- go mod download
 
-```
 
-## Before start
+## Environment Variables
 
-Please create .env file with this fields:
-- POSTGRES_USER = PostgreSQL user
-- POSTGRES_PASSWORD = PostgreSQL user password
-- POSTGRES_HOST = PostgreSQL host
-- POSTGRES_DB = PostgreSQL database name
-- MIGRATIONS_PATH = Path to migrations for example:"file://./db/migrations" 
-- PORT = Bind address which server going to use
-- DATABASE_URL = this field you can use if you don't want to create Postgres field
+To run this project, you will need to add the following environment variables to your ".env" file:
+- `POSTGRES_USER` - PostgreSQL user
+- `POSTGRES_PASSWORD` - PostgreSQL user password
+- `POSTGRES_HOST` - PostgreSQL host
+- `POSTGRES_DB` - PostgreSQL database name
+- `MIGRATIONS_PATH` - Path to migrations:“file://./db/migrations”
+- `PORT` - Bind address which server will use
+- `DATABASE_URL` - this field you can use if you don’t want to create PostgreSQL fields
 
-## Usage
+## Run Locally
 
-Start an application locally:
+Clone the project
 
 ```bash
- make run-l # Or you can use go run ./cmd/main.go
+   git clone git@github.com:VladPetriv/scanner_backend.git
 ```
 
-Start with docker-compose:
+Go to the project directory
 
 ```bash
- make build # Build docker compoe
-
- make run # Up docker compose
+  cd scanner_backend
 ```
 
-Running test suite
-
+Install dependencies
 
 ```bash
- make mock
-
- make test
+  go mod download
 ```
+
+Start the server locally:
+
+```bash
+  # Make sure that Apache Kafka and PostgreSQL are running
+  make run-l # Or you can use "go run ./cmd/main.go"
+```
+
+Start the server with docker compose:
+
+```bash
+  make build
+  
+  make run 
+```
+## Running Tests
+
+To run tests, run the following command:
+
+```bash
+  # Run it only if "mocks" folder not exist or if you updated "service.go" or "repository.go" files
+  make mock 
+```
+
+```bash
+  make test 
+```
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
