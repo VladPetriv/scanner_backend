@@ -20,7 +20,7 @@ func runMigrations(cfg *config.Config) error {
 	if cfg.DatabaseURL == "" {
 		connectionString = fmt.Sprintf(
 			"postgresql://%s:%s@%s:5432/%s?sslmode=disable",
-			cfg.PgUser, cfg.PgPassword, cfg.PgHost, cfg.PgDb,
+			cfg.PgUser, cfg.PgPassword, cfg.PgHost, cfg.PgDB,
 		)
 	} else {
 		connectionString = cfg.DatabaseURL

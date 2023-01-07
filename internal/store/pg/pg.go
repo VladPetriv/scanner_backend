@@ -11,13 +11,13 @@ type DB struct {
 	*sqlx.DB
 }
 
-func Dial(cfg *config.Config) (*DB, error) {
+func Init(cfg *config.Config) (*DB, error) {
 	var connectionString string
 
 	if cfg.DatabaseURL == "" {
 		connectionString = fmt.Sprintf(
 			"user=%s password=%s host=%s dbname=%s sslmode=disable",
-			cfg.PgUser, cfg.PgPassword, cfg.PgHost, cfg.PgDb,
+			cfg.PgUser, cfg.PgPassword, cfg.PgHost, cfg.PgDB,
 		)
 	} else {
 		connectionString = cfg.DatabaseURL

@@ -22,15 +22,15 @@ type Store struct {
 }
 
 func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
-	pgDB, err := pg.Dial(cfg)
+	pgDB, err := pg.Init(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("pg.Dial() failed: %w", err)
+		return nil, fmt.Errorf("init postgresql: %w", err)
 	}
 
 	if pgDB != nil {
-		log.Info("Running migrations...")
+		log.Info().Msg("Running migrations...")
 		if err := runMigrations(cfg); err != nil {
-			return nil, fmt.Errorf("run migrations error: %w", err)
+			return nil, fmt.Errorf("run migrations: %w", err)
 		}
 	}
 
@@ -69,15 +69,15 @@ func (s *Store) KeepAliveDB(cfg *config.Config) {
 			continue
 		}
 
-		s.logger.Debug("[store.KeepAliveDB] Lost db connection. Restoring...")
+		s.logger.Debug().Msg("[store.KeepAliveDB] Lost db connection. Restoring...")
 
-		s.pg, err = pg.Dial(cfg)
+		s.pg, err = pg.Init(cfg)
 		if err != nil {
-			s.logger.Error(err)
+			s.logger.Error().Err(err).Msg("init postgresql")
 
 			continue
 		}
 
-		s.logger.Debug("[store.KeepAliveDB] DB reconnected")
+		s.logger.Debug().Msg("[store.KeepAliveDB] DB reconnected")
 	}
 }

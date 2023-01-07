@@ -83,7 +83,7 @@ func (h *Handler) logAllRoutes(router *mux.Router) {
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()
 		if err != nil {
-			h.log.Error(err)
+			h.log.Error().Err(err).Msg("get template path")
 		}
 
 		met, _ := route.GetMethods()
@@ -91,7 +91,7 @@ func (h *Handler) logAllRoutes(router *mux.Router) {
 			met = append(met, "SUBROUTER")
 		}
 
-		h.log.Infof("Route - %s %s", tpl, met)
+		h.log.Info().Msgf("Route - %s %s", tpl, met)
 
 		return nil
 	})
@@ -100,7 +100,7 @@ func (h *Handler) logAllRoutes(router *mux.Router) {
 func (h *Handler) checkUserStatus(r *http.Request) interface{} {
 	sessions, err := h.store.Get(r, "session")
 	if err != nil {
-		h.log.Error("Session error: ", err)
+		h.log.Error().Err(err).Msg("get user session")
 	}
 
 	email, ok := sessions.Values["userEmail"]
@@ -114,7 +114,7 @@ func (h *Handler) checkUserStatus(r *http.Request) interface{} {
 func (h *Handler) writeToSessionStore(w http.ResponseWriter, r *http.Request, value interface{}) {
 	session, err := h.store.Get(r, "session")
 	if err != nil {
-		h.log.Error("Session error: ", err)
+		h.log.Error().Err(err).Msg("get user session")
 	}
 
 	session.Values["userEmail"] = value
@@ -124,12 +124,15 @@ func (h *Handler) writeToSessionStore(w http.ResponseWriter, r *http.Request, va
 func (h *Handler) removeFromSessionStore(w http.ResponseWriter, r *http.Request) {
 	session, err := h.store.Get(r, "session")
 	if err != nil {
-		h.log.Error("session error: ", err)
+		h.log.Error().Err(err).Msg("get user session")
 	}
 
 	delete(session.Values, "userEmail")
 
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		h.log.Error().Err(err).Msg("save session")
+	}
 }
 
 func (h *Handler) getUserFromForm(r *http.Request) *model.WebUser {

@@ -24,22 +24,22 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 
 	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
 
 	messagesCount, err := h.service.Message.GetMessagesCount()
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get messages count")
 	}
 
 	messages, err := h.service.Message.GetFullMessagesByPage(page)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get full messages by page")
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
 	messages = checkMessagesStatus(messages, h.service)
@@ -62,7 +62,7 @@ func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("execute base template")
 	}
 }
 

@@ -21,7 +21,7 @@ func (h *Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
 	h.tmpTree["register"] = template.Must(template.ParseFiles("templates/auth/register.html"))
 	err := h.tmpTree["register"].Execute(w, data)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("execute registration templates")
 	}
 }
 
@@ -33,7 +33,7 @@ func (h *Handler) loginPage(w http.ResponseWriter, r *http.Request) {
 	h.tmpTree["login"] = template.Must(template.ParseFiles("templates/auth/login.html"))
 	err := h.tmpTree["login"].Execute(w, data)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("execute login templates")
 	}
 }
 
@@ -58,7 +58,7 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 			w,
 			AuthPageData{Title: "Registration", Message: "Error while creating user. Please try again later!"},
 		)
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("execute registration template")
 	}
 
 	http.Redirect(w, r, "/auth/login", http.StatusFound)
@@ -69,14 +69,17 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 
 	candidate, err := h.service.WebUser.GetWebUserByEmail(u.Email)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get user by email")
 	}
 
 	if candidate == nil {
-		h.tmpTree["login"].Execute(
+		err = h.tmpTree["login"].Execute(
 			w,
 			AuthPageData{Title: "Login", Message: fmt.Sprintf("User with email %s not found", u.Email)},
 		)
+		if err != nil {
+			h.log.Error().Err(err).Msg("execute login template")
+		}
 	}
 
 	if util.ComparePassword(u.Password, candidate.Password) {
@@ -86,10 +89,13 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.tmpTree["login"].Execute(
+	err = h.tmpTree["login"].Execute(
 		w,
 		AuthPageData{Title: "Login", Message: "User password is incorrect!"},
 	)
+	if err != nil {
+		h.log.Error().Err(err).Msg("execute login template")
+	}
 }
 
 func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {

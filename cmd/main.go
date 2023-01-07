@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	_ "github.com/lib/pq"
 
 	"github.com/VladPetriv/scanner_backend/internal/handler"
@@ -13,21 +15,21 @@ import (
 )
 
 func main() {
-	log := logger.Get()
-
 	cfg, err := config.Get()
 	if err != nil {
-		log.Errorf("error while getting config: %v", err)
+		log.Fatalf("get config error: %v", err)
 	}
+
+	log := logger.Get(cfg)
 
 	store, err := store.New(cfg, log)
 	if err != nil {
-		log.Errorf("error while creating store: %v", err)
+		log.Fatal().Err(err).Msg("create store")
 	}
 
 	serviceManger, err := service.NewManager(store)
 	if err != nil {
-		log.Errorf("error while creating service manager: %v", err)
+		log.Fatal().Err(err).Msg("create service manager")
 	}
 
 	go kafka.SaveChannelsFromQueueToDB(serviceManger, cfg, log)
@@ -37,9 +39,9 @@ func main() {
 
 	handler := handler.NewHandler(serviceManger, log)
 
-	log.Infof("starting server at port %s", cfg.Port)
+	log.Info().Msgf("starting server at port: %s", cfg.Port)
 
-	if err := srv.Run(cfg.Port, handler.InitRouter()); err != nil {
-		log.Error("error while starting server: ", err)
+	if err = srv.Run(cfg.Port, handler.InitRouter()); err != nil {
+		log.Fatal().Err(err).Msg("start server")
 	}
 }

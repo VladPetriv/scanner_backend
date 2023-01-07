@@ -17,26 +17,29 @@ type MessagePageData struct {
 }
 
 func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
-	messageID, _ := strconv.Atoi(mux.Vars(r)["message_id"])
+	messageID, err := strconv.Atoi(mux.Vars(r)["message_id"])
+	if err != nil {
+		h.log.Error().Err(err).Msg("convert message_id to int")
+	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
 
 	message, err := h.service.Message.GetFullMessageByMessageID(messageID)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get full messages by message id")
 	}
 
 	replies, err := h.service.Replie.GetFullRepliesByMessageID(message.ID)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get full replies by message id")
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
 	message.Replies = replies
@@ -57,6 +60,6 @@ func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error(err)
+		h.log.Error().Err(err).Msg("execute message page")
 	}
 }
