@@ -32,21 +32,21 @@ type DBMessage struct {
 	UserID     int    `db:"user_id"`
 	Title      string `db:"title"`
 	MessageURL string `db:"message_url"`
-	ImageURL   string `db:"imageurl"`
+	ImageURL   string `db:"image_url"`
 }
 
 type FullMessage struct {
 	ID              int    `db:"id"`
 	MessageURL      string `db:"message_url"`
 	Title           string `db:"title"`
-	ImageURL        string `db:"imageurl"`
-	ChannelID       int    `db:"channelid"`
-	ChannelName     string `db:"channelname"`
-	ChannelTitle    string `db:"channeltitle"`
-	ChannelImageURL string `db:"channelimageurl"`
-	UserID          int    `db:"userid"`
+	ImageURL        string `db:"image_url"`
+	ChannelID       int    `db:"channel_id"`
+	ChannelName     string `db:"channel_name"`
+	ChannelTitle    string `db:"channel_title"`
+	ChannelImageURL string `db:"channel_image_url"`
+	UserID          int    `db:"user_id"`
 	FullName        string `db:"fullname"`
-	UserImageURL    string `db:"userimageurl"`
+	UserImageURL    string `db:"user_image_url"`
 	ReplieCount     int    `db:"count"`
 	Replies         []FullReply
 	SavedID         int
