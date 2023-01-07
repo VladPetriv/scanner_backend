@@ -15,7 +15,7 @@ type Store struct {
 
 	Channel ChannelRepo
 	Message MessageRepo
-	Replie  ReplieRepo
+	Reply   ReplyRepo
 	User    UserRepo
 	WebUser WebUserRepo
 	Saved   SavedRepo
@@ -41,7 +41,7 @@ func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
 		store.pg = pgDB
 		store.Channel = pg.NewChannelRepo(pgDB)
 		store.Message = pg.NewMessageRepo(pgDB)
-		store.Replie = pg.NewReplieRepo(pgDB)
+		store.Reply = pg.NewReplyRepo(pgDB)
 		store.User = pg.NewUserRepo(pgDB)
 		store.WebUser = pg.NewWebUserRepo(pgDB)
 		store.Saved = pg.NewSavedRepo(pgDB)

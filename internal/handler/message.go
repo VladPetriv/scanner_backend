@@ -32,7 +32,7 @@ func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get full messages by message id")
 	}
 
-	replies, err := h.service.Replie.GetFullRepliesByMessageID(message.ID)
+	replies, err := h.service.Reply.GetFullRepliesByMessageID(message.ID)
 	if err != nil {
 		h.log.Error().Err(err).Msg("get full replies by message id")
 	}

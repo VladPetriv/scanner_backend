@@ -20,9 +20,9 @@ type MessageService interface {
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
 
-type ReplieService interface {
-	CreateReplie(replie *model.DBReplie) error
-	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
+type ReplyService interface {
+	CreateReply(reply *model.DBReply) error
+	GetFullRepliesByMessageID(ID int) ([]model.FullReply, error)
 }
 
 type UserService interface {

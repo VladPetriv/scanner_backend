@@ -22,10 +22,10 @@ type MessageRepo interface {
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
 
-//go:generate mockery --dir . --name ReplieRepo --output ./mocks
-type ReplieRepo interface {
-	CreateReplie(replie *model.DBReplie) error
-	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
+//go:generate mockery --dir . --name ReplyRepo --output ./mocks
+type ReplyRepo interface {
+	CreateReply(reply *model.DBReply) error
+	GetFullRepliesByMessageID(ID int) ([]model.FullReply, error)
 }
 
 //go:generate mockery --dir . --name UserRepo --output ./mocks

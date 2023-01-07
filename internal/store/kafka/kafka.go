@@ -121,7 +121,7 @@ func SaveDataFromQueueToDB(srvManager *service.Manager, cfg *config.Config, log 
 						log.Error().Err(err).Msg("create user for reply")
 					}
 
-					err = srvManager.Replie.CreateReplie(&model.DBReplie{
+					err = srvManager.Reply.CreateReply(&model.DBReply{
 						MessageID: messageID,
 						UserID:    userID,
 						Title:     replie.Message,

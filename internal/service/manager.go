@@ -9,7 +9,7 @@ import (
 type Manager struct {
 	Channel ChannelService
 	Message MessageService
-	Replie  ReplieService
+	Reply   ReplyService
 	User    UserService
 	WebUser WebUserService
 	Saved   SavedService
@@ -23,7 +23,7 @@ func NewManager(store *store.Store) (*Manager, error) {
 	return &Manager{
 		Channel: NewChannelDBService(store),
 		Message: NewMessageDBService(store),
-		Replie:  NewReplieDBService(store),
+		Reply:   NewReplyDBService(store),
 		User:    NewUserDBService(store),
 		WebUser: NewWebUserDbService(store),
 		Saved:   NewSavedDbService(store),
