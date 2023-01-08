@@ -6,12 +6,12 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/VladPetriv/scanner_backend/internal/handler"
-	"github.com/VladPetriv/scanner_backend/internal/server"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/kafka"
 	"github.com/VladPetriv/scanner_backend/pkg/config"
 	"github.com/VladPetriv/scanner_backend/pkg/logger"
+	"github.com/VladPetriv/scanner_backend/pkg/server"
 )
 
 func main() {
