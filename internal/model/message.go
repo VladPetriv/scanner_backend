@@ -47,7 +47,7 @@ type FullMessage struct {
 	UserID          int    `db:"user_id"`
 	FullName        string `db:"fullname"`
 	UserImageURL    string `db:"user_image_url"`
-	ReplieCount     int    `db:"count"`
+	RepliesCount    int    `db:"count"`
 	Replies         []FullReply
 	SavedID         int
 	Status          bool
