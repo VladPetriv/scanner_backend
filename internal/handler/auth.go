@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/VladPetriv/scanner_backend/pkg/util"
+	"github.com/VladPetriv/scanner_backend/pkg/password"
 )
 
 type AuthPageData struct {
@@ -48,7 +48,10 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 		)
 	}
 
-	hashedPassword, _ := util.HashPassword(u.Password)
+	hashedPassword, err := password.HashPassword(u.Password)
+	if err != nil {
+		h.log.Error().Err(err).Msg("hash password")
+	}
 
 	u.Password = hashedPassword
 
@@ -82,7 +85,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if util.ComparePassword(u.Password, candidate.Password) {
+	if password.ComparePassword(u.Password, candidate.Password) {
 		h.writeToSessionStore(w, r, u.Email)
 
 		http.Redirect(w, r, "/home", http.StatusMovedPermanently)

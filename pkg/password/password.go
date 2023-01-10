@@ -1,4 +1,4 @@
-package util
+package password
 
 import (
 	"fmt"
@@ -7,9 +7,11 @@ import (
 )
 
 func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bcryptCost := 14
+
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
-		return "", fmt.Errorf("error while hashing password")
+		return "", fmt.Errorf("hash password: %w", err)
 	}
 
 	return string(bytes), nil
