@@ -1,10 +1,16 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
+)
+
+var (
+	ErrSavedMessagesNotFound = errors.New("saved messages not found")
+	ErrSavedMessageNotFound  = errors.New("saved message not found")
 )
 
 type SavedDbService struct {
@@ -15,34 +21,34 @@ func NewSavedDbService(store *store.Store) *SavedDbService {
 	return &SavedDbService{store: store}
 }
 
-func (s *SavedDbService) GetSavedMessages(UserID int) ([]model.Saved, error) {
-	savedMessages, err := s.store.Saved.GetSavedMessages(UserID)
+func (s *SavedDbService) GetSavedMessages(userID int) ([]model.Saved, error) {
+	messages, err := s.store.Saved.GetSavedMessages(userID)
 	if err != nil {
 		return nil, fmt.Errorf("[Saved] Service.GetSavedMessages error: %w", err)
 	}
 
-	if savedMessages == nil {
-		return nil, fmt.Errorf("saved messages not found")
+	if messages == nil {
+		return nil, ErrSavedMessagesNotFound
 	}
 
-	return savedMessages, nil
+	return messages, nil
 }
 
-func (s *SavedDbService) GetSavedMessageByMessageID(ID int) (*model.Saved, error) {
-	savedMessage, err := s.store.Saved.GetSavedMessageByMessageID(ID)
+func (s *SavedDbService) GetSavedMessageByMessageID(id int) (*model.Saved, error) {
+	message, err := s.store.Saved.GetSavedMessageByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("[Saved] Service.GetSavedMessageByMessageID error: %w", err)
 	}
 
-	if savedMessage == nil {
-		return nil, fmt.Errorf("saved message not found")
+	if message == nil {
+		return nil, ErrSavedMessageNotFound
 	}
 
-	return savedMessage, nil
+	return message, nil
 }
 
 func (s *SavedDbService) CreateSavedMessage(savedMessage *model.Saved) error {
-	_, err := s.store.Saved.CreateSavedMessage(savedMessage)
+	err := s.store.Saved.CreateSavedMessage(savedMessage)
 	if err != nil {
 		return fmt.Errorf("[Saved] Service.CreateSavedMessage error: %w", err)
 	}
@@ -50,8 +56,8 @@ func (s *SavedDbService) CreateSavedMessage(savedMessage *model.Saved) error {
 	return nil
 }
 
-func (s *SavedDbService) DeleteSavedMessage(ID int) error {
-	_, err := s.store.Saved.DeleteSavedMessage(ID)
+func (s *SavedDbService) DeleteSavedMessage(id int) error {
+	err := s.store.Saved.DeleteSavedMessage(id)
 	if err != nil {
 		return fmt.Errorf("[Saved] Service.DeleteSavedMessage error: %w", err)
 	}

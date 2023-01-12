@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
@@ -11,30 +10,29 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
-	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 )
 
 func Test_CreateUser(t *testing.T) {
 	userInput := &model.User{Username: "test", FullName: "test test", ImageURL: "test.jpg"}
+
 	tests := []struct {
-		name    string
-		mock    func(userRepo *mocks.UserRepo)
-		input   *model.User
-		want    int
-		wantErr bool
-		err     error
+		name          string
+		mock          func(userRepo *mocks.UserRepo)
+		input         *model.User
+		want          int
+		expectedError error
 	}{
 		{
-			name: "Ok: [User created]",
+			name: "CreateUser successful",
 			mock: func(userRepo *mocks.UserRepo) {
-				userRepo.On("GetUserByUsername", userInput.Username).Return(nil, pg.ErrUserNotFound)
+				userRepo.On("GetUserByUsername", userInput.Username).Return(nil, nil)
 				userRepo.On("CreateUser", userInput).Return(1, nil)
 			},
 			input: userInput,
 			want:  1,
 		},
 		{
-			name: "Error: [User is exist]",
+			name: "CreateUser successful with founded user",
 			mock: func(userRepo *mocks.UserRepo) {
 				userRepo.On("GetUserByUsername", userInput.Username).Return(userInput, nil)
 			},
@@ -42,17 +40,30 @@ func Test_CreateUser(t *testing.T) {
 			want:  userInput.ID,
 		},
 		{
-			name: "Error: [Store error]",
+			name: "CreateUser failed with error when get user by username",
 			mock: func(userRepo *mocks.UserRepo) {
-				userRepo.On("GetUserByUsername", userInput.Username).Return(nil, pg.ErrUserNotFound)
-				userRepo.On("CreateUser", userInput).Return(0, errors.New("failed to create user: some error"))
+				userRepo.On("GetUserByUsername", userInput.Username).
+					Return(nil, fmt.Errorf("get user by username: some store error"))
 			},
-			input:   userInput,
-			wantErr: true,
-			err:     errors.New("[User] Service.CreateUser error: failed to create user: some error"),
+			input: userInput,
+			expectedError: fmt.Errorf(
+				"[User] Service.GetUserByUsername error: %w",
+				fmt.Errorf("get user by username: some store error"),
+			),
+		},
+		{
+			name: "CreateUser failed with error when create user",
+			mock: func(userRepo *mocks.UserRepo) {
+				userRepo.On("GetUserByUsername", userInput.Username).Return(nil, nil)
+				userRepo.On("CreateUser", userInput).Return(0, fmt.Errorf("create tg user: some store error"))
+			},
+			input: userInput,
+			expectedError: fmt.Errorf(
+				"[User] Service.CreateUser error: %w",
+				fmt.Errorf("create tg user: some store error"),
+			),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Logf("running: %s", tt.name)
 
@@ -61,9 +72,9 @@ func Test_CreateUser(t *testing.T) {
 		tt.mock(userRepo)
 
 		got, err := userService.CreateUser(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.EqualValues(t, tt.err.Error(), err.Error())
+			assert.EqualValues(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.EqualValues(t, tt.want, got)
@@ -77,15 +88,14 @@ func Test_GetUserByUsername(t *testing.T) {
 	user := &model.User{ID: 1, Username: "test1", FullName: "test1 test", ImageURL: "test1.jpg"}
 
 	tests := []struct {
-		name    string
-		mock    func(userRepo *mocks.UserRepo)
-		input   string
-		want    *model.User
-		wantErr bool
-		err     error
+		name          string
+		mock          func(userRepo *mocks.UserRepo)
+		input         string
+		want          *model.User
+		expectedError error
 	}{
 		{
-			name: "Ok: [User found]",
+			name: "GetUserByUsername successful",
 			mock: func(userRepo *mocks.UserRepo) {
 				userRepo.On("GetUserByUsername", "test").Return(user, nil)
 			},
@@ -93,25 +103,25 @@ func Test_GetUserByUsername(t *testing.T) {
 			want:  user,
 		},
 		{
-			name: "Error: [User not found]",
+			name: "GetUserByUsername failed not found user",
 			mock: func(userRepo *mocks.UserRepo) {
-				userRepo.On("GetUserByUsername", "test").Return(nil, pg.ErrUserNotFound)
+				userRepo.On("GetUserByUsername", "test").Return(nil, nil)
 			},
-			input:   "test",
-			wantErr: true,
-			err:     fmt.Errorf("[User] Service.GetUserByUsername error: %w", pg.ErrUserNotFound),
+			input:         "test",
+			expectedError: service.ErrUserNotFound,
 		},
 		{
-			name: "Error: [Store error]",
+			name: "GetUserByUsername failed with some store error",
 			mock: func(userRepo *mocks.UserRepo) {
-				userRepo.On("GetUserByUsername", "test").Return(nil, errors.New("error while getting users: some error"))
+				userRepo.On("GetUserByUsername", "test").Return(nil, fmt.Errorf("get user by username: some store error"))
 			},
-			input:   "test",
-			wantErr: true,
-			err:     errors.New("[User] Service.GetUserByUsername error: error while getting users: some error"),
+			input: "test",
+			expectedError: fmt.Errorf(
+				"[User] Service.GetUserByUsername error: %w",
+				fmt.Errorf("get user by username: some store error"),
+			),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Logf("running: %s", tt.name)
 
@@ -120,9 +130,9 @@ func Test_GetUserByUsername(t *testing.T) {
 		tt.mock(userRepo)
 
 		got, err := userService.GetUserByUsername(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.Equal(t, tt.err.Error(), err.Error())
+			assert.Equal(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
@@ -136,15 +146,14 @@ func Test_GetUserByID(t *testing.T) {
 	user := &model.User{ID: 1, Username: "test1", FullName: "test1 test", ImageURL: "test1.jpg"}
 
 	tests := []struct {
-		name    string
-		mock    func(userRepo *mocks.UserRepo)
-		input   int
-		want    *model.User
-		wantErr bool
-		err     error
+		name          string
+		mock          func(userRepo *mocks.UserRepo)
+		input         int
+		want          *model.User
+		expectedError error
 	}{
 		{
-			name: "Ok: [User found]",
+			name: "GetUserByID successful",
 			mock: func(userRepo *mocks.UserRepo) {
 				userRepo.On("GetUserByID", 1).Return(user, nil)
 			},
@@ -152,25 +161,25 @@ func Test_GetUserByID(t *testing.T) {
 			want:  user,
 		},
 		{
-			name: "Error: [User not found]",
+			name: "GetUserByID failed not found user",
 			mock: func(userRepo *mocks.UserRepo) {
-				userRepo.On("GetUserByID", 1).Return(nil, pg.ErrUserNotFound)
+				userRepo.On("GetUserByID", 404).Return(nil, nil)
 			},
-			input:   1,
-			wantErr: true,
-			err:     fmt.Errorf("[User] Service.GetUserByID error: %w", pg.ErrUserNotFound),
+			input:         404,
+			expectedError: service.ErrUserNotFound,
 		},
 		{
-			name: "Error: [Store error]",
+			name: "GetUserByID failed with some store error",
 			mock: func(userRepo *mocks.UserRepo) {
-				userRepo.On("GetUserByID", 1).Return(nil, errors.New("error while getting users: some error"))
+				userRepo.On("GetUserByID", 1).Return(nil, fmt.Errorf("get user by id: some store error"))
 			},
-			input:   1,
-			wantErr: true,
-			err:     errors.New("[User] Service.GetUserByID error: error while getting users: some error"),
+			input: 1,
+			expectedError: fmt.Errorf(
+				"[User] Service.GetUserByID error: %w",
+				fmt.Errorf("get user by id: some store error"),
+			),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Logf("running: %s", tt.name)
 
@@ -179,9 +188,9 @@ func Test_GetUserByID(t *testing.T) {
 		tt.mock(userRepo)
 
 		got, err := userService.GetUserByID(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.Equal(t, tt.err.Error(), err.Error())
+			assert.Equal(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)

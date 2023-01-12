@@ -1,10 +1,17 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
+	"github.com/VladPetriv/scanner_backend/pkg/convert"
+)
+
+var (
+	ErrChannelsNotFound = errors.New("channels not found")
+	ErrChannelNotFound  = errors.New("channel not found")
 )
 
 type ChannelDBService struct {
@@ -32,22 +39,21 @@ func (s *ChannelDBService) GetChannels() ([]model.Channel, error) {
 		return nil, fmt.Errorf("[Channel] Service.GetChannels error: %w", err)
 	}
 
+	if channels == nil {
+		return nil, ErrChannelsNotFound
+	}
+
 	return channels, nil
 }
 
 func (s *ChannelDBService) GetChannelsByPage(page int) ([]model.Channel, error) {
-	if page == 1 || page == 0 {
-		page = 0
-	} else if page == 2 {
-		page = 10
-	} else {
-		page *= 10
-		page -= 10
-	}
-
-	channels, err := s.store.Channel.GetChannelsByPage(page)
+	channels, err := s.store.Channel.GetChannelsByPage(convert.PageToOffset(page))
 	if err != nil {
 		return nil, fmt.Errorf("[Channel] Service.GetChannelsByPage error: %w", err)
+	}
+
+	if channels == nil {
+		return nil, ErrChannelsNotFound
 	}
 
 	return channels, nil
@@ -57,6 +63,10 @@ func (s *ChannelDBService) GetChannelByName(name string) (*model.Channel, error)
 	channel, err := s.store.Channel.GetChannelByName(name)
 	if err != nil {
 		return nil, fmt.Errorf("[Channel] Service.GetChannelByName error: %w", err)
+	}
+
+	if channel == nil {
+		return nil, ErrChannelNotFound
 	}
 
 	return channel, nil
