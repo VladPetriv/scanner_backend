@@ -26,13 +26,13 @@ func (_m *ReplyRepo) CreateReply(reply *model.DBReply) error {
 	return r0
 }
 
-// GetFullRepliesByMessageID provides a mock function with given fields: ID
-func (_m *ReplyRepo) GetFullRepliesByMessageID(ID int) ([]model.FullReply, error) {
-	ret := _m.Called(ID)
+// GetFullRepliesByMessageID provides a mock function with given fields: id
+func (_m *ReplyRepo) GetFullRepliesByMessageID(id int) ([]model.FullReply, error) {
+	ret := _m.Called(id)
 
 	var r0 []model.FullReply
 	if rf, ok := ret.Get(0).(func(int) []model.FullReply); ok {
-		r0 = rf(ID)
+		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]model.FullReply)
@@ -41,7 +41,7 @@ func (_m *ReplyRepo) GetFullRepliesByMessageID(ID int) ([]model.FullReply, error
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(ID)
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}

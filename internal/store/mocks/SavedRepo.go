@@ -13,54 +13,40 @@ type SavedRepo struct {
 }
 
 // CreateSavedMessage provides a mock function with given fields: saved
-func (_m *SavedRepo) CreateSavedMessage(saved *model.Saved) (int, error) {
+func (_m *SavedRepo) CreateSavedMessage(saved *model.Saved) error {
 	ret := _m.Called(saved)
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func(*model.Saved) int); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Saved) error); ok {
 		r0 = rf(saved)
 	} else {
-		r0 = ret.Get(0).(int)
+		r0 = ret.Error(0)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.Saved) error); ok {
-		r1 = rf(saved)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
-// DeleteSavedMessage provides a mock function with given fields: ID
-func (_m *SavedRepo) DeleteSavedMessage(ID int) (int, error) {
-	ret := _m.Called(ID)
+// DeleteSavedMessage provides a mock function with given fields: id
+func (_m *SavedRepo) DeleteSavedMessage(id int) error {
+	ret := _m.Called(id)
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func(int) int); ok {
-		r0 = rf(ID)
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(id)
 	} else {
-		r0 = ret.Get(0).(int)
+		r0 = ret.Error(0)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(ID)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
-// GetSavedMessageByMessageID provides a mock function with given fields: ID
-func (_m *SavedRepo) GetSavedMessageByMessageID(ID int) (*model.Saved, error) {
-	ret := _m.Called(ID)
+// GetSavedMessageByID provides a mock function with given fields: id
+func (_m *SavedRepo) GetSavedMessageByID(id int) (*model.Saved, error) {
+	ret := _m.Called(id)
 
 	var r0 *model.Saved
 	if rf, ok := ret.Get(0).(func(int) *model.Saved); ok {
-		r0 = rf(ID)
+		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Saved)
@@ -69,7 +55,7 @@ func (_m *SavedRepo) GetSavedMessageByMessageID(ID int) (*model.Saved, error) {
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(ID)
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -77,13 +63,13 @@ func (_m *SavedRepo) GetSavedMessageByMessageID(ID int) (*model.Saved, error) {
 	return r0, r1
 }
 
-// GetSavedMessages provides a mock function with given fields: UserID
-func (_m *SavedRepo) GetSavedMessages(UserID int) ([]model.Saved, error) {
-	ret := _m.Called(UserID)
+// GetSavedMessages provides a mock function with given fields: userID
+func (_m *SavedRepo) GetSavedMessages(userID int) ([]model.Saved, error) {
+	ret := _m.Called(userID)
 
 	var r0 []model.Saved
 	if rf, ok := ret.Get(0).(func(int) []model.Saved); ok {
-		r0 = rf(UserID)
+		r0 = rf(userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]model.Saved)
@@ -92,7 +78,7 @@ func (_m *SavedRepo) GetSavedMessages(UserID int) ([]model.Saved, error) {
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(UserID)
+		r1 = rf(userID)
 	} else {
 		r1 = ret.Error(1)
 	}

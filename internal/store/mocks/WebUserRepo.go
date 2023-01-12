@@ -13,24 +13,17 @@ type WebUserRepo struct {
 }
 
 // CreateWebUser provides a mock function with given fields: user
-func (_m *WebUserRepo) CreateWebUser(user *model.WebUser) (int, error) {
+func (_m *WebUserRepo) CreateWebUser(user *model.WebUser) error {
 	ret := _m.Called(user)
 
-	var r0 int
-	if rf, ok := ret.Get(0).(func(*model.WebUser) int); ok {
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.WebUser) error); ok {
 		r0 = rf(user)
 	} else {
-		r0 = ret.Get(0).(int)
+		r0 = ret.Error(0)
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*model.WebUser) error); ok {
-		r1 = rf(user)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // GetWebUserByEmail provides a mock function with given fields: email
@@ -56,13 +49,13 @@ func (_m *WebUserRepo) GetWebUserByEmail(email string) (*model.WebUser, error) {
 	return r0, r1
 }
 
-// GetWebUserByID provides a mock function with given fields: userID
-func (_m *WebUserRepo) GetWebUserByID(userID int) (*model.WebUser, error) {
-	ret := _m.Called(userID)
+// GetWebUserByID provides a mock function with given fields: id
+func (_m *WebUserRepo) GetWebUserByID(id int) (*model.WebUser, error) {
+	ret := _m.Called(id)
 
 	var r0 *model.WebUser
 	if rf, ok := ret.Get(0).(func(int) *model.WebUser); ok {
-		r0 = rf(userID)
+		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.WebUser)
@@ -71,7 +64,7 @@ func (_m *WebUserRepo) GetWebUserByID(userID int) (*model.WebUser, error) {
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(userID)
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}
