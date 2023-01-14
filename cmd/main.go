@@ -5,10 +5,10 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/VladPetriv/scanner_backend/internal/handler"
+	handler "github.com/VladPetriv/scanner_backend/internal/handler/http"
+	"github.com/VladPetriv/scanner_backend/internal/handler/queue/kafka"
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
-	"github.com/VladPetriv/scanner_backend/internal/store/kafka"
 	"github.com/VladPetriv/scanner_backend/pkg/config"
 	"github.com/VladPetriv/scanner_backend/pkg/logger"
 	"github.com/VladPetriv/scanner_backend/pkg/server"
@@ -32,16 +32,17 @@ func main() {
 		log.Fatal().Err(err).Msg("create service manager")
 	}
 
-	go kafka.SaveChannelsFromQueueToDB(serviceManger, cfg, log)
-	go kafka.SaveDataFromQueueToDB(serviceManger, cfg, log)
+	queue := kafka.New(serviceManger, cfg, log)
+	go queue.SaveChannelsData()
+	go queue.SaveMessagesData()
 
 	srv := new(server.Server)
 
-	handler := handler.NewHandler(serviceManger, log)
+	httpHandler := handler.NewHandler(serviceManger, log)
 
 	log.Info().Msgf("starting server at port: %s", cfg.Port)
 
-	if err = srv.Run(cfg.Port, handler.InitRouter()); err != nil {
-		log.Fatal().Err(err).Msg("start server")
+	if err = srv.Run(cfg.Port, httpHandler.InitRouter()); err != nil {
+		log.Fatal().Err(err).Msgf("start server at port: %s", cfg.Port)
 	}
 }
