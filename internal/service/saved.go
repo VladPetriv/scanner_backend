@@ -1,16 +1,10 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
-)
-
-var (
-	ErrSavedMessagesNotFound = errors.New("saved messages not found")
-	ErrSavedMessageNotFound  = errors.New("saved message not found")
 )
 
 type savedService struct {

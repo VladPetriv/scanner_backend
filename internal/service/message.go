@@ -1,18 +1,11 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/pkg/convert"
-)
-
-var (
-	ErrMessagesCountNotFound = errors.New("message count not found")
-	ErrMessagesNotFound      = errors.New("messages not found")
-	ErrMessageNotFound       = errors.New("messages not found")
 )
 
 type messageService struct {

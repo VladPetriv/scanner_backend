@@ -31,8 +31,7 @@ func (s replyService) GetFullRepliesByMessageID(messageID int) ([]model.FullRepl
 	}
 
 	if replies == nil {
-		//TODO: return custom error
-		return nil, fmt.Errorf("replies not found")
+		return nil, ErrRepliesNotFound
 	}
 
 	return replies, nil

@@ -8,8 +8,6 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/store"
 )
 
-var ErrUserNotFound = errors.New("user not found")
-
 type userService struct {
 	store *store.Store
 }

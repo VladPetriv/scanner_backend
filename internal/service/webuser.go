@@ -1,14 +1,11 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 )
-
-var ErrWebUserNotFound = errors.New("web user not found")
 
 type webUserService struct {
 	store *store.Store

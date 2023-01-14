@@ -9,12 +9,6 @@ import (
 	"github.com/VladPetriv/scanner_backend/pkg/convert"
 )
 
-var (
-	ErrChannelsNotFound = errors.New("channels not found")
-	ErrChannelNotFound  = errors.New("channel not found")
-	ErrChannelExists    = errors.New("channel is exist")
-)
-
 type channelService struct {
 	store *store.Store
 }
