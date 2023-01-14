@@ -45,7 +45,7 @@ func Test_CreateSavedMessage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		savedRepo := &mocks.SavedRepo{}
-		savedService := service.NewSavedDbService(&store.Store{Saved: savedRepo})
+		savedService := service.NewSavedService(&store.Store{Saved: savedRepo})
 		tt.mock(savedRepo)
 
 		err := savedService.CreateSavedMessage(tt.input)
@@ -105,7 +105,7 @@ func Test_GetSavedMessages(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		savedRepo := &mocks.SavedRepo{}
-		savedService := service.NewSavedDbService(&store.Store{Saved: savedRepo})
+		savedService := service.NewSavedService(&store.Store{Saved: savedRepo})
 		tt.mock(savedRepo)
 
 		got, err := savedService.GetSavedMessages(tt.input)
@@ -164,7 +164,7 @@ func Test_GetSavedMessageByMessageID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		savedRepo := &mocks.SavedRepo{}
-		savedService := service.NewSavedDbService(&store.Store{Saved: savedRepo})
+		savedService := service.NewSavedService(&store.Store{Saved: savedRepo})
 		tt.mock(savedRepo)
 
 		got, err := savedService.GetSavedMessageByMessageID(tt.input)
@@ -211,7 +211,7 @@ func Test_DeleteSavedMessage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		savedRepo := &mocks.SavedRepo{}
-		savedService := service.NewSavedDbService(&store.Store{Saved: savedRepo})
+		savedService := service.NewSavedService(&store.Store{Saved: savedRepo})
 		tt.mock(savedRepo)
 
 		err := savedService.DeleteSavedMessage(tt.input)

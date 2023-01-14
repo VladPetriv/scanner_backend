@@ -21,11 +21,11 @@ func NewManager(store *store.Store) (*Manager, error) {
 	}
 
 	return &Manager{
-		Channel: NewChannelDBService(store),
-		Message: NewMessageDBService(store),
-		Reply:   NewReplyDBService(store),
-		User:    NewUserDBService(store),
-		WebUser: NewWebUserDbService(store),
-		Saved:   NewSavedDbService(store),
+		Channel: NewChannelService(store),
+		Message: NewMessageService(store),
+		Reply:   NewReplyService(store),
+		User:    NewUserService(store),
+		WebUser: NewWebUserService(store),
+		Saved:   NewSavedService(store),
 	}, nil
 }

@@ -43,7 +43,7 @@ func Test_CreateWebUser(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserDbService(&store.Store{WebUser: webUserRepo})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
 		tt.mock(webUserRepo)
 
 		err := webUserService.CreateWebUser(tt.input)
@@ -100,7 +100,7 @@ func Test_GetWebUserByID(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserDbService(&store.Store{WebUser: webUserRepo})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
 		tt.mock(webUserRepo)
 
 		got, err := webUserService.GetWebUserByID(tt.input)
@@ -160,7 +160,7 @@ func Test_GetWebUserByEmail(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserDbService(&store.Store{WebUser: webUserRepo})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
 		tt.mock(webUserRepo)
 
 		got, err := webUserService.GetWebUserByEmail(tt.input)

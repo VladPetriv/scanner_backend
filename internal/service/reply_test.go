@@ -46,7 +46,7 @@ func Test_CreateReply(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		replyRepo := &mocks.ReplyRepo{}
-		replyService := service.NewReplyDBService(&store.Store{Reply: replyRepo})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo})
 		tt.mock(replyRepo)
 
 		err := replyService.CreateReply(tt.input)
@@ -110,7 +110,7 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		replyRepo := &mocks.ReplyRepo{}
-		replyService := service.NewReplyDBService(&store.Store{Reply: replyRepo})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo})
 		tt.mock(replyRepo)
 
 		got, err := replyService.GetFullRepliesByMessageID(tt.input)

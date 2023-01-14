@@ -68,7 +68,7 @@ func Test_CreateUser(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		userRepo := &mocks.UserRepo{}
-		userService := service.NewUserDBService(&store.Store{User: userRepo})
+		userService := service.NewUserService(&store.Store{User: userRepo})
 		tt.mock(userRepo)
 
 		got, err := userService.CreateUser(tt.input)
@@ -126,7 +126,7 @@ func Test_GetUserByUsername(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		userRepo := &mocks.UserRepo{}
-		userService := service.NewUserDBService(&store.Store{User: userRepo})
+		userService := service.NewUserService(&store.Store{User: userRepo})
 		tt.mock(userRepo)
 
 		got, err := userService.GetUserByUsername(tt.input)
@@ -184,7 +184,7 @@ func Test_GetUserByID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		userRepo := &mocks.UserRepo{}
-		userService := service.NewUserDBService(&store.Store{User: userRepo})
+		userService := service.NewUserService(&store.Store{User: userRepo})
 		tt.mock(userRepo)
 
 		got, err := userService.GetUserByID(tt.input)

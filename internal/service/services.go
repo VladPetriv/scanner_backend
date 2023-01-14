@@ -43,3 +43,5 @@ type SavedService interface {
 	CreateSavedMessage(saved *model.Saved) error
 	DeleteSavedMessage(ID int) error
 }
+
+type AuthService interface{}

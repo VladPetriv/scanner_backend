@@ -66,7 +66,7 @@ func Test_CreateChannel(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		err := channelService.CreateChannel(tt.input)
@@ -120,7 +120,7 @@ func Test_GetChannels(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannels()
@@ -189,7 +189,7 @@ func Test_GetChannelsByPage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelServie := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelServie := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelServie.GetChannelsByPage(tt.input)
@@ -248,7 +248,7 @@ func Test_GetChannelByName(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannelByName(tt.input)
@@ -299,7 +299,7 @@ func Test_GetChannelStats(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannelStats(tt.input)

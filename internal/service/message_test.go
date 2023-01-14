@@ -46,7 +46,7 @@ func Test_CreateMessage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
 		tt.mock(messageRepo)
 
 		got, err := messageService.CreateMessage(tt.input)
@@ -98,7 +98,7 @@ func Test_GetMessagesCount(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetMessagesCount()
@@ -155,7 +155,7 @@ func Test_GetMessagesLengthByChannelID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetMessagesCountByChannelID(tt.input)
@@ -216,7 +216,7 @@ func Test_GetFullMessagesByPage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessagesByPage(tt.input)
@@ -278,7 +278,7 @@ func Test_GetFullMessagesByChannelIDAndPage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessagesByChannelIDAndPage(tt.input, 1)
@@ -339,7 +339,7 @@ func Test_GetFullMessagesByUserID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessagesByUserID(tt.input)
@@ -397,7 +397,7 @@ func Test_GetFullMessagesByMessageID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageDBService(&store.Store{Message: messageRepo})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessageByMessageID(tt.input)
