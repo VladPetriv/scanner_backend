@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"testing"
 
-	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
 	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 func Test_CreateChannel(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -71,7 +71,7 @@ func Test_CreateChannel(t *testing.T) {
 }
 
 func Test_GetChannels(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -143,7 +143,7 @@ func Test_GetChannels(t *testing.T) {
 }
 
 func Test_GetChannelsByPage(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -220,7 +220,7 @@ func Test_GetChannelsByPage(t *testing.T) {
 }
 
 func Test_GetChannelByName(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -293,7 +293,7 @@ func Test_GetChannelByName(t *testing.T) {
 }
 
 func Test_GetChannelStats(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}

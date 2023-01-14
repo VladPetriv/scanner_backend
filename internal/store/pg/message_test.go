@@ -9,12 +9,12 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
 	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 func Test_CreateMessage(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -84,7 +84,7 @@ func Test_CreateMessage(t *testing.T) {
 }
 
 func Test_GetMessagesCount(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -153,7 +153,7 @@ func Test_GetMessagesCount(t *testing.T) {
 }
 
 func Test_GetMessagesCountByChannelID(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -226,7 +226,7 @@ func Test_GetMessagesCountByChannelID(t *testing.T) {
 }
 
 func Test_GetFullMessagesByPage(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -350,7 +350,7 @@ func Test_GetFullMessagesByPage(t *testing.T) {
 }
 
 func Test_GetFullMessagesByChannelIDAndPage(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -475,7 +475,7 @@ func Test_GetFullMessagesByChannelIDAndPage(t *testing.T) {
 }
 
 func Test_GetFullMessagesByUserID(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -593,7 +593,7 @@ func Test_GetFullMessagesByUserID(t *testing.T) {
 }
 
 func Test_GetFullMessageByID(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 	}

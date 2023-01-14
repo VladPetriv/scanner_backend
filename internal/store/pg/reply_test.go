@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
 	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 func Test_CreateReply(t *testing.T) {
 	t.Parallel()
 
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -77,7 +77,7 @@ func Test_CreateReply(t *testing.T) {
 func Test_GetFullRepliesByMessageID(t *testing.T) {
 	t.Parallel()
 
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}

@@ -5,15 +5,16 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 )
 
 func Test_CreateSavedMessage(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -66,7 +67,7 @@ func Test_CreateSavedMessage(t *testing.T) {
 }
 
 func Test_GetSavedMessages(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -142,7 +143,7 @@ func Test_GetSavedMessages(t *testing.T) {
 }
 
 func Test_GetSavedMessageByID(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -215,7 +216,7 @@ func Test_GetSavedMessageByID(t *testing.T) {
 }
 
 func Test_DeleteSavedMessage(t *testing.T) {
-	db, mock, err := util.CreateMock()
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
