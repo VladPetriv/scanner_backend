@@ -24,23 +24,44 @@ func Test_CreateChannel(t *testing.T) {
 		{
 			name: "CreateChannel successful",
 			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelByName", channelInput.Name).Return(nil, nil)
 				channelRepo.On("CreateChannel", channelInput).Return(nil)
 			},
 			input: channelInput,
 		},
 		{
-			name: "CreateChannel failed with some store error",
+			name: "CreateChannel failed with existed channel",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("CreateChannel", channelInput).Return(fmt.Errorf("failed to create channel: some error"))
+				channelRepo.On("GetChannelByName", channelInput.Name).Return(&model.Channel{Name: "test"}, nil)
+			},
+			input:         channelInput,
+			expectedError: service.ErrChannelExists,
+		},
+		{
+			name: "CreateChannel failed with some store error when get channel by name",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelByName", channelInput.Name).
+					Return(nil, fmt.Errorf("get channel by name: some store error"))
+			},
+			input: channelInput,
+			expectedError: fmt.Errorf(
+				"[Channel] Service.GetChannelByName error: %w",
+				fmt.Errorf("get channel by name: some store error"),
+			),
+		},
+		{
+			name: "CreateChannel failed with some store error when create channel",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelByName", channelInput.Name).Return(nil, nil)
+				channelRepo.On("CreateChannel", channelInput).Return(fmt.Errorf("create channel: some store error"))
 			},
 			input: channelInput,
 			expectedError: fmt.Errorf(
 				"[Channel] Service.CreateChannel error: %w",
-				fmt.Errorf("failed to create channel: some error"),
+				fmt.Errorf("create channel: some store error"),
 			),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Logf("running: %s", tt.name)
 
