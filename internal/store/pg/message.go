@@ -17,21 +17,18 @@ func NewMessageRepo(db *DB) *MessageRepo {
 }
 
 func (repo *MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
-	result, err := repo.db.Exec(`
-		INSERT INTO message(channel_id, user_id, title, message_url, image_url) VALUES ($1, $2, $3, $4, $5);`,
+	var id int
+
+	row := repo.db.QueryRow(`
+		INSERT INTO message(channel_id, user_id, title, message_url, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
 		message.ChannelID, message.UserID, message.Title,
 		message.MessageURL, message.ImageURL,
 	)
-	if err != nil {
+	if err := row.Scan(&id); err != nil {
 		return 0, fmt.Errorf("create message: %w", err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("create message: %w", err)
-	}
-
-	return int(id), nil
+	return id, nil
 }
 
 func (repo *MessageRepo) GetMessagesCount() (int, error) {

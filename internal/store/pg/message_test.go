@@ -34,9 +34,11 @@ func Test_CreateMessage(t *testing.T) {
 		{
 			name: "CreateMessage successful",
 			mock: func() {
-				mock.ExpectExec(
-					"INSERT INTO message(channel_id, user_id, title, message_url, image_url) VALUES ($1, $2, $3, $4, $5);",
-				).WithArgs(1, 1, "test", "test.url", "test.jpg").WillReturnResult(sqlmock.NewResult(1, 1))
+				row := sqlmock.NewRows([]string{"id"}).AddRow(1)
+
+				mock.ExpectQuery(
+					"INSERT INTO message(channel_id, user_id, title, message_url, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING id;", //nolint:lll
+				).WithArgs(1, 1, "test", "test.url", "test.jpg").WillReturnRows(row)
 			},
 			input: &model.DBMessage{ChannelID: 1, UserID: 1, Title: "test", MessageURL: "test.url", ImageURL: "test.jpg"},
 			want:  1,
@@ -44,8 +46,8 @@ func Test_CreateMessage(t *testing.T) {
 		{
 			name: "CreateMessage failed with some sql error",
 			mock: func() {
-				mock.ExpectExec(
-					"INSERT INTO message(channel_id, user_id, title, message_url, image_url) VALUES ($1, $2, $3, $4, $5);",
+				mock.ExpectQuery(
+					"INSERT INTO message(channel_id, user_id, title, message_url, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING id;", //nolint:lll
 				).WithArgs(1, 1, "test", "test.url", "test.jpg").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input: &model.DBMessage{

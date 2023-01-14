@@ -17,20 +17,17 @@ func NewUserRepo(db *DB) *UserRepo {
 }
 
 func (repo *UserRepo) CreateUser(user *model.User) (int, error) {
-	row, err := repo.db.Exec(`
-		INSERT INTO tg_user(username, fullname, image_url) VALUES ($1, $2, $3);`,
+	var id int
+
+	row := repo.db.QueryRow(`
+		INSERT INTO tg_user(username, fullname, image_url) VALUES ($1, $2, $3) RETURNING id;`,
 		user.Username, user.FullName, user.ImageURL,
 	)
-	if err != nil {
+	if err := row.Scan(&id); err != nil {
 		return 0, fmt.Errorf("create tg user: %w", err)
 	}
 
-	id, err := row.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("create tg user: %w", err)
-	}
-
-	return int(id), nil
+	return id, nil
 }
 
 func (repo *UserRepo) GetUserByUsername(username string) (*model.User, error) {

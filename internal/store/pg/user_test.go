@@ -33,9 +33,10 @@ func Test_CreateUser(t *testing.T) {
 		{
 			name: "CreateUser successful",
 			mock: func() {
-				mock.ExpectExec(`
-					INSERT INTO tg_user(username, fullname, image_url) VALUES ($1, $2, $3);`,
-				).WithArgs("test", "test test", "test.jpg").WillReturnResult(sqlmock.NewResult(1, 1))
+				row := sqlmock.NewRows([]string{"id"}).AddRow(1)
+				mock.ExpectQuery(`
+					INSERT INTO tg_user(username, fullname, image_url) VALUES ($1, $2, $3) RETURNING id;`,
+				).WithArgs("test", "test test", "test.jpg").WillReturnRows(row)
 			},
 			input: &model.User{Username: "test", FullName: "test test", ImageURL: "test.jpg"},
 			want:  1,
@@ -43,8 +44,8 @@ func Test_CreateUser(t *testing.T) {
 		{
 			name: "CreateUser failed with some sql error",
 			mock: func() {
-				mock.ExpectExec(`
-					INSERT INTO tg_user(username, fullname, image_url) VALUES ($1, $2, $3);`,
+				mock.ExpectQuery(`
+					INSERT INTO tg_user(username, fullname, image_url) VALUES ($1, $2, $3) RETURNING id;`,
 				).WithArgs("test", "test test", "test.jpg").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         &model.User{Username: "test", FullName: "test test", ImageURL: "test.jpg"},
