@@ -18,11 +18,10 @@ func Test_CreateReply(t *testing.T) {
 	replyInput := &model.DBReply{UserID: 1, MessageID: 1, Title: "test", ImageURL: "test.jpg"}
 
 	tests := []struct {
-		name    string
-		mock    func(replyRepo *mocks.ReplyRepo)
-		input   *model.DBReply
-		wantErr bool
-		err     error
+		name          string
+		mock          func(replyRepo *mocks.ReplyRepo)
+		input         *model.DBReply
+		expectedError error
 	}{
 		{
 			name: "CreateReply successful",
@@ -36,12 +35,13 @@ func Test_CreateReply(t *testing.T) {
 			mock: func(replyRepo *mocks.ReplyRepo) {
 				replyRepo.On("CreateReply", replyInput).Return(fmt.Errorf("failed to create reply: some error"))
 			},
-			input:   replyInput,
-			wantErr: true,
-			err:     fmt.Errorf("[Reply] Service.CreateReply error: %w", fmt.Errorf("failed to create reply: some error")),
+			input: replyInput,
+			expectedError: fmt.Errorf(
+				"[Reply] Service.CreateReply error: %w",
+				fmt.Errorf("failed to create reply: some error"),
+			),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Logf("running: %s", tt.name)
 
@@ -50,9 +50,9 @@ func Test_CreateReply(t *testing.T) {
 		tt.mock(replyRepo)
 
 		err := replyService.CreateReply(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.EqualValues(t, tt.err, err)
+			assert.EqualValues(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 		}
@@ -68,12 +68,11 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		mock    func(replyRepo *mocks.ReplyRepo)
-		input   int
-		want    []model.FullReply
-		wantErr bool
-		err     error
+		name          string
+		mock          func(replyRepo *mocks.ReplyRepo)
+		input         int
+		want          []model.FullReply
+		expectedError error
 	}{
 		{
 			name: "GetFullRepliesByMessageID successful",
@@ -88,18 +87,16 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 			mock: func(replyRepo *mocks.ReplyRepo) {
 				replyRepo.On("GetFullRepliesByMessageID", 1).Return(nil, nil)
 			},
-			input:   1,
-			wantErr: true,
-			err:     fmt.Errorf("replies not found"),
+			input:         1,
+			expectedError: service.ErrRepliesNotFound,
 		},
 		{
 			name: "GetFullRepliesByMessageID failed with store error",
 			mock: func(replyRepo *mocks.ReplyRepo) {
 				replyRepo.On("GetFullRepliesByMessageID", 1).Return(nil, fmt.Errorf("get full replies by message id: some error"))
 			},
-			input:   1,
-			wantErr: true,
-			err: fmt.Errorf(
+			input: 1,
+			expectedError: fmt.Errorf(
 				"[Reply] Service.GetFullRepliesByMessageID error: %w",
 				fmt.Errorf("get full replies by message id: some error"),
 			),
@@ -114,9 +111,9 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 		tt.mock(replyRepo)
 
 		got, err := replyService.GetFullRepliesByMessageID(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.Equal(t, tt.err, err)
+			assert.Equal(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
