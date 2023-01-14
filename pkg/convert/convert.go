@@ -6,8 +6,7 @@ func PageToOffset(page int) int {
 	case 1:
 		page = 0
 	default:
-		page *= 10
-		page -= 10
+		page = (page * 10) - 10 //nolint:gomnd // .
 	}
 
 	return page
