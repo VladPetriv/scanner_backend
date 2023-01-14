@@ -25,7 +25,7 @@ func NewMessageDBService(store *store.Store) *MessageDBService {
 	}
 }
 
-func (s *MessageDBService) CreateMessage(message *model.DBMessage) (int, error) {
+func (s MessageDBService) CreateMessage(message *model.DBMessage) (int, error) {
 	id, err := s.store.Message.CreateMessage(message)
 	if err != nil {
 		return id, fmt.Errorf("[Message] Service.CreateMessage error: %w", err)
@@ -34,7 +34,7 @@ func (s *MessageDBService) CreateMessage(message *model.DBMessage) (int, error) 
 	return id, nil
 }
 
-func (s *MessageDBService) GetMessagesCount() (int, error) {
+func (s MessageDBService) GetMessagesCount() (int, error) {
 	count, err := s.store.Message.GetMessagesCount()
 	if err != nil {
 		return 0, fmt.Errorf("[Message] Service.GetMessagesCount error: %w", err)
@@ -47,7 +47,7 @@ func (s *MessageDBService) GetMessagesCount() (int, error) {
 	return count, nil
 }
 
-func (s *MessageDBService) GetMessagesCountByChannelID(id int) (int, error) {
+func (s MessageDBService) GetMessagesCountByChannelID(id int) (int, error) {
 	count, err := s.store.Message.GetMessagesCountByChannelID(id)
 	if err != nil {
 		return 0, fmt.Errorf("[Message] Service.GetMessagesCountByChannelID error: %w", err)
@@ -60,7 +60,7 @@ func (s *MessageDBService) GetMessagesCountByChannelID(id int) (int, error) {
 	return count, nil
 }
 
-func (s *MessageDBService) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
+func (s MessageDBService) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
 	messages, err := s.store.Message.GetFullMessagesByPage(convert.PageToOffset(page))
 	if err != nil {
 		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByPage error: %w", err)
@@ -73,7 +73,7 @@ func (s *MessageDBService) GetFullMessagesByPage(page int) ([]model.FullMessage,
 	return messages, nil
 }
 
-func (s *MessageDBService) GetFullMessagesByChannelIDAndPage(id, page int) ([]model.FullMessage, error) {
+func (s MessageDBService) GetFullMessagesByChannelIDAndPage(id, page int) ([]model.FullMessage, error) {
 	messages, err := s.store.Message.GetFullMessagesByChannelIDAndPage(id, convert.PageToOffset(page))
 	if err != nil {
 		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByChannelIDAndPage error: %w", err)
@@ -86,7 +86,7 @@ func (s *MessageDBService) GetFullMessagesByChannelIDAndPage(id, page int) ([]mo
 	return messages, nil
 }
 
-func (s *MessageDBService) GetFullMessagesByUserID(id int) ([]model.FullMessage, error) {
+func (s MessageDBService) GetFullMessagesByUserID(id int) ([]model.FullMessage, error) {
 	messages, err := s.store.Message.GetFullMessagesByUserID(id)
 	if err != nil {
 		return nil, fmt.Errorf("[Message] Service.GetFullMessagesByUserID error: %w", err)
@@ -99,7 +99,7 @@ func (s *MessageDBService) GetFullMessagesByUserID(id int) ([]model.FullMessage,
 	return messages, nil
 }
 
-func (s *MessageDBService) GetFullMessageByMessageID(id int) (*model.FullMessage, error) {
+func (s MessageDBService) GetFullMessageByMessageID(id int) (*model.FullMessage, error) {
 	message, err := s.store.Message.GetFullMessageByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("[Message] Service.GetFullMessageByMessageID error: %w", err)

@@ -21,7 +21,7 @@ type ChannelPageData struct {
 	Pager           *pagination.Pagination
 }
 
-func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page value to int")
@@ -72,7 +72,7 @@ func (h *Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) channelPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["channel_name"]
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {

@@ -16,7 +16,7 @@ func NewChannelRepo(db *DB) *ChannelPgRepo {
 	return &ChannelPgRepo{db}
 }
 
-func (repo *ChannelPgRepo) CreateChannel(channel *model.DBChannel) error {
+func (repo ChannelPgRepo) CreateChannel(channel *model.DBChannel) error {
 	_, err := repo.db.Exec(`
 		INSERT INTO channel(name, title, image_url) VALUES ($1, $2, $3);`,
 		channel.Name, channel.Title, channel.ImageURL,
@@ -28,7 +28,7 @@ func (repo *ChannelPgRepo) CreateChannel(channel *model.DBChannel) error {
 	return nil
 }
 
-func (repo *ChannelPgRepo) GetChannels() ([]model.Channel, error) {
+func (repo ChannelPgRepo) GetChannels() ([]model.Channel, error) {
 	var channels []model.Channel
 
 	err := repo.db.Select(&channels, "SELECT * FROM channel;")
@@ -43,7 +43,7 @@ func (repo *ChannelPgRepo) GetChannels() ([]model.Channel, error) {
 	return channels, nil
 }
 
-func (repo *ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) {
+func (repo ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) {
 	var channels []model.Channel
 
 	err := repo.db.Select(&channels, "SELECT * FROM channel LIMIT 10 OFFSET $1;", page)
@@ -58,7 +58,7 @@ func (repo *ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) 
 	return channels, nil
 }
 
-func (repo *ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error) {
+func (repo ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error) {
 	var channel model.Channel
 
 	err := repo.db.Get(&channel, "SELECT * FROM channel WHERE name = $1;", name)
@@ -73,7 +73,7 @@ func (repo *ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error)
 	return &channel, nil
 }
 
-func (repo *ChannelPgRepo) GetChannelStats(channelID int) (*model.Stat, error) {
+func (repo ChannelPgRepo) GetChannelStats(channelID int) (*model.Stat, error) {
 	var sum int
 
 	stat := &model.Stat{}

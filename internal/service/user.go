@@ -18,7 +18,7 @@ func NewUserDBService(store *store.Store) *UserDBService {
 	return &UserDBService{store: store}
 }
 
-func (s *UserDBService) CreateUser(user *model.User) (int, error) {
+func (s UserDBService) CreateUser(user *model.User) (int, error) {
 	candidate, err := s.GetUserByUsername(user.Username)
 	if err != nil {
 		if !errors.Is(err, ErrUserNotFound) {
@@ -37,7 +37,7 @@ func (s *UserDBService) CreateUser(user *model.User) (int, error) {
 	return id, nil
 }
 
-func (s *UserDBService) GetUserByUsername(username string) (*model.User, error) {
+func (s UserDBService) GetUserByUsername(username string) (*model.User, error) {
 	user, err := s.store.User.GetUserByUsername(username)
 	if err != nil {
 		return nil, fmt.Errorf("[User] Service.GetUserByUsername error: %w", err)
@@ -50,7 +50,7 @@ func (s *UserDBService) GetUserByUsername(username string) (*model.User, error) 
 	return user, nil
 }
 
-func (s *UserDBService) GetUserByID(id int) (*model.User, error) {
+func (s UserDBService) GetUserByID(id int) (*model.User, error) {
 	user, err := s.store.User.GetUserByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("[User] Service.GetUserByID error: %w", err)

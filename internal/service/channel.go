@@ -25,7 +25,7 @@ func NewChannelDBService(store *store.Store) *ChannelDBService {
 	}
 }
 
-func (s *ChannelDBService) CreateChannel(channel *model.DBChannel) error {
+func (s ChannelDBService) CreateChannel(channel *model.DBChannel) error {
 	candidate, err := s.GetChannelByName(channel.Name)
 	if err != nil {
 		if !errors.Is(err, ErrChannelNotFound) {
@@ -44,7 +44,7 @@ func (s *ChannelDBService) CreateChannel(channel *model.DBChannel) error {
 	return nil
 }
 
-func (s *ChannelDBService) GetChannels() ([]model.Channel, error) {
+func (s ChannelDBService) GetChannels() ([]model.Channel, error) {
 	channels, err := s.store.Channel.GetChannels()
 	if err != nil {
 		return nil, fmt.Errorf("[Channel] Service.GetChannels error: %w", err)
@@ -57,7 +57,7 @@ func (s *ChannelDBService) GetChannels() ([]model.Channel, error) {
 	return channels, nil
 }
 
-func (s *ChannelDBService) GetChannelsByPage(page int) ([]model.Channel, error) {
+func (s ChannelDBService) GetChannelsByPage(page int) ([]model.Channel, error) {
 	channels, err := s.store.Channel.GetChannelsByPage(convert.PageToOffset(page))
 	if err != nil {
 		return nil, fmt.Errorf("[Channel] Service.GetChannelsByPage error: %w", err)
@@ -70,7 +70,7 @@ func (s *ChannelDBService) GetChannelsByPage(page int) ([]model.Channel, error) 
 	return channels, nil
 }
 
-func (s *ChannelDBService) GetChannelByName(name string) (*model.Channel, error) {
+func (s ChannelDBService) GetChannelByName(name string) (*model.Channel, error) {
 	channel, err := s.store.Channel.GetChannelByName(name)
 	if err != nil {
 		return nil, fmt.Errorf("[Channel] Service.GetChannelByName error: %w", err)
@@ -83,7 +83,7 @@ func (s *ChannelDBService) GetChannelByName(name string) (*model.Channel, error)
 	return channel, nil
 }
 
-func (s *ChannelDBService) GetChannelStats(channelID int) (*model.Stat, error) {
+func (s ChannelDBService) GetChannelStats(channelID int) (*model.Stat, error) {
 	stat, err := s.store.Channel.GetChannelStats(channelID)
 	if err != nil {
 		return nil, fmt.Errorf("[Channel] Service.GetChannelStats error: %w", err)

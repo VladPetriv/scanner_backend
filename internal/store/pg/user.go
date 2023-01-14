@@ -16,7 +16,7 @@ func NewUserRepo(db *DB) *UserRepo {
 	return &UserRepo{db: db}
 }
 
-func (repo *UserRepo) CreateUser(user *model.User) (int, error) {
+func (repo UserRepo) CreateUser(user *model.User) (int, error) {
 	var id int
 
 	row := repo.db.QueryRow(`
@@ -30,7 +30,7 @@ func (repo *UserRepo) CreateUser(user *model.User) (int, error) {
 	return id, nil
 }
 
-func (repo *UserRepo) GetUserByUsername(username string) (*model.User, error) {
+func (repo UserRepo) GetUserByUsername(username string) (*model.User, error) {
 	var user model.User
 
 	err := repo.db.Get(&user, "SELECT * FROM tg_user WHERE username = $1;", username)
@@ -45,7 +45,7 @@ func (repo *UserRepo) GetUserByUsername(username string) (*model.User, error) {
 	return &user, nil
 }
 
-func (repo *UserRepo) GetUserByID(id int) (*model.User, error) {
+func (repo UserRepo) GetUserByID(id int) (*model.User, error) {
 	var user model.User
 
 	err := repo.db.Get(&user, "SELECT * FROM tg_user WHERE id = $1;", id)

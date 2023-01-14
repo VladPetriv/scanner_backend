@@ -17,7 +17,7 @@ type SavedPageData struct {
 	MessagesLength  int
 }
 
-func (h *Handler) savedPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
@@ -72,7 +72,7 @@ func (h *Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
@@ -98,7 +98,7 @@ func (h *Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/saved/%d", user.ID), http.StatusFound)
 }
 
-func (h *Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 	savedID, err := strconv.Atoi(mux.Vars(r)["saved_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert saved message id to int")

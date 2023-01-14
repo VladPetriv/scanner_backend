@@ -16,7 +16,7 @@ func NewMessageRepo(db *DB) *MessageRepo {
 	return &MessageRepo{db: db}
 }
 
-func (repo *MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
+func (repo MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
 	var id int
 
 	row := repo.db.QueryRow(`
@@ -31,7 +31,7 @@ func (repo *MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
 	return id, nil
 }
 
-func (repo *MessageRepo) GetMessagesCount() (int, error) {
+func (repo MessageRepo) GetMessagesCount() (int, error) {
 	var count int
 
 	err := repo.db.Get(&count, "SELECT COUNT(*) FROM message;")
@@ -46,7 +46,7 @@ func (repo *MessageRepo) GetMessagesCount() (int, error) {
 	return count, nil
 }
 
-func (repo *MessageRepo) GetMessagesCountByChannelID(channelID int) (int, error) {
+func (repo MessageRepo) GetMessagesCountByChannelID(channelID int) (int, error) {
 	var count int
 
 	err := repo.db.Get(
@@ -65,7 +65,7 @@ func (repo *MessageRepo) GetMessagesCountByChannelID(channelID int) (int, error)
 	return count, nil
 }
 
-func (repo *MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
+func (repo MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
 	var messages []model.FullMessage
 
 	err := repo.db.Select(
@@ -91,7 +91,7 @@ func (repo *MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, e
 	return messages, nil
 }
 
-func (repo *MessageRepo) GetFullMessagesByChannelIDAndPage(channelID, page int) ([]model.FullMessage, error) {
+func (repo MessageRepo) GetFullMessagesByChannelIDAndPage(channelID, page int) ([]model.FullMessage, error) {
 	var messages []model.FullMessage
 
 	err := repo.db.Select(
@@ -118,7 +118,7 @@ func (repo *MessageRepo) GetFullMessagesByChannelIDAndPage(channelID, page int) 
 	return messages, nil
 }
 
-func (repo *MessageRepo) GetFullMessagesByUserID(id int) ([]model.FullMessage, error) {
+func (repo MessageRepo) GetFullMessagesByUserID(id int) ([]model.FullMessage, error) {
 	var messages []model.FullMessage
 
 	err := repo.db.Select(
@@ -144,7 +144,7 @@ func (repo *MessageRepo) GetFullMessagesByUserID(id int) ([]model.FullMessage, e
 	return messages, nil
 }
 
-func (repo *MessageRepo) GetFullMessageByID(messageID int) (*model.FullMessage, error) {
+func (repo MessageRepo) GetFullMessageByID(messageID int) (*model.FullMessage, error) {
 	var message model.FullMessage
 
 	err := repo.db.Get(

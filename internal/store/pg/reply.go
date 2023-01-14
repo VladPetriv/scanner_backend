@@ -14,7 +14,7 @@ func NewReplyRepo(db *DB) *ReplyRepo {
 	return &ReplyRepo{db: db}
 }
 
-func (repo *ReplyRepo) CreateReply(reply *model.DBReply) error {
+func (repo ReplyRepo) CreateReply(reply *model.DBReply) error {
 	_, err := repo.db.Exec(`
 		INSERT INTO reply(user_id, message_id, title, image_url) VALUES ($1, $2, $3, $4);`,
 		reply.UserID, reply.MessageID, reply.Title, reply.ImageURL,
@@ -26,7 +26,7 @@ func (repo *ReplyRepo) CreateReply(reply *model.DBReply) error {
 	return nil
 }
 
-func (repo *ReplyRepo) GetFullRepliesByMessageID(messageID int) ([]model.FullReply, error) {
+func (repo ReplyRepo) GetFullRepliesByMessageID(messageID int) ([]model.FullReply, error) {
 	var replies []model.FullReply
 
 	err := repo.db.Select(

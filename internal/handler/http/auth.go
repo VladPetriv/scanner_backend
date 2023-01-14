@@ -13,7 +13,7 @@ type AuthPageData struct {
 	Message string
 }
 
-func (h *Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
 	data := AuthPageData{
 		Title: "Registration",
 	}
@@ -25,7 +25,7 @@ func (h *Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) loginPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) loginPage(w http.ResponseWriter, r *http.Request) {
 	data := AuthPageData{
 		Title: "login",
 	}
@@ -37,7 +37,7 @@ func (h *Handler) loginPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
+func (h Handler) registration(w http.ResponseWriter, r *http.Request) {
 	u := h.getUserFromForm(r)
 
 	candidate, err := h.service.WebUser.GetWebUserByEmail(u.Email)
@@ -67,7 +67,7 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/auth/login", http.StatusFound)
 }
 
-func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
+func (h Handler) login(w http.ResponseWriter, r *http.Request) {
 	u := h.getUserFromForm(r)
 
 	candidate, err := h.service.WebUser.GetWebUserByEmail(u.Email)
@@ -101,7 +101,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) logout(w http.ResponseWriter, r *http.Request) {
+func (h Handler) logout(w http.ResponseWriter, r *http.Request) {
 	h.removeFromSessionStore(w, r)
 
 	http.Redirect(w, r, "/home", http.StatusMovedPermanently)

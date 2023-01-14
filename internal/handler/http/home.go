@@ -19,7 +19,7 @@ type HomePageData struct {
 	Pager           *pagination.Pagination
 }
 
-func (h *Handler) homePage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 
 	navBarChannels, err := h.service.Channel.GetChannels()

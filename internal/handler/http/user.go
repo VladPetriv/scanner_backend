@@ -18,7 +18,7 @@ type UserPageData struct {
 	MessagesLength  int
 }
 
-func (h *Handler) userPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) userPage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("covert user id to int")

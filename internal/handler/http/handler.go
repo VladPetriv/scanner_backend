@@ -45,7 +45,7 @@ func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
 	}
 }
 
-func (h *Handler) InitRouter() *mux.Router {
+func (h Handler) InitRouter() *mux.Router {
 	router := mux.NewRouter()
 
 	home := router.PathPrefix("/").Subrouter()
@@ -79,7 +79,7 @@ func (h *Handler) InitRouter() *mux.Router {
 	return router
 }
 
-func (h *Handler) logAllRoutes(router *mux.Router) {
+func (h Handler) logAllRoutes(router *mux.Router) {
 	router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()
 		if err != nil {

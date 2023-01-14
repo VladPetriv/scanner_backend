@@ -16,7 +16,7 @@ type MessagePageData struct {
 	Message         model.FullMessage
 }
 
-func (h *Handler) messagePage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 	messageID, err := strconv.Atoi(mux.Vars(r)["message_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message_id to int")
