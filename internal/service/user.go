@@ -20,10 +20,11 @@ func NewUserDBService(store *store.Store) *UserDBService {
 
 func (s *UserDBService) CreateUser(user *model.User) (int, error) {
 	candidate, err := s.GetUserByUsername(user.Username)
-	if err != nil && !errors.Is(err, ErrUserNotFound) {
-		return 0, err
+	if err != nil {
+		if !errors.Is(err, ErrUserNotFound) {
+			return 0, err
+		}
 	}
-
 	if candidate != nil {
 		return candidate.ID, nil
 	}

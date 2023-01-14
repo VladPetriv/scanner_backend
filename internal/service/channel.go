@@ -12,6 +12,7 @@ import (
 var (
 	ErrChannelsNotFound = errors.New("channels not found")
 	ErrChannelNotFound  = errors.New("channel not found")
+	ErrChannelExists    = errors.New("channel is exist")
 )
 
 type ChannelDBService struct {
@@ -25,7 +26,17 @@ func NewChannelDBService(store *store.Store) *ChannelDBService {
 }
 
 func (s *ChannelDBService) CreateChannel(channel *model.DBChannel) error {
-	err := s.store.Channel.CreateChannel(channel)
+	candidate, err := s.GetChannelByName(channel.Name)
+	if err != nil {
+		if !errors.Is(err, ErrChannelNotFound) {
+			return err
+		}
+	}
+	if candidate != nil {
+		return ErrChannelExists
+	}
+
+	err = s.store.Channel.CreateChannel(channel)
 	if err != nil {
 		return fmt.Errorf("[Channel] Service.CreateChannel error: %w", err)
 	}
