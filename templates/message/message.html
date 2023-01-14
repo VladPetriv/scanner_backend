@@ -75,7 +75,7 @@
     </div>
 
 
-    {{ if eq .Message.ReplieCount 0 }}
+    {{ if eq .Message.RepliesCount 0 }}
     <h4 class="mt-4">
       <span class="text-muted" itemprop="answerCount">
         No replies found)
@@ -84,7 +84,7 @@
     {{ else }}
     <h4 class="mt-4">
       <span class="text-muted" itemprop="answerCount">
-        {{ .Message.ReplieCount }} </span>
+        {{ .Message.RepliesCount }} </span>
       replies
     </h4>
     {{ $author := .Message.FullName }}
