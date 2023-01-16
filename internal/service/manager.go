@@ -13,6 +13,7 @@ type Manager struct {
 	User    UserService
 	WebUser WebUserService
 	Saved   SavedService
+	Auth    AuthService
 }
 
 func NewManager(store *store.Store) (*Manager, error) {
@@ -20,12 +21,15 @@ func NewManager(store *store.Store) (*Manager, error) {
 		return nil, fmt.Errorf("no store provided")
 	}
 
-	return &Manager{
+	srvManager := &Manager{
 		Channel: NewChannelService(store),
 		Message: NewMessageService(store),
 		Reply:   NewReplyService(store),
 		User:    NewUserService(store),
 		WebUser: NewWebUserService(store),
 		Saved:   NewSavedService(store),
-	}, nil
+	}
+	srvManager.Auth = NewAuthService(srvManager.WebUser)
+
+	return srvManager, nil
 }

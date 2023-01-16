@@ -70,3 +70,13 @@ type WebUserService interface {
 }
 
 var ErrWebUserNotFound = errors.New("web user not found")
+
+type AuthService interface {
+	Login(email string, userPassword string) (string, error)
+	Register(user *model.WebUser) error
+}
+
+var (
+	ErrIncorrectPassword = errors.New("incorrect password")
+	ErrWebUserIsExist    = errors.New("web user is exist")
+)

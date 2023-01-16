@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 
-	"github.com/VladPetriv/scanner_backend/pkg/password"
+	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
 type AuthPageData struct {
@@ -13,7 +14,7 @@ type AuthPageData struct {
 	Message string
 }
 
-func (h Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) loadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 	data := AuthPageData{
 		Title: "Registration",
 	}
@@ -21,11 +22,11 @@ func (h Handler) registrationPage(w http.ResponseWriter, r *http.Request) {
 	h.tmpTree["register"] = template.Must(template.ParseFiles("templates/auth/register.html"))
 	err := h.tmpTree["register"].Execute(w, data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute registration templates")
+		h.log.Error().Err(err).Msg("load register page")
 	}
 }
 
-func (h Handler) loginPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) loadLoginPage(w http.ResponseWriter, r *http.Request) {
 	data := AuthPageData{
 		Title: "login",
 	}
@@ -33,69 +34,63 @@ func (h Handler) loginPage(w http.ResponseWriter, r *http.Request) {
 	h.tmpTree["login"] = template.Must(template.ParseFiles("templates/auth/login.html"))
 	err := h.tmpTree["login"].Execute(w, data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute login templates")
+		h.log.Error().Err(err).Msg("load login page")
 	}
 }
 
 func (h Handler) registration(w http.ResponseWriter, r *http.Request) {
-	u := h.getUserFromForm(r)
-
-	candidate, err := h.service.WebUser.GetWebUserByEmail(u.Email)
-	if candidate != nil && err == nil {
-		h.tmpTree["register"].Execute(
-			w,
-			AuthPageData{Title: "Registration", Message: fmt.Sprintf("User with email %s is exist", u.Email)},
-		)
+	authPageData := AuthPageData{
+		Title: "Registration",
 	}
 
-	hashedPassword, err := password.HashPassword(u.Password)
-	if err != nil {
-		h.log.Error().Err(err).Msg("hash password")
-	}
+	user := h.getUserFromForm(r)
 
-	u.Password = hashedPassword
-
-	err = h.service.WebUser.CreateWebUser(u)
+	err := h.service.Auth.Register(user)
 	if err != nil {
-		h.tmpTree["register"].Execute(
-			w,
-			AuthPageData{Title: "Registration", Message: "Error while creating user. Please try again later!"},
-		)
-		h.log.Error().Err(err).Msg("execute registration template")
+		switch {
+		case errors.Is(err, service.ErrWebUserIsExist):
+			authPageData.Message = fmt.Sprintf("User with email %s is exist!", user.Email)
+		default:
+			authPageData.Message = "Failed to register new user!"
+		}
+		err = h.tmpTree["register"].Execute(w, authPageData)
+		if err != nil {
+			h.log.Error().Err(err).Msg("execute register template")
+		}
 	}
 
 	http.Redirect(w, r, "/auth/login", http.StatusFound)
 }
 
 func (h Handler) login(w http.ResponseWriter, r *http.Request) {
-	u := h.getUserFromForm(r)
-
-	candidate, err := h.service.WebUser.GetWebUserByEmail(u.Email)
-	if err != nil {
-		h.log.Error().Err(err).Msg("get user by email")
+	authPageData := AuthPageData{
+		Title: "Login",
 	}
 
-	if candidate == nil {
-		err = h.tmpTree["login"].Execute(
-			w,
-			AuthPageData{Title: "Login", Message: fmt.Sprintf("User with email %s not found", u.Email)},
-		)
-		if err != nil {
-			h.log.Error().Err(err).Msg("execute login template")
+	user := h.getUserFromForm(r)
+
+	email, err := h.service.Auth.Login(user.Email, user.Password)
+	if err != nil {
+		switch {
+		case errors.Is(err, service.ErrWebUserNotFound):
+			authPageData.Message = fmt.Sprintf("User with email %s not found!", user.Email)
+		case errors.Is(err, service.ErrIncorrectPassword):
+			authPageData.Message = "User password is incorrect!"
+		default:
+			authPageData.Message = "Failed to login!"
+			h.log.Error().Err(err).Msg("login user")
 		}
 	}
 
-	if password.ComparePassword(u.Password, candidate.Password) {
-		h.writeToSessionStore(w, r, u.Email)
+	if email != "" {
+		h.writeToSessionStore(w, r, email)
 
 		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+
 		return
 	}
 
-	err = h.tmpTree["login"].Execute(
-		w,
-		AuthPageData{Title: "Login", Message: "User password is incorrect!"},
-	)
+	err = h.tmpTree["login"].Execute(w, authPageData)
 	if err != nil {
 		h.log.Error().Err(err).Msg("execute login template")
 	}
