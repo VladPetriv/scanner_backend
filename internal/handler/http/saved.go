@@ -35,7 +35,7 @@ func (h Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
@@ -51,16 +51,14 @@ func (h Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 		messages = append(messages, *fullMessage)
 	}
 
-	webUserID, webUserEmail := util.ProcessWebUserData(user)
-
 	data := SavedPageData{
 		DefaultPageData: PageData{
 			Type:           "saved",
 			Title:          "Saved user messages",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   webUserEmail,
-			WebUserID:      webUserID,
+			WebUserEmail:   user.Email,
+			WebUserID:      user.ID,
 		},
 		Messages:       messages,
 		MessagesLength: len(messages),
@@ -82,7 +80,7 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("convert message id to int")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
@@ -104,7 +102,7 @@ func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("convert saved message id to int")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}

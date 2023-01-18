@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,6 +10,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
+
+const channelsPerPage = 10
 
 type ChannelPageData struct {
 	DefaultPageData PageData
@@ -37,7 +38,7 @@ func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get channels by page")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
@@ -51,19 +52,17 @@ func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		channels[index].Stats = *stat
 	}
 
-	webUserID, webUserEmail := util.ProcessWebUserData(user)
-
 	data := ChannelPageData{
 		DefaultPageData: PageData{
 			Title:          "Telegram channels",
 			Type:           "channels",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   webUserEmail,
-			WebUserID:      webUserID,
+			WebUserEmail:   user.Email,
+			WebUserID:      user.ID,
 		},
 		Channels: channels,
-		Pager:    pagination.New(len(navBarChannels), 10, page, "/channel/?page=2"),
+		Pager:    pagination.New(len(navBarChannels), channelsPerPage, page, "/channel/?page=2"),
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
@@ -74,6 +73,7 @@ func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["channel_name"]
+
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page to int")
@@ -99,12 +99,10 @@ func (h Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get full messages by channel id and page")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
-
-	webUserID, webUserEmail := util.ProcessWebUserData(user)
 
 	data := ChannelPageData{
 		DefaultPageData: PageData{
@@ -112,13 +110,13 @@ func (h Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 			Title:          "Telegram channel",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   webUserEmail,
-			WebUserID:      webUserID,
+			WebUserEmail:   user.Email,
+			WebUserID:      user.ID,
 		},
 		Channel:        *channel,
 		Messages:       messages,
 		MessagesLength: count,
-		Pager:          pagination.New(count, 10, page, "/channel/ru_python/?page=0"),
+		Pager:          pagination.New(count, channelsPerPage, page, "/channel/ru_python/?page=0"),
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -11,6 +10,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
+
+const messagesPerPage = 10
 
 type HomePageData struct {
 	DefaultPageData PageData
@@ -37,14 +38,12 @@ func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get full messages by page")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
-	messages = checkMessagesStatus(messages, h.service)
-
-	webUserID, webUserEmail := util.ProcessWebUserData(user)
+	messages = updateMessagesStatuses(messages, h.service)
 
 	data := HomePageData{
 		DefaultPageData: PageData{
@@ -52,12 +51,12 @@ func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
 			Type:           "messages",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   webUserEmail,
-			WebUserID:      webUserID,
+			WebUserEmail:   user.Email,
+			WebUserID:      user.ID,
 		},
 		Messages:       messages,
 		MessagesLength: messagesCount,
-		Pager:          pagination.New(messagesCount, 10, page, "/home/?page=0"),
+		Pager:          pagination.New(messagesCount, messagesPerPage, page, "/home/?page=0"),
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
@@ -66,8 +65,8 @@ func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func checkMessagesStatus(messages []model.FullMessage, manager *service.Manager) []model.FullMessage {
-	result := make([]model.FullMessage, 0)
+func updateMessagesStatuses(messages []model.FullMessage, manager *service.Manager) []model.FullMessage {
+	var result []model.FullMessage
 
 	for _, message := range messages {
 		saved, err := manager.Saved.GetSavedMessageByMessageID(message.ID)

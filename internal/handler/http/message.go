@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -37,14 +36,12 @@ func (h Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get full replies by message id")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
 	message.Replies = replies
-
-	webUserID, webUserEmail := util.ProcessWebUserData(user)
 
 	data := MessagePageData{
 		DefaultPageData: PageData{
@@ -52,8 +49,8 @@ func (h Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 			Title:          "Telegram message",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   webUserEmail,
-			WebUserID:      webUserID,
+			WebUserEmail:   user.Email,
+			WebUserID:      user.ID,
 		},
 		Message: *message,
 	}

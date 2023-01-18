@@ -83,7 +83,7 @@ func (h Handler) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if email != "" {
-		h.writeToSessionStore(w, r, email)
+		h.addUserToSession(w, r, email)
 
 		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 
@@ -97,7 +97,7 @@ func (h Handler) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) logout(w http.ResponseWriter, r *http.Request) {
-	h.removeFromSessionStore(w, r)
+	h.deleteSavedMessage(w, r)
 
 	http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 }

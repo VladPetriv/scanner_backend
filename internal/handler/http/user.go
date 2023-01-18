@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -22,9 +21,12 @@ func (h Handler) userPage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("covert user id to int")
+
+		http.Redirect(w, r, "/home", http.StatusNotFound)
+		return
 	}
 
-	user, err := h.service.User.GetUserByID(userID)
+	tgUser, err := h.service.User.GetUserByID(userID)
 	if err != nil {
 		h.log.Error().Err(err).Msg("get user by id")
 	}
@@ -34,17 +36,15 @@ func (h Handler) userPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
 
-	messages, err := h.service.Message.GetFullMessagesByUserID(user.ID)
+	messages, err := h.service.Message.GetFullMessagesByUserID(tgUser.ID)
 	if err != nil {
 		h.log.Error().Err(err).Msg("get full messages by user id")
 	}
 
-	webUser, err := h.service.WebUser.GetWebUserByEmail(fmt.Sprint(h.checkUserStatus(r)))
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
-
-	webUserID, webUserEmail := util.ProcessWebUserData(webUser)
 
 	data := UserPageData{
 		DefaultPageData: PageData{
@@ -52,10 +52,10 @@ func (h Handler) userPage(w http.ResponseWriter, r *http.Request) {
 			Title:          "Telegram User",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   webUserEmail,
-			WebUserID:      webUserID,
+			WebUserEmail:   user.Email,
+			WebUserID:      user.ID,
 		},
-		User:           *user,
+		User:           *tgUser,
 		Messages:       messages,
 		MessagesLength: len(messages),
 	}

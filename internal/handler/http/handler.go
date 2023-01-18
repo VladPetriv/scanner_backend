@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -29,7 +30,7 @@ type PageData struct {
 	WebUserID      int
 }
 
-func NewHandler(serviceManager *service.Manager, log *logger.Logger) *Handler {
+func NewHandler(serviceManager *service.Manager, cookieStoreSecret string, log *logger.Logger) *Handler {
 	return &Handler{
 		store:   sessions.NewCookieStore([]byte("secret")),
 		service: serviceManager,
@@ -82,7 +83,7 @@ func (h Handler) InitRouter() *mux.Router {
 }
 
 func (h Handler) logAllRoutes(router *mux.Router) {
-	err := router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
+	err := router.Walk(func(route *mux.Route, _ *mux.Router, _ []*mux.Route) error {
 		tpl, err := route.GetPathTemplate()
 		if err != nil {
 			h.log.Error().Err(err).Msg("get template path")
@@ -102,34 +103,35 @@ func (h Handler) logAllRoutes(router *mux.Router) {
 	}
 }
 
-func (h *Handler) checkUserStatus(r *http.Request) interface{} {
-	sessions, err := h.store.Get(r, "session")
+func (h Handler) getUserFromSession(r *http.Request) string {
+	session, err := h.store.Get(r, "session")
 	if err != nil {
 		h.log.Error().Err(err).Msg("get user session")
 	}
 
-	email, ok := sessions.Values["userEmail"]
+	email, ok := session.Values["userEmail"]
 	if ok {
-		return email
+		return fmt.Sprintf("%v", email)
 	}
 
 	return ""
 }
 
-func (h *Handler) writeToSessionStore(w http.ResponseWriter, r *http.Request, value interface{}) {
+func (h Handler) addUserToSession(w http.ResponseWriter, r *http.Request, value interface{}) {
 	session, err := h.store.Get(r, "session")
 	if err != nil {
 		h.log.Error().Err(err).Msg("get user session")
 	}
 
 	session.Values["userEmail"] = value
+
 	err = session.Save(r, w)
 	if err != nil {
 		h.log.Error().Err(err).Msg("save user session")
 	}
 }
 
-func (h *Handler) removeFromSessionStore(w http.ResponseWriter, r *http.Request) {
+func (h Handler) removeUserFromSession(w http.ResponseWriter, r *http.Request) {
 	session, err := h.store.Get(r, "session")
 	if err != nil {
 		h.log.Error().Err(err).Msg("get user session")
@@ -139,15 +141,14 @@ func (h *Handler) removeFromSessionStore(w http.ResponseWriter, r *http.Request)
 
 	err = session.Save(r, w)
 	if err != nil {
-		h.log.Error().Err(err).Msg("save session")
+		h.log.Error().Err(err).Msg("save user session")
 	}
 }
 
-func (h *Handler) getUserFromForm(r *http.Request) *model.WebUser {
+func (h Handler) getUserFromForm(r *http.Request) *model.WebUser {
 	err := r.ParseForm()
-
 	if err != nil {
-		h.log.Error().Err(err).Msg("get form")
+		h.log.Error().Err(err).Msg("parse form")
 	}
 
 	user := &model.WebUser{

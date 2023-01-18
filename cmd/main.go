@@ -38,7 +38,7 @@ func main() {
 
 	srv := new(server.Server)
 
-	httpHandler := handler.NewHandler(serviceManger, log)
+	httpHandler := handler.NewHandler(serviceManger, cfg.CookieSecret, log)
 
 	log.Info().Msgf("starting server at port: %s", cfg.Port)
 
