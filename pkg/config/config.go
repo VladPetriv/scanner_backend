@@ -18,6 +18,7 @@ type Config struct {
 	LogLevel       string
 	LogFilename    string
 	KafkaAddr      string
+	CookieSecret   string
 }
 
 func Get() (*Config, error) {
@@ -36,5 +37,6 @@ func Get() (*Config, error) {
 		LogLevel:       os.Getenv("LOG_LEVEL"),
 		LogFilename:    os.Getenv("LOG_FILENAME"),
 		KafkaAddr:      os.Getenv("KAFKA_ADDR"),
+		CookieSecret:   os.Getenv("COOKIE_SECRET"),
 	}, nil
 }
