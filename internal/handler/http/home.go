@@ -51,12 +51,16 @@ func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
 			Type:           "messages",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   user.Email,
-			WebUserID:      user.ID,
+			WebUserEmail:   "",
+			WebUserID:      0,
 		},
 		Messages:       messages,
 		MessagesLength: messagesCount,
 		Pager:          pagination.New(messagesCount, messagesPerPage, page, "/home/?page=0"),
+	}
+	if user != nil {
+		data.DefaultPageData.WebUserEmail = user.Email
+		data.DefaultPageData.WebUserID = user.ID
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)

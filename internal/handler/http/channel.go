@@ -58,11 +58,15 @@ func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 			Type:           "channels",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   user.Email,
-			WebUserID:      user.ID,
+			WebUserEmail:   "",
+			WebUserID:      0,
 		},
 		Channels: channels,
 		Pager:    pagination.New(len(navBarChannels), channelsPerPage, page, "/channel/?page=2"),
+	}
+	if user != nil {
+		data.DefaultPageData.WebUserEmail = user.Email
+		data.DefaultPageData.WebUserID = user.ID
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)

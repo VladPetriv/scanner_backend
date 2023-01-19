@@ -52,12 +52,16 @@ func (h Handler) userPage(w http.ResponseWriter, r *http.Request) {
 			Title:          "Telegram User",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   user.Email,
-			WebUserID:      user.ID,
+			WebUserEmail:   "",
+			WebUserID:      0,
 		},
 		User:           *tgUser,
 		Messages:       messages,
 		MessagesLength: len(messages),
+	}
+	if user != nil {
+		data.DefaultPageData.WebUserEmail = user.Email
+		data.DefaultPageData.WebUserID = user.ID
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
