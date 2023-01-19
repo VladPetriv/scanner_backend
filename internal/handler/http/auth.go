@@ -97,7 +97,7 @@ func (h Handler) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) logout(w http.ResponseWriter, r *http.Request) {
-	h.deleteSavedMessage(w, r)
+	h.removeUserFromSession(w, r)
 
 	http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 }
