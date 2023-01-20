@@ -17,13 +17,13 @@ type SavedPageData struct {
 	MessagesLength  int
 }
 
-func (h Handler) savedPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
 	}
 
-	messages := make([]model.FullMessage, 0)
+	var messages []model.FullMessage
 
 	savedMessages, err := h.service.Saved.GetSavedMessages(userID)
 	if err != nil {
@@ -35,20 +35,22 @@ func (h Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
-	if err != nil {
-		h.log.Error().Err(err).Msg("get web user by email")
-	}
-
 	for _, msg := range savedMessages {
 		fullMessage, err := h.service.Message.GetFullMessageByMessageID(msg.MessageID)
 		if err != nil {
 			h.log.Error().Err(err).Msg("get full message by message id")
+
+			continue
 		}
 
 		fullMessage.SavedID = msg.ID
 
 		messages = append(messages, *fullMessage)
+	}
+
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
+	if err != nil {
+		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
 	data := SavedPageData{
@@ -70,7 +72,7 @@ func (h Handler) savedPage(w http.ResponseWriter, r *http.Request) {
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute save page")
+		h.log.Error().Err(err).Msg("load saved messages page")
 	}
 }
 
@@ -79,6 +81,7 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
 	}
+
 	messageID, err := strconv.Atoi(mux.Vars(r)["message_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message id to int")
@@ -97,11 +100,11 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/saved/%d", user.ID), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/saved/%v", user.ID), http.StatusFound)
 }
 
 func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
-	savedID, err := strconv.Atoi(mux.Vars(r)["saved_id"])
+	id, err := strconv.Atoi(mux.Vars(r)["saved_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert saved message id to int")
 	}
@@ -111,7 +114,7 @@ func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
-	err = h.service.Saved.DeleteSavedMessage(savedID)
+	err = h.service.Saved.DeleteSavedMessage(id)
 	if err != nil {
 		h.log.Error().Err(err).Msg("delete saved message")
 	}

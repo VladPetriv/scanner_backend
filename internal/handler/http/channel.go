@@ -22,7 +22,7 @@ type ChannelPageData struct {
 	Pager           *pagination.Pagination
 }
 
-func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) loadChannelsPage(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page value to int")
@@ -38,18 +38,20 @@ func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get channels by page")
 	}
 
-	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
-	if err != nil {
-		h.log.Error().Err(err).Msg("get web user by email")
-	}
-
 	for index, channel := range channels {
 		stat, err := h.service.Channel.GetChannelStats(channel.ID)
 		if err != nil {
 			h.log.Error().Err(err).Msg("get channel stats")
+
+			continue
 		}
 
 		channels[index].Stats = *stat
+	}
+
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
+	if err != nil {
+		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
 	data := ChannelPageData{
@@ -71,11 +73,11 @@ func (h Handler) channelsPage(w http.ResponseWriter, r *http.Request) {
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute base template")
+		h.log.Error().Err(err).Msg("load channels page")
 	}
 }
 
-func (h Handler) channelPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) loadChannelPage(w http.ResponseWriter, r *http.Request) {
 	name := mux.Vars(r)["channel_name"]
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
@@ -114,17 +116,21 @@ func (h Handler) channelPage(w http.ResponseWriter, r *http.Request) {
 			Title:          "Telegram channel",
 			Channels:       util.ProcessChannels(navBarChannels),
 			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   user.Email,
-			WebUserID:      user.ID,
+			WebUserEmail:   "",
+			WebUserID:      0,
 		},
 		Channel:        *channel,
 		Messages:       messages,
 		MessagesLength: count,
 		Pager:          pagination.New(count, channelsPerPage, page, "/channel/ru_python/?page=0"),
 	}
+	if user != nil {
+		data.DefaultPageData.WebUserEmail = user.Email
+		data.DefaultPageData.WebUserID = user.ID
+	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute base template")
+		h.log.Error().Err(err).Msg("load channel page")
 	}
 }

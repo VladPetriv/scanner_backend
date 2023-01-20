@@ -20,12 +20,15 @@ type HomePageData struct {
 	Pager           *pagination.Pagination
 }
 
-func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
-	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+func (h Handler) loadHomePage(w http.ResponseWriter, r *http.Request) {
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		h.log.Error().Err(err).Msg("convert page to int")
+	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
-		h.log.Error().Err(err).Msg("get channels for navbar")
+		h.log.Error().Err(err).Msg("get channels for nav bar")
 	}
 
 	messagesCount, err := h.service.Message.GetMessagesCount()
@@ -38,12 +41,12 @@ func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get full messages by page")
 	}
 
+	messages = updateMessagesStatuses(messages, h.service)
+
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
-
-	messages = updateMessagesStatuses(messages, h.service)
 
 	data := HomePageData{
 		DefaultPageData: PageData{
@@ -65,7 +68,7 @@ func (h Handler) homePage(w http.ResponseWriter, r *http.Request) {
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute base template")
+		h.log.Error().Err(err).Msg("load home page")
 	}
 }
 

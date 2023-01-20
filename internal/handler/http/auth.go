@@ -22,7 +22,7 @@ func (h Handler) loadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 	h.tmpTree["register"] = template.Must(template.ParseFiles("templates/auth/register.html"))
 	err := h.tmpTree["register"].Execute(w, data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("load register page")
+		h.log.Error().Err(err).Msg("load registration page")
 	}
 }
 

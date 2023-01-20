@@ -17,7 +17,7 @@ type UserPageData struct {
 	MessagesLength  int
 }
 
-func (h Handler) userPage(w http.ResponseWriter, r *http.Request) {
+func (h Handler) loadUserPage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("covert user id to int")
@@ -66,6 +66,6 @@ func (h Handler) userPage(w http.ResponseWriter, r *http.Request) {
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute user page")
+		h.log.Error().Err(err).Msg("load user page")
 	}
 }

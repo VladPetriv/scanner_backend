@@ -15,8 +15,8 @@ type MessagePageData struct {
 	Message         model.FullMessage
 }
 
-func (h Handler) messagePage(w http.ResponseWriter, r *http.Request) {
-	messageID, err := strconv.Atoi(mux.Vars(r)["message_id"])
+func (h Handler) loadMessagePage(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["message_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message_id to int")
 	}
@@ -26,7 +26,7 @@ func (h Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
 
-	message, err := h.service.Message.GetFullMessageByMessageID(messageID)
+	message, err := h.service.Message.GetFullMessageByMessageID(id)
 	if err != nil {
 		h.log.Error().Err(err).Msg("get full messages by message id")
 	}
@@ -61,6 +61,6 @@ func (h Handler) messagePage(w http.ResponseWriter, r *http.Request) {
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
 	if err != nil {
-		h.log.Error().Err(err).Msg("execute message page")
+		h.log.Error().Err(err).Msg("load message page")
 	}
 }
