@@ -158,3 +158,13 @@ func (h Handler) getUserFromForm(r *http.Request) *model.WebUser {
 
 	return user
 }
+
+const maxChannelsCount = 10
+
+func GetRightChannelsCountForNavBar(channels []model.Channel) []model.Channel {
+	if len(channels) <= maxChannelsCount {
+		return channels
+	}
+
+	return channels[:maxChannelsCount]
+}

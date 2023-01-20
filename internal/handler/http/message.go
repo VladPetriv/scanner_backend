@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 type MessagePageData struct {
@@ -47,7 +46,7 @@ func (h Handler) loadMessagePage(w http.ResponseWriter, r *http.Request) {
 		DefaultPageData: PageData{
 			Type:           "message",
 			Title:          "Telegram message",
-			Channels:       util.ProcessChannels(navBarChannels),
+			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
 			ChannelsLength: len(navBarChannels),
 			WebUserEmail:   "",
 			WebUserID:      0,

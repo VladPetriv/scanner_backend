@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 const channelsPerPage = 10
@@ -58,7 +57,7 @@ func (h Handler) loadChannelsPage(w http.ResponseWriter, r *http.Request) {
 		DefaultPageData: PageData{
 			Title:          "Telegram channels",
 			Type:           "channels",
-			Channels:       util.ProcessChannels(navBarChannels),
+			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
 			ChannelsLength: len(navBarChannels),
 			WebUserEmail:   "",
 			WebUserID:      0,
@@ -114,7 +113,7 @@ func (h Handler) loadChannelPage(w http.ResponseWriter, r *http.Request) {
 		DefaultPageData: PageData{
 			Type:           "channel",
 			Title:          "Telegram channel",
-			Channels:       util.ProcessChannels(navBarChannels),
+			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
 			ChannelsLength: len(navBarChannels),
 			WebUserEmail:   "",
 			WebUserID:      0,

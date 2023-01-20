@@ -94,7 +94,6 @@ func (repo ChannelPgRepo) GetChannelStats(channelID int) (*model.Stat, error) {
 
 	defer rows.Close()
 
-	//TODO: refactor and simplify this logic...
 	for rows.Next() {
 		var mC int
 		var rC int

@@ -1,9 +1,11 @@
 package store
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/golang-migrate/migrate"
+	// postgres and file module are required for running migration.
 	_ "github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
 
@@ -19,8 +21,8 @@ func runMigrations(cfg *config.Config) error {
 
 	if cfg.DatabaseURL == "" {
 		connectionString = fmt.Sprintf(
-			"postgresql://%s:%s@%s:5432/%s?sslmode=disable",
-			cfg.PgUser, cfg.PgPassword, cfg.PgHost, cfg.PgDB,
+			"postgresql://%s/%s?user=%s&password=%s&sslmode=disable",
+			cfg.PgHost, cfg.PgDB, cfg.PgUser, cfg.PgDB,
 		)
 	} else {
 		connectionString = cfg.DatabaseURL
@@ -34,8 +36,10 @@ func runMigrations(cfg *config.Config) error {
 		return fmt.Errorf("create migrations error: %w", err)
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("up migrations error: %w", err)
+	if err := m.Up(); err != nil {
+		if !errors.Is(err, migrate.ErrNoChange) {
+			return fmt.Errorf("up migrations error: %w", err)
+		}
 	}
 
 	return nil

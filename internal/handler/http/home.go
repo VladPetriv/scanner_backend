@@ -8,7 +8,6 @@ import (
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/service"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 const messagesPerPage = 10
@@ -52,7 +51,7 @@ func (h Handler) loadHomePage(w http.ResponseWriter, r *http.Request) {
 		DefaultPageData: PageData{
 			Title:          "Telegram Overflow",
 			Type:           "messages",
-			Channels:       util.ProcessChannels(navBarChannels),
+			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
 			ChannelsLength: len(navBarChannels),
 			WebUserEmail:   "",
 			WebUserID:      0,

@@ -10,7 +10,6 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/pkg/config"
 	"github.com/VladPetriv/scanner_backend/pkg/logger"
-	"github.com/rs/zerolog/log"
 )
 
 type kafka struct {
@@ -65,7 +64,7 @@ func (k kafka) SaveChannelsData() {
 	}()
 }
 
-func (k kafka) SaveMessagesData() {
+func (k kafka) SaveMessagesData() { //nolint:gocognit
 	consumer, err := connectAsConsumer(k.Cfg.KafkaAddr, "messages")
 	if err != nil {
 		k.Log.Error().Err(err).Msg("connect to queue as consumer")
@@ -90,15 +89,9 @@ func (k kafka) SaveMessagesData() {
 
 				channel, err := k.SrvManager.Channel.GetChannelByName(telegramMessage.PeerID.Username)
 				if err != nil {
-					if errors.Is(err, service.ErrChannelNotFound) {
-						k.Log.Warn().Err(err)
-
-						continue
+					if !errors.Is(err, service.ErrChannelNotFound) {
+						k.Log.Error().Err(err).Msg("get channel by name")
 					}
-
-					log.Error().Err(err).Msg("get channel by name")
-
-					continue
 				}
 
 				userID, err := k.SrvManager.User.CreateUser(&model.User{
@@ -107,7 +100,7 @@ func (k kafka) SaveMessagesData() {
 					ImageURL: telegramMessage.FromID.ImageURL,
 				})
 				if err != nil {
-					log.Error().Err(err).Msg("create user")
+					k.Log.Error().Err(err).Msg("create user")
 
 					continue
 				}
@@ -120,7 +113,7 @@ func (k kafka) SaveMessagesData() {
 					ImageURL:   telegramMessage.ImageURL,
 				})
 				if err != nil {
-					log.Error().Err(err).Msg("create message")
+					k.Log.Error().Err(err).Msg("create message")
 
 					continue
 				}

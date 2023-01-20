@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 type SavedPageData struct {
@@ -57,7 +56,7 @@ func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
 		DefaultPageData: PageData{
 			Type:           "saved",
 			Title:          "Saved user messages",
-			Channels:       util.ProcessChannels(navBarChannels),
+			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
 			ChannelsLength: len(navBarChannels),
 			WebUserEmail:   "",
 			WebUserID:      0,

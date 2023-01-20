@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 )
 
 type UserPageData struct {
@@ -50,7 +49,7 @@ func (h Handler) loadUserPage(w http.ResponseWriter, r *http.Request) {
 		DefaultPageData: PageData{
 			Type:           "user",
 			Title:          "Telegram User",
-			Channels:       util.ProcessChannels(navBarChannels),
+			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
 			ChannelsLength: len(navBarChannels),
 			WebUserEmail:   "",
 			WebUserID:      0,

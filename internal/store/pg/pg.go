@@ -16,8 +16,8 @@ func Init(cfg *config.Config) (*DB, error) {
 
 	if cfg.DatabaseURL == "" {
 		connectionString = fmt.Sprintf(
-			"user=%s password=%s host=%s dbname=%s sslmode=disable",
-			cfg.PgUser, cfg.PgPassword, cfg.PgHost, cfg.PgDB,
+			"postgresql://%s/%s?user=%s&password=%s&sslmode=disable",
+			cfg.PgHost, cfg.PgDB, cfg.PgUser, cfg.PgDB,
 		)
 	} else {
 		connectionString = cfg.DatabaseURL

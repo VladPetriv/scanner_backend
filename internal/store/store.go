@@ -52,11 +52,13 @@ func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
 	return &store, nil
 }
 
+const aliveTimeout = 5
+
 func (s *Store) KeepAliveDB(cfg *config.Config) {
 	var err error
 
 	for {
-		time.Sleep(time.Second * 5)
+		time.Sleep(aliveTimeout * time.Second)
 
 		lostConnection := false
 		if s.pg == nil {
