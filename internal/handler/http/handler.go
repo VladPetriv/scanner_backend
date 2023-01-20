@@ -53,17 +53,17 @@ func (h Handler) InitRouter() *mux.Router {
 
 	home := router.PathPrefix("/").Subrouter()
 	home.Handle("/", http.RedirectHandler("/home", http.StatusMovedPermanently)).Methods("GET")
-	home.HandleFunc("/home", h.homePage).Methods("GET")
+	home.HandleFunc("/home", h.loadHomePage).Methods("GET")
 
 	channel := router.PathPrefix("/channel").Subrouter()
-	channel.HandleFunc("/", h.channelsPage).Methods("GET")
-	channel.HandleFunc("/{channel_name}", h.channelPage).Methods("GET")
+	channel.HandleFunc("/", h.loadChannelsPage).Methods("GET")
+	channel.HandleFunc("/{channel_name}", h.loadChannelPage).Methods("GET")
 
 	user := router.PathPrefix("/user").Subrouter()
-	user.HandleFunc("/{user_id}", h.userPage).Methods("GET")
+	user.HandleFunc("/{user_id}", h.loadUserPage).Methods("GET")
 
 	message := router.PathPrefix("/message").Subrouter()
-	message.HandleFunc("/{message_id}", h.messagePage).Methods("GET")
+	message.HandleFunc("/{message_id}", h.loadMessagePage).Methods("GET")
 
 	auth := router.PathPrefix("/auth").Subrouter()
 	auth.HandleFunc("/login", h.login).Methods("POST")
@@ -73,7 +73,7 @@ func (h Handler) InitRouter() *mux.Router {
 	auth.HandleFunc("/registration", h.loadRegistrationPage).Methods("GET")
 
 	saved := router.PathPrefix("/saved").Subrouter()
-	saved.HandleFunc("/{user_id}", h.savedPage).Methods("GET")
+	saved.HandleFunc("/{user_id}", h.loadSavedMessagesPage).Methods("GET")
 	saved.HandleFunc("/delete/{saved_id}", h.deleteSavedMessage).Methods("POST")
 	saved.HandleFunc("/create/{user_id}/{message_id}", h.createSavedMessage).Methods("POST")
 
