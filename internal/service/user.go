@@ -1,22 +1,28 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 )
 
-type UserDBService struct {
+type userService struct {
 	store *store.Store
 }
 
-func NewUserDBService(store *store.Store) *UserDBService {
-	return &UserDBService{store: store}
+func NewUserService(store *store.Store) UserService {
+	return &userService{store: store}
 }
 
-func (s *UserDBService) CreateUser(user *model.User) (int, error) {
-	candidate, _ := s.GetUserByUsername(user.Username)
+func (s userService) CreateUser(user *model.User) (int, error) {
+	candidate, err := s.GetUserByUsername(user.Username)
+	if err != nil {
+		if !errors.Is(err, ErrUserNotFound) {
+			return 0, err
+		}
+	}
 	if candidate != nil {
 		return candidate.ID, nil
 	}
@@ -29,19 +35,27 @@ func (s *UserDBService) CreateUser(user *model.User) (int, error) {
 	return id, nil
 }
 
-func (s *UserDBService) GetUserByUsername(username string) (*model.User, error) {
+func (s userService) GetUserByUsername(username string) (*model.User, error) {
 	user, err := s.store.User.GetUserByUsername(username)
 	if err != nil {
 		return nil, fmt.Errorf("[User] Service.GetUserByUsername error: %w", err)
 	}
 
+	if user == nil {
+		return nil, ErrUserNotFound
+	}
+
 	return user, nil
 }
 
-func (s *UserDBService) GetUserByID(ID int) (*model.User, error) {
-	user, err := s.store.User.GetUserByID(ID)
+func (s userService) GetUserByID(id int) (*model.User, error) {
+	user, err := s.store.User.GetUserByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("[User] Service.GetUserByID error: %w", err)
+	}
+
+	if user == nil {
+		return nil, ErrUserNotFound
 	}
 
 	return user, nil

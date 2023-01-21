@@ -5,34 +5,86 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/internal/store/pg"
-	"github.com/VladPetriv/scanner_backend/pkg/util"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 )
 
-func TestSavedPg_GetSavedMessgaes(t *testing.T) {
-	db, mock, err := util.CreateMock()
+func Test_CreateSavedMessage(t *testing.T) {
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-
-	defer db.Close()
 
 	sqlxDB := sqlx.NewDb(db, "postgres")
 
 	r := pg.NewSavedRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    []model.Saved
-		wantErr bool
+		name          string
+		mock          func()
+		input         *model.Saved
+		expectedError error
 	}{
 		{
-			name: "OK: [messages found]",
+			name: "CreateSavedMessage successful",
+			mock: func() {
+				mock.ExpectExec("INSERT INTO saved(user_id, message_id) VALUES ($1, $2);").
+					WithArgs(1, 2).WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			input: &model.Saved{WebUserID: 1, MessageID: 2},
+		},
+		{
+			name: "CreateSavedMessage failed with some sql error",
+			mock: func() {
+				mock.ExpectExec("INSERT INTO saved(user_id, message_id) VALUES ($1, $2);").
+					WithArgs(1, 2).WillReturnError(fmt.Errorf("some sql error"))
+			},
+			input:         &model.Saved{WebUserID: 1, MessageID: 2},
+			expectedError: fmt.Errorf("create saved message: %w", fmt.Errorf("some sql error")),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mock()
+
+			err := r.CreateSavedMessage(tt.input)
+			if tt.expectedError != nil {
+				assert.Error(t, err)
+				assert.EqualValues(t, tt.expectedError, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.NoError(t, mock.ExpectationsWereMet())
+		})
+	}
+	t.Cleanup(func() {
+		db.Close()
+	})
+}
+
+func Test_GetSavedMessages(t *testing.T) {
+	db, mock, err := mocks.CreateMock()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewSavedRepo(&pg.DB{DB: sqlxDB})
+
+	tests := []struct {
+		name          string
+		mock          func()
+		input         int
+		want          []model.Saved
+		expectedError error
+	}{
+		{
+			name: "GetSavedMessages successful",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "user_id", "message_id"}).
 					AddRow(1, 2, 1).
@@ -48,34 +100,34 @@ func TestSavedPg_GetSavedMessgaes(t *testing.T) {
 			},
 		},
 		{
-			name: "Error: [messages not found]",
+			name: "GetSavedMessages failed with not found messages",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "user_id", "message_id"})
 
 				mock.ExpectQuery("SELECT * FROM saved WHERE user_id = $1;").
 					WithArgs(2).WillReturnRows(rows)
 			},
-			input:   2,
-			wantErr: true,
+			input:         2,
+			expectedError: nil,
 		},
 		{
-			name: "Error: [some sql error]",
+			name: "GetSavedMessages failed with some sql error",
 			mock: func() {
 				mock.ExpectQuery("SELECT * FROM saved WHERE user_id = $1;").
-					WithArgs(2).WillReturnError(fmt.Errorf("some error"))
+					WithArgs(2).WillReturnError(fmt.Errorf("some sql error"))
 			},
-			input:   2,
-			wantErr: true,
+			input:         2,
+			expectedError: fmt.Errorf("get saved messages: %w", fmt.Errorf("some sql error")),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
 
 			got, err := r.GetSavedMessages(tt.input)
-			if tt.wantErr {
+			if tt.expectedError != nil {
 				assert.Error(t, err)
+				assert.EqualValues(t, tt.expectedError, err)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.want, got)
@@ -84,29 +136,31 @@ func TestSavedPg_GetSavedMessgaes(t *testing.T) {
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+
+	t.Cleanup(func() {
+		db.Close()
+	})
 }
 
-func TestSavedPg_GetSavedMessageByMessageID(t *testing.T) {
-	db, mock, err := util.CreateMock()
+func Test_GetSavedMessageByID(t *testing.T) {
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-
-	defer db.Close()
 
 	sqlxDB := sqlx.NewDb(db, "postgres")
 
 	r := pg.NewSavedRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   int
-		want    *model.Saved
-		wantErr bool
+		name          string
+		mock          func()
+		input         int
+		want          *model.Saved
+		expectedError error
 	}{
 		{
-			name: "OK: [message found]",
+			name: "GetSavedMessageByID successful",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "user_id", "message_id"}).
 					AddRow(1, 2, 1)
@@ -118,34 +172,35 @@ func TestSavedPg_GetSavedMessageByMessageID(t *testing.T) {
 			want:  &model.Saved{ID: 1, WebUserID: 2, MessageID: 1},
 		},
 		{
-			name: "Error: [messages not found]",
+			name: "GetSavedMessageByID failed with not found message",
 			mock: func() {
 				rows := sqlmock.NewRows([]string{"id", "user_id", "message_id"})
 
 				mock.ExpectQuery("SELECT * FROM saved WHERE message_id = $1;").
 					WithArgs(1).WillReturnRows(rows)
 			},
-			input: 1,
-			want:  nil,
+			input:         1,
+			expectedError: nil,
 		},
 		{
-			name: "Error: [some sql error]",
+			name: "GetSavedMessageByID failed with some sql error",
 			mock: func() {
 				mock.ExpectQuery("SELECT * FROM saved WHERE message_id = $1;").
-					WithArgs(1).WillReturnError(fmt.Errorf("some error"))
+					WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
-			input:   1,
-			wantErr: true,
+			input:         1,
+			expectedError: fmt.Errorf("get saved message by id: %w", fmt.Errorf("some sql error")),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
 
-			got, err := r.GetSavedMessageByMessageID(tt.input)
-			if err != nil {
+			got, err := r.GetSavedMessageByID(tt.input)
+
+			if tt.expectedError != nil {
 				assert.Error(t, err)
+				assert.EqualValues(t, tt.expectedError, err)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.want, got)
@@ -154,64 +209,62 @@ func TestSavedPg_GetSavedMessageByMessageID(t *testing.T) {
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+
+	t.Cleanup(func() {
+		db.Close()
+	})
 }
 
-func TestSavedPg_CreateSavedMessage(t *testing.T) {
-	db, mock, err := util.CreateMock()
+func Test_DeleteSavedMessage(t *testing.T) {
+	db, mock, err := mocks.CreateMock()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-
-	defer db.Close()
 
 	sqlxDB := sqlx.NewDb(db, "postgres")
 
 	r := pg.NewSavedRepo(&pg.DB{DB: sqlxDB})
 
 	tests := []struct {
-		name    string
-		mock    func()
-		input   *model.Saved
-		want    int
-		wantErr bool
+		name          string
+		mock          func()
+		input         int
+		expectedError error
 	}{
 		{
-			name: "OK: [message created]",
+			name: "DeleteSavedMessage successful",
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id"}).
-					AddRow(1)
-
-				mock.ExpectQuery("INSERT INTO saved(user_id, message_id) VALUES ($1, $2) RETURNING id;").
-					WithArgs(1, 2).WillReturnRows(rows)
+				mock.ExpectExec("DELETE FROM saved WHERE id = $1;").
+					WithArgs(1).WillReturnResult(sqlmock.NewResult(1, 1))
 			},
-			input: &model.Saved{WebUserID: 1, MessageID: 2},
-			want:  1,
+			input: 1,
 		},
 		{
-			name: "Error: [some sql error]",
+			name: "DelateSavedMessage failed with some sql error",
 			mock: func() {
-				mock.ExpectQuery("INSERT INTO saved(user_id, message_id) VALUES ($1, $2) RETURNING id;").
-					WithArgs(1, 2).WillReturnError(fmt.Errorf("some error"))
+				mock.ExpectExec("DELETE FROM saved WHERE id = $1;").
+					WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
-			input:   &model.Saved{WebUserID: 1, MessageID: 2},
-			wantErr: true,
+			input:         1,
+			expectedError: fmt.Errorf("delete saved message: %w", fmt.Errorf("some sql error")),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
 
-			got, err := r.CreateSavedMessage(tt.input)
-
-			if tt.wantErr {
+			err := r.DeleteSavedMessage(tt.input)
+			if tt.expectedError != nil {
 				assert.Error(t, err)
+				assert.EqualValues(t, tt.expectedError, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
 			}
-
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
+
+	t.Cleanup(func() {
+		db.Close()
+	})
 }

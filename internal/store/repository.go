@@ -15,37 +15,37 @@ type ChannelRepo interface {
 type MessageRepo interface {
 	CreateMessage(message *model.DBMessage) (int, error)
 	GetMessagesCount() (int, error)
-	GetMessagesCountByChannelID(ID int) (int, error)
+	GetMessagesCountByChannelID(id int) (int, error)
 	GetFullMessagesByPage(page int) ([]model.FullMessage, error)
-	GetFullMessagesByChannelIDAndPage(ID, page int) ([]model.FullMessage, error)
-	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
-	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
+	GetFullMessagesByChannelIDAndPage(id, page int) ([]model.FullMessage, error)
+	GetFullMessagesByUserID(id int) ([]model.FullMessage, error)
+	GetFullMessageByID(id int) (*model.FullMessage, error)
 }
 
-//go:generate mockery --dir . --name ReplieRepo --output ./mocks
-type ReplieRepo interface {
-	CreateReplie(replie *model.DBReplie) error
-	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
+//go:generate mockery --dir . --name ReplyRepo --output ./mocks
+type ReplyRepo interface {
+	CreateReply(reply *model.DBReply) error
+	GetFullRepliesByMessageID(id int) ([]model.FullReply, error)
 }
 
 //go:generate mockery --dir . --name UserRepo --output ./mocks
 type UserRepo interface {
 	CreateUser(user *model.User) (int, error)
 	GetUserByUsername(username string) (*model.User, error)
-	GetUserByID(ID int) (*model.User, error)
+	GetUserByID(id int) (*model.User, error)
 }
 
 //go:generate mockery --dir . --name WebUserRepo --output ./mocks
 type WebUserRepo interface {
-	GetWebUserByID(userID int) (*model.WebUser, error)
+	GetWebUserByID(id int) (*model.WebUser, error)
 	GetWebUserByEmail(email string) (*model.WebUser, error)
-	CreateWebUser(user *model.WebUser) (int, error)
+	CreateWebUser(user *model.WebUser) error
 }
 
 //go:generate mockery --dir . --name SavedRepo --output ./mocks
 type SavedRepo interface {
-	GetSavedMessages(UserID int) ([]model.Saved, error)
-	GetSavedMessageByMessageID(ID int) (*model.Saved, error)
-	CreateSavedMessage(saved *model.Saved) (int, error)
-	DeleteSavedMessage(ID int) (int, error)
+	CreateSavedMessage(saved *model.Saved) error
+	GetSavedMessages(userID int) ([]model.Saved, error)
+	GetSavedMessageByID(id int) (*model.Saved, error)
+	DeleteSavedMessage(id int) error
 }

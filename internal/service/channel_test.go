@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
@@ -11,48 +10,69 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
-	"github.com/VladPetriv/scanner_backend/internal/store/pg"
 )
 
 func Test_CreateChannel(t *testing.T) {
 	channelInput := &model.DBChannel{Name: "test", Title: "test T", ImageURL: "test.jpg"}
 
 	tests := []struct {
-		name    string
-		mock    func(channelRepo *mocks.ChannelRepo)
-		input   *model.DBChannel
-		wantErr bool
-		err     error
+		name          string
+		mock          func(channelRepo *mocks.ChannelRepo)
+		input         *model.DBChannel
+		expectedError error
 	}{
 		{
-			name: "Ok: [Channel  created]",
+			name: "CreateChannel successful",
 			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelByName", channelInput.Name).Return(nil, nil)
 				channelRepo.On("CreateChannel", channelInput).Return(nil)
 			},
 			input: channelInput,
 		},
 		{
-			name: "Error: [Store error]",
+			name: "CreateChannel failed with existed channel",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("CreateChannel", channelInput).Return(errors.New("failed to create channel: some error"))
+				channelRepo.On("GetChannelByName", channelInput.Name).Return(&model.Channel{Name: "test"}, nil)
 			},
-			input:   channelInput,
-			wantErr: true,
-			err:     errors.New("[Channel] Service.CreateChannel error: failed to create channel: some error"),
+			input:         channelInput,
+			expectedError: service.ErrChannelExists,
+		},
+		{
+			name: "CreateChannel failed with some store error when get channel by name",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelByName", channelInput.Name).
+					Return(nil, fmt.Errorf("get channel by name: some store error"))
+			},
+			input: channelInput,
+			expectedError: fmt.Errorf(
+				"[Channel] Service.GetChannelByName error: %w",
+				fmt.Errorf("get channel by name: some store error"),
+			),
+		},
+		{
+			name: "CreateChannel failed with some store error when create channel",
+			mock: func(channelRepo *mocks.ChannelRepo) {
+				channelRepo.On("GetChannelByName", channelInput.Name).Return(nil, nil)
+				channelRepo.On("CreateChannel", channelInput).Return(fmt.Errorf("create channel: some store error"))
+			},
+			input: channelInput,
+			expectedError: fmt.Errorf(
+				"[Channel] Service.CreateChannel error: %w",
+				fmt.Errorf("create channel: some store error"),
+			),
 		},
 	}
-
 	for _, tt := range tests {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		err := channelService.CreateChannel(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.EqualValues(t, tt.err.Error(), err.Error())
+			assert.EqualValues(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 		}
@@ -68,34 +88,31 @@ func Test_GetChannels(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		mock    func(channelRepo *mocks.ChannelRepo)
-		want    []model.Channel
-		wantErr bool
-		err     error
+		name          string
+		mock          func(channelRepo *mocks.ChannelRepo)
+		want          []model.Channel
+		expectedError error
 	}{
 		{
-			name: "Ok: [Channels found]",
+			name: "GetChannels successful",
 			mock: func(channelRepo *mocks.ChannelRepo) {
 				channelRepo.On("GetChannels").Return(data, nil)
 			},
 			want: data,
 		},
 		{
-			name: "Error: [Channels not found]",
+			name: "GetChannel failed with not found channels",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannels").Return(nil, pg.ErrChannelsNotFound)
+				channelRepo.On("GetChannels").Return(nil, nil)
 			},
-			wantErr: true,
-			err:     fmt.Errorf("[Channel] Service.GetChannels error: %w", pg.ErrChannelsNotFound),
+			expectedError: service.ErrChannelsNotFound,
 		},
 		{
-			name: "Error: [Store error]",
+			name: "GetChannel failed with some store error",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannels").Return(nil, errors.New("error while getting channels: some error"))
+				channelRepo.On("GetChannels").Return(nil, fmt.Errorf("get channels: some error"))
 			},
-			wantErr: true,
-			err:     errors.New("[Channel] Service.GetChannels error: error while getting channels: some error"),
+			expectedError: fmt.Errorf("[Channel] Service.GetChannels error: %w", fmt.Errorf("get channels: some error")),
 		},
 	}
 
@@ -103,13 +120,13 @@ func Test_GetChannels(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannels()
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.Equal(t, tt.err.Error(), err.Error())
+			assert.EqualValues(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
@@ -126,15 +143,14 @@ func Test_GetChannelsByPage(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		mock    func(channelRepo *mocks.ChannelRepo)
-		input   int
-		want    []model.Channel
-		wantErr bool
-		err     error
+		name          string
+		mock          func(channelRepo *mocks.ChannelRepo)
+		input         int
+		want          []model.Channel
+		expectedError error
 	}{
 		{
-			name: "Ok: [Channels found, return 1 page]",
+			name: "GetChannelsByPage successful with first page",
 			mock: func(channelRepo *mocks.ChannelRepo) {
 				channelRepo.On("GetChannelsByPage", 0).Return(data[:10], nil)
 			},
@@ -142,7 +158,7 @@ func Test_GetChannelsByPage(t *testing.T) {
 			want:  data[:10],
 		},
 		{
-			name: "Ok: [Channels found, return 2 page]",
+			name: "GetChannelsByPage successful with second page",
 			mock: func(channelRepo *mocks.ChannelRepo) {
 				channelRepo.On("GetChannelsByPage", 10).Return(data[9:], nil)
 			},
@@ -150,22 +166,22 @@ func Test_GetChannelsByPage(t *testing.T) {
 			want:  data[9:],
 		},
 		{
-			name: "Error: [Channels not found, return page 404]",
+			name: "GetChannelsByPage failed with not found channels by page",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannelsByPage", 4030).Return(nil, pg.ErrChannelsNotFound)
+				channelRepo.On("GetChannelsByPage", 4030).Return(nil, nil)
 			},
-			input:   404,
-			wantErr: true,
-			err:     fmt.Errorf("[Channel] Service.GetChannelsByPage error: %w", pg.ErrChannelsNotFound),
+			input:         404,
+			expectedError: service.ErrChannelsNotFound,
 		},
-		{
-			name: "Error: [Store error]",
+		{name: "GetChannelsByPage failed with some store error",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannelsByPage", 0).Return(nil, errors.New("error while getting channels: some error"))
+				channelRepo.On("GetChannelsByPage", 0).Return(nil, fmt.Errorf("get channels by page: some error"))
 			},
-			input:   1,
-			wantErr: true,
-			err:     errors.New("[Channel] Service.GetChannelsByPage error: error while getting channels: some error"),
+			input: 1,
+			expectedError: fmt.Errorf(
+				"[Channel] Service.GetChannelsByPage error: %w",
+				fmt.Errorf("get channels by page: some error"),
+			),
 		},
 	}
 
@@ -173,13 +189,13 @@ func Test_GetChannelsByPage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelServie := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelServie := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelServie.GetChannelsByPage(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.Equal(t, tt.err.Error(), err.Error())
+			assert.EqualValues(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
@@ -193,15 +209,14 @@ func Test_GetChannelByName(t *testing.T) {
 	channel := &model.Channel{ID: 1, Name: "test", Title: "test", ImageURL: "test.jpg"}
 
 	tests := []struct {
-		name    string
-		mock    func(channelRepo *mocks.ChannelRepo)
-		input   string
-		want    *model.Channel
-		wantErr bool
-		err     error
+		name          string
+		mock          func(channelRepo *mocks.ChannelRepo)
+		input         string
+		want          *model.Channel
+		expectedError error
 	}{
 		{
-			name: "Ok: [Channel found]",
+			name: "GetChannelByName successful",
 			mock: func(channelRepo *mocks.ChannelRepo) {
 				channelRepo.On("GetChannelByName", "test").Return(channel, nil)
 			},
@@ -209,22 +224,23 @@ func Test_GetChannelByName(t *testing.T) {
 			want:  channel,
 		},
 		{
-			name: "Error: [Channel not found]",
+			name: "GetChannelByName failed with not found channel",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannelByName", "test").Return(nil, pg.ErrChannelNotFound)
+				channelRepo.On("GetChannelByName", "test").Return(nil, nil)
 			},
-			input:   "test",
-			wantErr: true,
-			err:     fmt.Errorf("[Channel] Service.GetChannelByName error: %w", pg.ErrChannelNotFound),
+			input:         "test",
+			expectedError: service.ErrChannelNotFound,
 		},
 		{
-			name: "Error: [Store error]",
+			name: "GetChannelByName failed with some store error",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannelByName", "test").Return(nil, errors.New("error while getting channel: some error"))
+				channelRepo.On("GetChannelByName", "test").Return(nil, fmt.Errorf("get channel by name: some error"))
 			},
-			input:   "test",
-			wantErr: true,
-			err:     errors.New("[Channel] Service.GetChannelByName error: error while getting channel: some error"),
+			input: "test",
+			expectedError: fmt.Errorf(
+				"[Channel] Service.GetChannelByName error: %w",
+				fmt.Errorf("get channel by name: some error"),
+			),
 		},
 	}
 
@@ -232,13 +248,13 @@ func Test_GetChannelByName(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannelByName(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.Equal(t, tt.err.Error(), err.Error())
+			assert.EqualValues(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
@@ -248,17 +264,18 @@ func Test_GetChannelByName(t *testing.T) {
 	}
 }
 
-func TestChannelServie_GetChannelStats(t *testing.T) {
+func Test_GetChannelStats(t *testing.T) {
 	tests := []struct {
-		name    string
-		mock    func(channelRepo *mocks.ChannelRepo)
-		input   int
-		want    *model.Stat
-		wantErr bool
-		err     error
+		name          string
+		mock          func(channelRepo *mocks.ChannelRepo)
+		input         int
+		want          *model.Stat
+		wantErr       bool
+		err           error
+		expectedError error
 	}{
 		{
-			name: "Ok: [Stat found]",
+			name: "GetChannelStats successful",
 			mock: func(channelRepo *mocks.ChannelRepo) {
 				channelRepo.On("GetChannelStats", 1).Return(&model.Stat{MessagesCount: 1, RepliesCount: 12}, nil)
 			},
@@ -266,13 +283,15 @@ func TestChannelServie_GetChannelStats(t *testing.T) {
 			want:  &model.Stat{MessagesCount: 1, RepliesCount: 12},
 		},
 		{
-			name: "Error: [Store error]",
+			name: "GetChannelStats failed with some store error",
 			mock: func(channelRepo *mocks.ChannelRepo) {
-				channelRepo.On("GetChannelStats", 1).Return(nil, errors.New("error while getting channel stat: some error"))
+				channelRepo.On("GetChannelStats", 1).Return(nil, fmt.Errorf("get channel statistic: some error"))
 			},
-			input:   1,
-			wantErr: true,
-			err:     errors.New("[Channel] Service.GetChannelStats error: error while getting channel stat: some error"),
+			input: 1,
+			expectedError: fmt.Errorf(
+				"[Channel] Service.GetChannelStats error: %w",
+				fmt.Errorf("get channel statistic: some error"),
+			),
 		},
 	}
 
@@ -280,13 +299,13 @@ func TestChannelServie_GetChannelStats(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelDBService(&store.Store{Channel: channelRepo})
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannelStats(tt.input)
-		if tt.wantErr {
+		if tt.expectedError != nil {
 			assert.Error(t, err)
-			assert.Equal(t, tt.err.Error(), err.Error())
+			assert.EqualValues(t, tt.expectedError, err)
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)

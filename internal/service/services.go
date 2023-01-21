@@ -1,6 +1,10 @@
 package service
 
-import "github.com/VladPetriv/scanner_backend/internal/model"
+import (
+	"errors"
+
+	"github.com/VladPetriv/scanner_backend/internal/model"
+)
 
 type ChannelService interface {
 	CreateChannel(channel *model.DBChannel) error
@@ -9,6 +13,12 @@ type ChannelService interface {
 	GetChannelByName(name string) (*model.Channel, error)
 	GetChannelStats(channelID int) (*model.Stat, error)
 }
+
+var (
+	ErrChannelsNotFound = errors.New("channels not found")
+	ErrChannelNotFound  = errors.New("channel not found")
+	ErrChannelExists    = errors.New("channel is exist")
+)
 
 type MessageService interface {
 	CreateMessage(message *model.DBMessage) (int, error)
@@ -20,22 +30,18 @@ type MessageService interface {
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
 }
 
-type ReplieService interface {
-	CreateReplie(replie *model.DBReplie) error
-	GetFullRepliesByMessageID(ID int) ([]model.FullReplie, error)
+var (
+	ErrMessagesCountNotFound = errors.New("message count not found")
+	ErrMessagesNotFound      = errors.New("messages not found")
+	ErrMessageNotFound       = errors.New("messages not found")
+)
+
+type ReplyService interface {
+	CreateReply(reply *model.DBReply) error
+	GetFullRepliesByMessageID(ID int) ([]model.FullReply, error)
 }
 
-type UserService interface {
-	CreateUser(user *model.User) (int, error)
-	GetUserByUsername(username string) (*model.User, error)
-	GetUserByID(ID int) (*model.User, error)
-}
-
-type WebUserService interface {
-	GetWebUserByID(userID int) (*model.WebUser, error)
-	GetWebUserByEmail(email string) (*model.WebUser, error)
-	CreateWebUser(user *model.WebUser) error
-}
+var ErrRepliesNotFound = errors.New("replies not found")
 
 type SavedService interface {
 	GetSavedMessages(UserID int) ([]model.Saved, error)
@@ -43,3 +49,34 @@ type SavedService interface {
 	CreateSavedMessage(saved *model.Saved) error
 	DeleteSavedMessage(ID int) error
 }
+
+var (
+	ErrSavedMessagesNotFound = errors.New("saved messages not found")
+	ErrSavedMessageNotFound  = errors.New("saved message not found")
+)
+
+type UserService interface {
+	CreateUser(user *model.User) (int, error)
+	GetUserByUsername(username string) (*model.User, error)
+	GetUserByID(ID int) (*model.User, error)
+}
+
+var ErrUserNotFound = errors.New("user not found")
+
+type WebUserService interface {
+	GetWebUserByID(userID int) (*model.WebUser, error)
+	GetWebUserByEmail(email string) (*model.WebUser, error)
+	CreateWebUser(user *model.WebUser) error
+}
+
+var ErrWebUserNotFound = errors.New("web user not found")
+
+type AuthService interface {
+	Login(email string, userPassword string) (string, error)
+	Register(user *model.WebUser) error
+}
+
+var (
+	ErrIncorrectPassword = errors.New("incorrect password")
+	ErrWebUserIsExist    = errors.New("web user is exist")
+)

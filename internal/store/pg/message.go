@@ -8,12 +8,6 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
 
-var (
-	ErrMessagesCountNotFound = errors.New("messages count not found")
-	ErrMessagesNotFound      = errors.New("messages not found")
-	ErrMessageNotFound       = errors.New("message not found")
-)
-
 type MessageRepo struct {
 	db *DB
 }
@@ -22,64 +16,64 @@ func NewMessageRepo(db *DB) *MessageRepo {
 	return &MessageRepo{db: db}
 }
 
-func (repo *MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
+func (repo MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
 	var id int
 
 	row := repo.db.QueryRow(`
-		INSERT INTO message(channel_id, user_id, title, message_url, imageurl) 
-		VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+		INSERT INTO message(channel_id, user_id, title, message_url, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
 		message.ChannelID, message.UserID, message.Title,
 		message.MessageURL, message.ImageURL,
 	)
 	if err := row.Scan(&id); err != nil {
-		return id, fmt.Errorf("failed to create message: %w", err)
+		return 0, fmt.Errorf("create message: %w", err)
 	}
 
 	return id, nil
 }
 
-func (repo *MessageRepo) GetMessagesCount() (int, error) {
+func (repo MessageRepo) GetMessagesCount() (int, error) {
 	var count int
 
 	err := repo.db.Get(&count, "SELECT COUNT(*) FROM message;")
-	if err == sql.ErrNoRows {
-		return 0, ErrMessagesCountNotFound
-	}
-
 	if err != nil {
-		return 0, fmt.Errorf("error while getting messages count: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, nil
+		}
+
+		return 0, fmt.Errorf("get messages count: %w", err)
 	}
 
 	return count, nil
 }
 
-func (repo *MessageRepo) GetMessagesCountByChannelID(channelID int) (int, error) {
+func (repo MessageRepo) GetMessagesCountByChannelID(channelID int) (int, error) {
 	var count int
+
 	err := repo.db.Get(
 		&count,
 		`SELECT COUNT(*) FROM message m LEFT JOIN channel c ON c.id = m.channel_id WHERE m.channel_id = $1;`,
 		channelID,
 	)
-	if err == sql.ErrNoRows {
-		return 0, ErrMessagesCountNotFound
-	}
-
 	if err != nil {
-		return 0, fmt.Errorf("error while getting messages count by channel ID: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, nil
+		}
+
+		return 0, fmt.Errorf("get messages count by channel id: %w", err)
 	}
 
 	return count, nil
 }
 
-func (repo *MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
-	messages := make([]model.FullMessage, 0, 10)
+func (repo MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
+	var messages []model.FullMessage
 
 	err := repo.db.Select(
 		&messages,
-		`SELECT m.id, m.title, m.message_url, m.imageurl, 
-		 c.id AS channelid, c.name AS channelname, c.imageurl AS channelimageurl, 
-		 u.id AS userid, u.fullname, u.imageurl AS userimageurl, 
-		 (SELECT COUNT(*) FROM replie WHERE message_id = m.id)
+		`SELECT m.id, m.title, m.message_url, m.image_url, 
+		 c.id AS channel_id, c.name AS channel_name, c.image_url AS channel_image_url, 
+		 u.id AS user_id, u.fullname, u.image_url AS user_image_url, 
+		 (SELECT COUNT(*) FROM reply WHERE message_id = m.id)
 		 FROM message m 
 		 LEFT JOIN channel c ON c.id = m.channel_id 
 		 LEFT JOIN tg_user u ON u.id = m.user_id
@@ -87,25 +81,25 @@ func (repo *MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, e
 		page,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error while getting full messages by page: %w", err)
+		return nil, fmt.Errorf("get full messages by page: %w", err)
 	}
 
 	if len(messages) == 0 {
-		return nil, ErrMessagesNotFound
+		return nil, nil
 	}
 
 	return messages, nil
 }
 
-func (repo *MessageRepo) GetFullMessagesByChannelIDAndPage(channelID, page int) ([]model.FullMessage, error) {
-	messages := make([]model.FullMessage, 0, 10)
+func (repo MessageRepo) GetFullMessagesByChannelIDAndPage(channelID, page int) ([]model.FullMessage, error) {
+	var messages []model.FullMessage
 
 	err := repo.db.Select(
 		&messages,
-		`SELECT m.id, m.title, m.message_url, m.imageurl, 
-		 c.id AS channelid, c.name AS channelname, c.imageurl AS channelimageurl, 
-		 u.id AS userid, u.fullname, u.imageurl AS userimageurl, 
-		 (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		`SELECT m.id, m.title, m.message_url, m.image_url, 
+		 c.id AS channel_id, c.name AS channel_name, c.image_url AS channel_image_url, 
+		 u.id AS user_id, u.fullname, u.image_url AS user_image_url, 
+		 (SELECT COUNT(id) FROM reply WHERE message_id = m.id)
 		 FROM message m 
 		 LEFT JOIN channel c ON c.id = m.channel_id 
 		 LEFT JOIN tg_user u ON u.id = m.user_id
@@ -114,63 +108,63 @@ func (repo *MessageRepo) GetFullMessagesByChannelIDAndPage(channelID, page int) 
 		channelID, page,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error while getting full messages by channel ID: %w", err)
+		return nil, fmt.Errorf("get full messages by channel id and page: %w", err)
 	}
 
 	if len(messages) == 0 {
-		return nil, ErrMessagesNotFound
+		return nil, nil
 	}
 
 	return messages, nil
 }
 
-func (repo *MessageRepo) GetFullMessagesByUserID(ID int) ([]model.FullMessage, error) {
-	messages := make([]model.FullMessage, 0, 5)
+func (repo MessageRepo) GetFullMessagesByUserID(id int) ([]model.FullMessage, error) {
+	var messages []model.FullMessage
 
 	err := repo.db.Select(
 		&messages,
-		`SELECT m.id, m.title, m.message_url, m.imageurl, 
-		 c.id AS channelid, c.name AS channelname, c.Title AS channeltitle, c.imageurl AS channelimageurl, 
-		 (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		`SELECT m.id, m.title, m.message_url, m.image_url, 
+		 c.id AS channel_id, c.name AS channel_name, c.Title AS channel_title, c.image_url AS channel_image_url, 
+		 (SELECT COUNT(id) FROM reply WHERE message_id = m.id)
 		 FROM message m 
 		 LEFT JOIN channel c ON c.id = m.channel_id 
 		 LEFT JOIN tg_user u ON u.id = m.user_id
 		 WHERE m.user_id= $1 
 		 ORDER BY count DESC NULLS LAST;`,
-		ID,
+		id,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error while getting full messages by user ID: %w", err)
+		return nil, fmt.Errorf("get full messages by user id: %w", err)
 	}
 
 	if len(messages) == 0 {
-		return nil, ErrMessagesNotFound
+		return nil, nil
 	}
 
 	return messages, nil
 }
 
-func (repo *MessageRepo) GetFullMessageByMessageID(messageID int) (*model.FullMessage, error) {
+func (repo MessageRepo) GetFullMessageByID(messageID int) (*model.FullMessage, error) {
 	var message model.FullMessage
 
 	err := repo.db.Get(
 		&message,
-		`SELECT m.id, m.title, m.message_url, m.imageurl, 
-		 c.id AS channelid, c.name AS channelname, c.title as channeltitle, c.imageurl as channelimageurl, 
-		 u.id as userid, u.fullname, u.imageurl as userimageurl, 
-		 (SELECT COUNT(id) FROM replie WHERE message_id = m.id)
+		`SELECT m.id, m.title, m.message_url, m.image_url, 
+		 c.id AS channel_id, c.name AS channel_name, c.title as channel_title, c.image_url as channel_image_url, 
+		 u.id as user_id, u.fullname, u.image_url as user_image_url, 
+		 (SELECT COUNT(id) FROM reply WHERE message_id = m.id)
 		 FROM message m 
 		 LEFT JOIN channel c ON c.id = m.channel_id 
 		 LEFT JOIN tg_user u ON u.id = m.user_id
 		 WHERE m.id = $1;`,
 		messageID,
 	)
-	if err == sql.ErrNoRows {
-		return nil, ErrMessageNotFound
-	}
-
 	if err != nil {
-		return nil, fmt.Errorf("error while getting full message by message ID: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("get full message by id: %w", err)
 	}
 
 	return &message, nil

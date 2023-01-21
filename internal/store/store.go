@@ -15,22 +15,22 @@ type Store struct {
 
 	Channel ChannelRepo
 	Message MessageRepo
-	Replie  ReplieRepo
+	Reply   ReplyRepo
 	User    UserRepo
 	WebUser WebUserRepo
 	Saved   SavedRepo
 }
 
 func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
-	pgDB, err := pg.Dial(cfg)
+	pgDB, err := pg.Init(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("pg.Dial() failed: %w", err)
+		return nil, fmt.Errorf("init postgresql: %w", err)
 	}
 
 	if pgDB != nil {
-		log.Info("Running migrations...")
+		log.Info().Msg("Running migrations...")
 		if err := runMigrations(cfg); err != nil {
-			return nil, fmt.Errorf("run migrations error: %w", err)
+			return nil, fmt.Errorf("run migrations: %w", err)
 		}
 	}
 
@@ -41,7 +41,7 @@ func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
 		store.pg = pgDB
 		store.Channel = pg.NewChannelRepo(pgDB)
 		store.Message = pg.NewMessageRepo(pgDB)
-		store.Replie = pg.NewReplieRepo(pgDB)
+		store.Reply = pg.NewReplyRepo(pgDB)
 		store.User = pg.NewUserRepo(pgDB)
 		store.WebUser = pg.NewWebUserRepo(pgDB)
 		store.Saved = pg.NewSavedRepo(pgDB)
@@ -52,11 +52,13 @@ func New(cfg *config.Config, log *logger.Logger) (*Store, error) {
 	return &store, nil
 }
 
+const aliveTimeout = 5
+
 func (s *Store) KeepAliveDB(cfg *config.Config) {
 	var err error
 
 	for {
-		time.Sleep(time.Second * 5)
+		time.Sleep(aliveTimeout * time.Second)
 
 		lostConnection := false
 		if s.pg == nil {
@@ -69,15 +71,15 @@ func (s *Store) KeepAliveDB(cfg *config.Config) {
 			continue
 		}
 
-		s.logger.Debug("[store.KeepAliveDB] Lost db connection. Restoring...")
+		s.logger.Debug().Msg("[store.KeepAliveDB] Lost db connection. Restoring...")
 
-		s.pg, err = pg.Dial(cfg)
+		s.pg, err = pg.Init(cfg)
 		if err != nil {
-			s.logger.Error(err)
+			s.logger.Error().Err(err).Msg("init postgresql")
 
 			continue
 		}
 
-		s.logger.Debug("[store.KeepAliveDB] DB reconnected")
+		s.logger.Debug().Msg("[store.KeepAliveDB] DB reconnected")
 	}
 }
