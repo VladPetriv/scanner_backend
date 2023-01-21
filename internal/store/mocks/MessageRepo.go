@@ -125,6 +125,29 @@ func (_m *MessageRepo) GetFullMessagesByUserID(id int) ([]model.FullMessage, err
 	return r0, r1
 }
 
+// GetMessageByTitle provides a mock function with given fields: title
+func (_m *MessageRepo) GetMessageByTitle(title string) (*model.DBMessage, error) {
+	ret := _m.Called(title)
+
+	var r0 *model.DBMessage
+	if rf, ok := ret.Get(0).(func(string) *model.DBMessage); ok {
+		r0 = rf(title)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.DBMessage)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(title)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetMessagesCount provides a mock function with given fields:
 func (_m *MessageRepo) GetMessagesCount() (int, error) {
 	ret := _m.Called()
