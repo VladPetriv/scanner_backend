@@ -16,6 +16,7 @@ type MessageRepo interface {
 	CreateMessage(message *model.DBMessage) (int, error)
 	GetMessagesCount() (int, error)
 	GetMessagesCountByChannelID(id int) (int, error)
+	GetMessageByTitle(title string) (*model.DBMessage, error)
 	GetFullMessagesByPage(page int) ([]model.FullMessage, error)
 	GetFullMessagesByChannelIDAndPage(id, page int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(id int) ([]model.FullMessage, error)

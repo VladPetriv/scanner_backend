@@ -224,6 +224,78 @@ func Test_GetMessagesCountByChannelID(t *testing.T) {
 		db.Close()
 	})
 }
+func Test_GetMessageByTitle(t *testing.T) {
+	db, mock, err := mocks.CreateMock()
+	if err != nil {
+		t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	sqlxDB := sqlx.NewDb(db, "postgres")
+
+	r := pg.NewMessageRepo(&pg.DB{DB: sqlxDB})
+
+	tests := []struct {
+		name          string
+		mock          func()
+		input         string
+		want          *model.DBMessage
+		expectedError error
+	}{
+		{
+			name: "GetMessageByTitle successful",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "channel_id", "user_id", "title", "message_url", "image_url"}).
+					AddRow(1, 1, 1, "test", "test", "test")
+
+				mock.ExpectQuery(
+					"SELECT * FROM message WHERE title = $1;",
+				).WithArgs("test").WillReturnRows(rows)
+			},
+			input: "test",
+			want:  &model.DBMessage{ID: 1, ChannelID: 1, UserID: 1, Title: "test", MessageURL: "test", ImageURL: "test"},
+		},
+		{
+			name: "GetMessageByTitle failed with not found message",
+			mock: func() {
+				rows := sqlmock.NewRows([]string{"id", "channel_id", "user_id", "title", "message_url", "image_url"})
+
+				mock.ExpectQuery(
+					"SELECT * FROM message WHERE title = $1;",
+				).WithArgs("test").WillReturnRows(rows)
+			},
+			input:         "test",
+			expectedError: nil,
+		},
+		{
+			name: "GetMessageByTitle failed with some sql error",
+			mock: func() {
+				mock.ExpectQuery(
+					"SELECT * FROM message WHERE title = $1;",
+				).WithArgs("test").WillReturnError(fmt.Errorf("some sql error"))
+			},
+			input:         "test",
+			expectedError: fmt.Errorf("get message by title: %w", fmt.Errorf("some sql error")),
+		},
+	}
+	for _, tt := range tests {
+		tt.mock()
+
+		got, err := r.GetMessageByTitle(tt.input)
+		if tt.expectedError != nil {
+			assert.Error(t, err)
+			assert.EqualValues(t, tt.expectedError, err)
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		}
+
+		assert.NoError(t, mock.ExpectationsWereMet())
+	}
+
+	t.Cleanup(func() {
+		db.Close()
+	})
+}
 
 func Test_GetFullMessagesByPage(t *testing.T) {
 	db, mock, err := mocks.CreateMock()

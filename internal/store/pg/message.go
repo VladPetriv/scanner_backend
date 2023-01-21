@@ -65,6 +65,21 @@ func (repo MessageRepo) GetMessagesCountByChannelID(channelID int) (int, error) 
 	return count, nil
 }
 
+func (repo MessageRepo) GetMessageByTitle(title string) (*model.DBMessage, error) {
+	var message model.DBMessage
+
+	err := repo.db.Get(&message, "SELECT * FROM message WHERE title = $1;", title)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("get message by title: %w", err)
+	}
+
+	return &message, nil
+}
+
 func (repo MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
 	var messages []model.FullMessage
 

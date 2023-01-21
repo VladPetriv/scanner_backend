@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
@@ -19,6 +20,17 @@ func NewMessageService(store *store.Store) MessageService {
 }
 
 func (s messageService) CreateMessage(message *model.DBMessage) (int, error) {
+	candidate, err := s.GetMessageByTitle(message.Title)
+	if err != nil {
+		if !errors.Is(err, ErrMessageNotFound) {
+			return 0, err
+		}
+	}
+
+	if candidate != nil && candidate.ChannelID == message.ChannelID {
+		return 0, ErrMessageExists
+	}
+
 	id, err := s.store.Message.CreateMessage(message)
 	if err != nil {
 		return id, fmt.Errorf("[Message] Service.CreateMessage error: %w", err)
@@ -51,6 +63,19 @@ func (s messageService) GetMessagesCountByChannelID(id int) (int, error) {
 	}
 
 	return count, nil
+}
+
+func (s messageService) GetMessageByTitle(title string) (*model.DBMessage, error) {
+	message, err := s.store.Message.GetMessageByTitle(title)
+	if err != nil {
+		return nil, fmt.Errorf("[Message] Service.GetMessageByTitle error: %w", err)
+	}
+
+	if message == nil {
+		return nil, ErrMessageNotFound
+	}
+
+	return message, nil
 }
 
 func (s messageService) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
