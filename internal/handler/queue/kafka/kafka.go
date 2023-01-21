@@ -92,6 +92,8 @@ func (k kafka) SaveMessagesData() { //nolint:gocognit
 					if !errors.Is(err, service.ErrChannelNotFound) {
 						k.Log.Error().Err(err).Msg("get channel by name")
 					}
+
+					continue
 				}
 
 				userID, err := k.SrvManager.User.CreateUser(&model.User{
@@ -113,7 +115,9 @@ func (k kafka) SaveMessagesData() { //nolint:gocognit
 					ImageURL:   telegramMessage.ImageURL,
 				})
 				if err != nil {
-					k.Log.Error().Err(err).Msg("create message")
+					if !errors.Is(err, service.ErrMessageExists) {
+						k.Log.Error().Err(err).Msg("create message")
+					}
 
 					continue
 				}

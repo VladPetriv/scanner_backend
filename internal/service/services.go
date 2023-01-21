@@ -24,6 +24,7 @@ type MessageService interface {
 	CreateMessage(message *model.DBMessage) (int, error)
 	GetMessagesCount() (int, error)
 	GetMessagesCountByChannelID(ID int) (int, error)
+	GetMessageByTitle(title string) (*model.DBMessage, error)
 	GetFullMessagesByPage(page int) ([]model.FullMessage, error)
 	GetFullMessagesByChannelIDAndPage(ID, page int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
@@ -34,6 +35,7 @@ var (
 	ErrMessagesCountNotFound = errors.New("message count not found")
 	ErrMessagesNotFound      = errors.New("messages not found")
 	ErrMessageNotFound       = errors.New("messages not found")
+	ErrMessageExists         = errors.New("message is exist")
 )
 
 type ReplyService interface {
