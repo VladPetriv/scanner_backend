@@ -50,6 +50,12 @@ type SavedService interface {
 	GetSavedMessageByMessageID(ID int) (*model.Saved, error)
 	CreateSavedMessage(saved *model.Saved) error
 	DeleteSavedMessage(ID int) error
+	ProcessSavedMessages(userID int) (*LoadSavedMessagesOutput, error)
+}
+
+type LoadSavedMessagesOutput struct {
+	SavedMessages      []model.FullMessage
+	SavedMessagesCount int
 }
 
 var (

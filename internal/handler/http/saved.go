@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -8,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
 type SavedPageData struct {
@@ -17,52 +19,44 @@ type SavedPageData struct {
 }
 
 func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
+	data := SavedPageData{
+		DefaultPageData: PageData{
+			Type:         "saved",
+			Title:        "Saved user messages",
+			WebUserEmail: "",
+			WebUserID:    0,
+		},
+	}
+
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
+
+		http.Redirect(w, r, "/home", http.StatusBadRequest)
+		return
 	}
 
-	var messages []model.FullMessage
-
-	savedMessages, err := h.service.Saved.GetSavedMessages(userID)
+	pageData, err := h.service.Saved.ProcessSavedMessages(userID)
 	if err != nil {
-		h.log.Error().Err(err).Msg("get saved messages")
+		if !errors.Is(err, service.ErrSavedMessagesNotFound) {
+			h.log.Error().Err(err).Msg("process saved messages")
+		}
+	}
+	if pageData != nil {
+		data.Messages = pageData.SavedMessages
+		data.MessagesLength = pageData.SavedMessagesCount
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
-
-	for _, msg := range savedMessages {
-		fullMessage, err := h.service.Message.GetFullMessageByMessageID(msg.MessageID)
-		if err != nil {
-			h.log.Error().Err(err).Msg("get full message by message id")
-
-			continue
-		}
-
-		fullMessage.SavedID = msg.ID
-
-		messages = append(messages, *fullMessage)
-	}
+	data.DefaultPageData.Channels = GetRightChannelsCountForNavBar(navBarChannels)
+	data.DefaultPageData.ChannelsLength = len(navBarChannels)
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
-	}
-
-	data := SavedPageData{
-		DefaultPageData: PageData{
-			Type:           "saved",
-			Title:          "Saved user messages",
-			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
-			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   "",
-			WebUserID:      0,
-		},
-		Messages:       messages,
-		MessagesLength: len(messages),
 	}
 	if user != nil {
 		data.DefaultPageData.WebUserEmail = user.Email
@@ -103,7 +97,7 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(r)["saved_id"])
+	messageID, err := strconv.Atoi(mux.Vars(r)["saved_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert saved message id to int")
 	}
@@ -113,7 +107,7 @@ func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
-	err = h.service.Saved.DeleteSavedMessage(id)
+	err = h.service.Saved.DeleteSavedMessage(messageID)
 	if err != nil {
 		h.log.Error().Err(err).Msg("delete saved message")
 	}

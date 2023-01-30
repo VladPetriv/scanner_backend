@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/store"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 type Manager struct {
@@ -16,20 +17,28 @@ type Manager struct {
 	Auth    AuthService
 }
 
-func NewManager(store *store.Store) (*Manager, error) {
+func NewManager(store *store.Store, logger *logger.Logger) (*Manager, error) {
 	if store == nil {
 		return nil, fmt.Errorf("no store provided")
 	}
 
+	channelService := NewChannelService(store)
+	messageService := NewMessageService(store)
+	replyService := NewReplyService(store)
+	userService := NewUserService(store)
+	webUserService := NewWebUserService(store)
+	savedService := NewSavedService(store, logger, messageService)
+	authService := NewAuthService(webUserService)
+
 	srvManager := &Manager{
-		Channel: NewChannelService(store),
-		Message: NewMessageService(store),
-		Reply:   NewReplyService(store),
-		User:    NewUserService(store),
-		WebUser: NewWebUserService(store),
-		Saved:   NewSavedService(store),
+		Channel: channelService,
+		Message: messageService,
+		Reply:   replyService,
+		User:    userService,
+		WebUser: webUserService,
+		Saved:   savedService,
+		Auth:    authService,
 	}
-	srvManager.Auth = NewAuthService(srvManager.WebUser)
 
 	return srvManager, nil
 }
