@@ -67,6 +67,13 @@ type UserService interface {
 	CreateUser(user *model.User) (int, error)
 	GetUserByUsername(username string) (*model.User, error)
 	GetUserByID(ID int) (*model.User, error)
+	ProcessUserPage(userID int) (*LoadUserOutput, error)
+}
+
+type LoadUserOutput struct {
+	TgUser        *model.User
+	Messages      []model.FullMessage
+	MessagesCount int
 }
 
 var ErrUserNotFound = errors.New("user not found")
