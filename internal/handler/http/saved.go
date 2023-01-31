@@ -36,6 +36,24 @@ func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	navBarChannels, err := h.service.Channel.GetChannels()
+	if err != nil {
+		h.log.Error().Err(err).Msg("get channels for navbar")
+	}
+	if navBarChannels != nil {
+		data.DefaultPageData.Channels = GetRightChannelsCountForNavBar(navBarChannels)
+		data.DefaultPageData.ChannelsLength = len(navBarChannels)
+	}
+
+	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
+	if err != nil {
+		h.log.Error().Err(err).Msg("get web user by email")
+	}
+	if user != nil {
+		data.DefaultPageData.WebUserEmail = user.Email
+		data.DefaultPageData.WebUserID = user.ID
+	}
+
 	pageData, err := h.service.Saved.ProcessSavedMessages(userID)
 	if err != nil {
 		if !errors.Is(err, service.ErrSavedMessagesNotFound) {
@@ -45,22 +63,6 @@ func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
 	if pageData != nil {
 		data.Messages = pageData.SavedMessages
 		data.MessagesLength = pageData.SavedMessagesCount
-	}
-
-	navBarChannels, err := h.service.Channel.GetChannels()
-	if err != nil {
-		h.log.Error().Err(err).Msg("get channels for navbar")
-	}
-	data.DefaultPageData.Channels = GetRightChannelsCountForNavBar(navBarChannels)
-	data.DefaultPageData.ChannelsLength = len(navBarChannels)
-
-	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
-	if err != nil {
-		h.log.Error().Err(err).Msg("get web user by email")
-	}
-	if user != nil {
-		data.DefaultPageData.WebUserEmail = user.Email
-		data.DefaultPageData.WebUserID = user.ID
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
@@ -73,11 +75,17 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	messageID, err := strconv.Atoi(mux.Vars(r)["message_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message id to int")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
@@ -100,6 +108,9 @@ func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 	messageID, err := strconv.Atoi(mux.Vars(r)["saved_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert saved message id to int")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
