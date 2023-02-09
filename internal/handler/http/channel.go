@@ -25,6 +25,9 @@ func (h Handler) loadChannelsPage(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page value to int")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
@@ -82,6 +85,9 @@ func (h Handler) loadChannelPage(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page to int")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()

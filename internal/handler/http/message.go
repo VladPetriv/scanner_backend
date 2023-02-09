@@ -18,6 +18,9 @@ func (h Handler) loadMessagePage(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["message_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message_id to int")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()

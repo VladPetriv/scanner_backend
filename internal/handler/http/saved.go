@@ -91,6 +91,9 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	err = h.service.Saved.CreateSavedMessage(&model.Saved{WebUserID: userID, MessageID: messageID})
@@ -116,6 +119,9 @@ func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
+
+		http.Redirect(w, r, "/home", http.StatusConflict)
+		return
 	}
 
 	err = h.service.Saved.DeleteSavedMessage(messageID)
