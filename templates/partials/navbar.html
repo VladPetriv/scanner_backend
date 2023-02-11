@@ -3,14 +3,14 @@
 <div class="col-xl-3 col-xxl-4 d-none d-xl-block">
   {{ if eq .DefaultPageData.ChannelsLength 0 }}
   <h2 class="mt-5 mb-4">
-    <a class="text-decoration-none text-dark" href="/channel/">
+    <a class="text-decoration-none text-dark" href="/channel/?page=0">
       <span class="text-muted"> No channels found </span>
     </a>
   </h2>
   {{else}}
 
   <h2 class="mt-5 mb-4">
-    <a class="text-decoration-none text-dark" href="/channel/">
+    <a class="text-decoration-none text-dark" href="/channel/?page=0">
       <span class="text-muted"> {{ .DefaultPageData.ChannelsLength }} </span>
       channels
     </a>
