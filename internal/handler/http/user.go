@@ -30,7 +30,7 @@ func (h Handler) loadUserPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("covert user id to int")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 

@@ -26,7 +26,7 @@ func (h Handler) loadChannelsPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page value to int")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -86,7 +86,7 @@ func (h Handler) loadChannelPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page to int")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 

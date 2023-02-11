@@ -32,7 +32,7 @@ func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
 
-		http.Redirect(w, r, "/home", http.StatusBadRequest)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message id to int")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -100,7 +100,7 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("create saved message")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -112,7 +112,7 @@ func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert saved message id to int")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -120,7 +120,7 @@ func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
