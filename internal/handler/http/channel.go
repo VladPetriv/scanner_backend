@@ -12,7 +12,7 @@ import (
 
 const channelsPerPage = 10
 
-type ChannelPageData struct {
+type channelPageData struct {
 	DefaultPageData PageData
 	Channel         model.Channel
 	Channels        []model.Channel
@@ -56,7 +56,7 @@ func (h Handler) loadChannelsPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
-	data := ChannelPageData{
+	data := channelPageData{
 		DefaultPageData: PageData{
 			Title:          "Telegram channels",
 			Type:           "channels",
@@ -115,7 +115,7 @@ func (h Handler) loadChannelPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
-	data := ChannelPageData{
+	data := channelPageData{
 		DefaultPageData: PageData{
 			Type:           "channel",
 			Title:          "Telegram channel",

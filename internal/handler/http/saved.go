@@ -12,14 +12,14 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
-type SavedPageData struct {
+type savedPageData struct {
 	DefaultPageData PageData
 	Messages        []model.FullMessage
 	MessagesLength  int
 }
 
 func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
-	data := SavedPageData{
+	data := savedPageData{
 		DefaultPageData: PageData{
 			Type:         "saved",
 			Title:        "Saved user messages",

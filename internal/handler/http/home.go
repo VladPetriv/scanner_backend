@@ -12,7 +12,7 @@ import (
 
 const messagesPerPage = 10
 
-type HomePageData struct {
+type homePageData struct {
 	DefaultPageData PageData
 	Messages        []model.FullMessage
 	MessagesLength  int
@@ -50,7 +50,7 @@ func (h Handler) loadHomePage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
 
-	data := HomePageData{
+	data := homePageData{
 		DefaultPageData: PageData{
 			Title:          "Telegram Overflow",
 			Type:           "messages",

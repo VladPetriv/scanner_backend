@@ -11,13 +11,13 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
-type MessagePageData struct {
+type messagePageData struct {
 	DefaultPageData PageData
 	Message         model.FullMessage
 }
 
 func (h Handler) loadMessagePage(w http.ResponseWriter, r *http.Request) {
-	data := MessagePageData{
+	data := messagePageData{
 		DefaultPageData: PageData{
 			Type:         "message",
 			Title:        "Telegram message",
