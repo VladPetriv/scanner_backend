@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
+	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
 type MessagePageData struct {
@@ -15,11 +17,20 @@ type MessagePageData struct {
 }
 
 func (h Handler) loadMessagePage(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(r)["message_id"])
+	data := MessagePageData{
+		DefaultPageData: PageData{
+			Type:         "message",
+			Title:        "Telegram message",
+			WebUserEmail: "",
+			WebUserID:    0,
+		},
+	}
+
+	messageID, err := strconv.Atoi(mux.Vars(r)["message_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message_id to int")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -27,38 +38,28 @@ func (h Handler) loadMessagePage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
-
-	message, err := h.service.Message.GetFullMessageByMessageID(id)
-	if err != nil {
-		h.log.Error().Err(err).Msg("get full messages by message id")
-	}
-
-	replies, err := h.service.Reply.GetFullRepliesByMessageID(message.ID)
-	if err != nil {
-		h.log.Error().Err(err).Msg("get full replies by message id")
+	if navBarChannels != nil {
+		data.DefaultPageData.Channels = GetRightChannelsCountForNavBar(navBarChannels)
+		data.DefaultPageData.ChannelsLength = len(navBarChannels)
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
-
-	message.Replies = replies
-
-	data := MessagePageData{
-		DefaultPageData: PageData{
-			Type:           "message",
-			Title:          "Telegram message",
-			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
-			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   "",
-			WebUserID:      0,
-		},
-		Message: *message,
-	}
 	if user != nil {
 		data.DefaultPageData.WebUserEmail = user.Email
 		data.DefaultPageData.WebUserID = user.ID
+	}
+
+	pageData, err := h.service.Message.ProcessMessagePage(messageID)
+	if err != nil {
+		if !errors.Is(err, service.ErrMessageNotFound) && !errors.Is(err, service.ErrRepliesNotFound) {
+			h.log.Error().Err(err).Msg("process data for message page")
+		}
+	}
+	if pageData != nil {
+		data.Message = *pageData.Message
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)

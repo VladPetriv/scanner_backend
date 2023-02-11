@@ -13,12 +13,14 @@ import (
 type messageService struct {
 	store  *store.Store
 	logger *logger.Logger
+	reply  ReplyService
 }
 
-func NewMessageService(store *store.Store, logger *logger.Logger) MessageService {
+func NewMessageService(store *store.Store, logger *logger.Logger, replyService ReplyService) MessageService {
 	return &messageService{
 		store:  store,
 		logger: logger,
+		reply:  replyService,
 	}
 }
 
@@ -175,4 +177,34 @@ func (s messageService) GetFullMessageByMessageID(id int) (*model.FullMessage, e
 
 	logger.Info().Interface("message", message).Msg("successfully got message by id")
 	return message, nil
+}
+
+func (s messageService) ProcessMessagePage(messageID int) (*LoadMessageOutput, error) {
+	logger := s.logger
+
+	message, err := s.GetFullMessageByMessageID(messageID)
+	if err != nil {
+		if errors.Is(err, ErrMessageNotFound) {
+			logger.Info().Msg("message not found")
+			return nil, err
+		}
+
+		logger.Error().Err(err).Msg("get message by id")
+		return nil, fmt.Errorf("get message by id: %w", err)
+	}
+
+	replies, err := s.reply.GetFullRepliesByMessageID(message.ID)
+	if err != nil {
+		if errors.Is(err, ErrRepliesNotFound) {
+			logger.Info().Msg("replies not found")
+		}
+
+		logger.Error().Err(err).Msg("get replies by message id")
+		return nil, fmt.Errorf("get replies by message id: %w", err)
+	}
+
+	message.Replies = replies
+	message.RepliesCount = len(replies)
+
+	return &LoadMessageOutput{Message: message}, nil
 }

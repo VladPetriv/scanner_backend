@@ -25,7 +25,7 @@ func NewManager(store *store.Store, logger *logger.Logger) (*Manager, error) {
 	channelService := NewChannelService(store)
 	replyService := NewReplyService(store)
 	webUserService := NewWebUserService(store)
-	messageService := NewMessageService(store, logger)
+	messageService := NewMessageService(store, logger, replyService)
 	userService := NewUserService(store, logger, messageService)
 	savedService := NewSavedService(store, logger, messageService)
 	authService := NewAuthService(webUserService)

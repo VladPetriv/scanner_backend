@@ -29,6 +29,11 @@ type MessageService interface {
 	GetFullMessagesByChannelIDAndPage(ID, page int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
 	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
+	ProcessMessagePage(messageID int) (*LoadMessageOutput, error)
+}
+
+type LoadMessageOutput struct {
+	Message *model.FullMessage
 }
 
 var (
