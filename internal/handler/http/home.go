@@ -24,7 +24,7 @@ func (h Handler) loadHomePage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert page to int")
 
-		http.Redirect(w, r, "/hoome", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
