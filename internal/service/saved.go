@@ -37,7 +37,7 @@ func (s savedService) GetSavedMessages(userID int) ([]model.Saved, error) {
 		return nil, ErrSavedMessagesNotFound
 	}
 
-	logger.Info().Interface("Messages", messages).Msg("successfully got saved messages")
+	logger.Info().Interface("messages", messages).Msg("successfully got saved messages")
 	return messages, nil
 }
 
@@ -54,7 +54,7 @@ func (s savedService) GetSavedMessageByMessageID(id int) (*model.Saved, error) {
 		return nil, ErrSavedMessageNotFound
 	}
 
-	logger.Info().Interface("message", message).Msg("successfully got saved message")
+	logger.Info().Interface("message", message).Msg("successfully got saved message by message id")
 	return message, nil
 }
 

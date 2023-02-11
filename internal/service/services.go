@@ -12,6 +12,18 @@ type ChannelService interface {
 	GetChannelsByPage(page int) ([]model.Channel, error)
 	GetChannelByName(name string) (*model.Channel, error)
 	GetChannelStats(channelID int) (*model.Stat, error)
+	ProcessChannelPage(channelName string, page int) (*LoadChannelOutput, error)
+	ProcessChannelsPage(page int) (*LoadChannelsOutput, error)
+}
+
+type LoadChannelOutput struct {
+	Channel       model.Channel
+	Messages      []model.FullMessage
+	MessagesCount int
+}
+
+type LoadChannelsOutput struct {
+	Channels []model.Channel
 }
 
 var (
