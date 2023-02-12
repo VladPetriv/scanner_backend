@@ -208,3 +208,28 @@ func (s messageService) ProcessMessagePage(messageID int) (*LoadMessageOutput, e
 
 	return &LoadMessageOutput{Message: message}, nil
 }
+
+func (s messageService) ProcessHomePage(page int) (*LoadHomeOutput, error) {
+	logger := s.logger
+
+	messagesCount, err := s.GetMessagesCount()
+	if err != nil {
+		if !errors.Is(err, ErrMessagesCountNotFound) {
+			logger.Error().Err(err).Msg("get messages count")
+			return nil, fmt.Errorf("get messages count error: %w", err)
+		}
+	}
+
+	messages, err := s.GetFullMessagesByPage(page)
+	if err != nil {
+		if !errors.Is(err, ErrMessagesNotFound) {
+			logger.Error().Err(err).Msg("get messages by page")
+			return nil, fmt.Errorf("get messages by page error: %w", err)
+		}
+	}
+
+	return &LoadHomeOutput{
+		Messages:      messages,
+		MessagesCount: messagesCount,
+	}, nil
+}
