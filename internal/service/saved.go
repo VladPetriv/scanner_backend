@@ -90,12 +90,10 @@ func (s savedService) ProcessSavedMessages(userID int) (*LoadSavedMessagesOutput
 
 	messages, err := s.GetSavedMessages(userID)
 	if err != nil {
-		if errors.Is(err, ErrSavedMessagesNotFound) {
-			return nil, err
+		if !errors.Is(err, ErrSavedMessagesNotFound) {
+			logger.Error().Err(err).Msg("get saved messages")
+			return nil, fmt.Errorf("get saved messages: %w", err)
 		}
-
-		logger.Error().Err(err).Msg("get saved messages")
-		return nil, fmt.Errorf("get saved messages: %w", err)
 	}
 
 	for _, msg := range messages {

@@ -1,14 +1,12 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
 type messagePageData struct {
@@ -54,9 +52,7 @@ func (h Handler) loadMessagePage(w http.ResponseWriter, r *http.Request) {
 
 	pageData, err := h.service.Message.ProcessMessagePage(messageID)
 	if err != nil {
-		if !errors.Is(err, service.ErrMessageNotFound) && !errors.Is(err, service.ErrRepliesNotFound) {
-			h.log.Error().Err(err).Msg("process data for message page")
-		}
+		h.log.Error().Err(err).Msg("get data for message page")
 	}
 	if pageData != nil {
 		data.Message = *pageData.Message

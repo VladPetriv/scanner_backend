@@ -54,7 +54,7 @@ func (h Handler) loadUserPage(w http.ResponseWriter, r *http.Request) {
 
 	pageData, err := h.service.User.ProcessUserPage(userID)
 	if err != nil {
-		h.log.Error().Err(err).Msg("proccess user page")
+		h.log.Error().Err(err).Msg("get data for usar page")
 	}
 	if pageData != nil {
 		data.Messages = pageData.Messages

@@ -184,23 +184,18 @@ func (s messageService) ProcessMessagePage(messageID int) (*LoadMessageOutput, e
 
 	message, err := s.GetFullMessageByMessageID(messageID)
 	if err != nil {
-		if errors.Is(err, ErrMessageNotFound) {
-			logger.Info().Msg("message not found")
-			return nil, err
+		if !errors.Is(err, ErrMessageNotFound) {
+			logger.Error().Err(err).Msg("get message by id")
+			return nil, fmt.Errorf("get message by id: %w", err)
 		}
-
-		logger.Error().Err(err).Msg("get message by id")
-		return nil, fmt.Errorf("get message by id: %w", err)
 	}
 
 	replies, err := s.reply.GetFullRepliesByMessageID(message.ID)
 	if err != nil {
-		if errors.Is(err, ErrRepliesNotFound) {
-			logger.Info().Msg("replies not found")
+		if !errors.Is(err, ErrRepliesNotFound) {
+			logger.Error().Err(err).Msg("get replies by message id")
+			return nil, fmt.Errorf("get replies by message id: %w", err)
 		}
-
-		logger.Error().Err(err).Msg("get replies by message id")
-		return nil, fmt.Errorf("get replies by message id: %w", err)
 	}
 
 	message.Replies = replies

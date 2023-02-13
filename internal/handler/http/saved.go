@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -9,7 +8,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
-	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
 type savedPageData struct {
@@ -56,9 +54,7 @@ func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
 
 	pageData, err := h.service.Saved.ProcessSavedMessages(userID)
 	if err != nil {
-		if !errors.Is(err, service.ErrSavedMessagesNotFound) {
-			h.log.Error().Err(err).Msg("process saved messages")
-		}
+		h.log.Error().Err(err).Msg("get data for saved page")
 	}
 	if pageData != nil {
 		data.Messages = pageData.SavedMessages

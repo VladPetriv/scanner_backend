@@ -38,7 +38,7 @@ func (h Handler) loadChannelsPage(w http.ResponseWriter, r *http.Request) {
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
-		h.log.Error().Err(err).Msg("convert page value to int")
+		h.log.Error().Err(err).Msg("convert page value for channels to int")
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
@@ -61,7 +61,7 @@ func (h Handler) loadChannelsPage(w http.ResponseWriter, r *http.Request) {
 
 	pageData, err := h.service.Channel.ProcessChannelsPage(page)
 	if err != nil {
-		h.log.Error().Err(err).Msg("process channel page")
+		h.log.Error().Err(err).Msg("get data for channels page")
 	}
 	if pageData != nil {
 		data.Channels = pageData.Channels
@@ -88,7 +88,7 @@ func (h Handler) loadChannelPage(w http.ResponseWriter, r *http.Request) {
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
-		h.log.Error().Err(err).Msg("convert channel messages page to int")
+		h.log.Error().Err(err).Msg("convert page value for channel to int")
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
@@ -111,7 +111,7 @@ func (h Handler) loadChannelPage(w http.ResponseWriter, r *http.Request) {
 
 	pageData, err := h.service.Channel.ProcessChannelPage(channelName, page)
 	if err != nil {
-		h.log.Error().Err(err).Msg("process channel page")
+		h.log.Error().Err(err).Msg("get data for channel page")
 	}
 	if pageData != nil {
 		data.Channel = pageData.Channel

@@ -31,7 +31,7 @@ func (h Handler) loadHomePage(w http.ResponseWriter, r *http.Request) {
 
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
-		h.log.Error().Err(err).Msg("convert page to int")
+		h.log.Error().Err(err).Msg("convert page value for messages to int")
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
@@ -54,7 +54,7 @@ func (h Handler) loadHomePage(w http.ResponseWriter, r *http.Request) {
 
 	pageData, err := h.service.Message.ProcessHomePage(page)
 	if err != nil {
-		h.log.Error().Err(err).Msg("process home page")
+		h.log.Error().Err(err).Msg("get data for home page")
 	}
 	if pageData != nil {
 		pageData.Messages = updateMessagesStatuses(pageData.Messages, h.service)
