@@ -10,15 +10,17 @@ import (
 )
 
 type savedService struct {
-	logger  *logger.Logger
 	store   *store.Store
+	logger  *logger.Logger
 	message MessageService
 }
 
-func NewSavedService(store *store.Store, logger *logger.Logger, messageService MessageService) SavedService {
+var _ SavedService = (*savedService)(nil)
+
+func NewSavedService(store *store.Store, logger *logger.Logger, messageService MessageService) *savedService {
 	return &savedService{
-		logger:  logger,
 		store:   store,
+		logger:  logger,
 		message: messageService,
 	}
 }
@@ -28,8 +30,8 @@ func (s savedService) GetSavedMessages(userID int) ([]model.Saved, error) {
 
 	messages, err := s.store.Saved.GetSavedMessages(userID)
 	if err != nil {
-		logger.Error().Err(err).Msg("get saved message by user id")
-		return nil, fmt.Errorf("get saved messages by user id: %w", err)
+		logger.Error().Err(err).Msg("get saved messages by user id")
+		return nil, fmt.Errorf("get saved messages by user id error: %w", err)
 	}
 
 	if messages == nil {
@@ -47,7 +49,7 @@ func (s savedService) GetSavedMessageByMessageID(id int) (*model.Saved, error) {
 	message, err := s.store.Saved.GetSavedMessageByID(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("get saved message by id")
-		return nil, fmt.Errorf("get saved message by id: %w", err)
+		return nil, fmt.Errorf("get saved message by id error: %w", err)
 	}
 
 	if message == nil {
@@ -64,7 +66,7 @@ func (s savedService) CreateSavedMessage(savedMessage *model.Saved) error {
 	err := s.store.Saved.CreateSavedMessage(savedMessage)
 	if err != nil {
 		logger.Error().Err(err).Msg("create saved message")
-		return fmt.Errorf("create saved message: %w", err)
+		return fmt.Errorf("create saved message error: %w", err)
 	}
 
 	logger.Info().Msg("saved message successfully created")
@@ -80,6 +82,7 @@ func (s savedService) DeleteSavedMessage(id int) error {
 		return fmt.Errorf("delete saved message: %w", err)
 	}
 
+	logger.Info().Msg("successfully delete saved message")
 	return nil
 }
 
@@ -92,7 +95,7 @@ func (s savedService) ProcessSavedMessages(userID int) (*LoadSavedMessagesOutput
 	if err != nil {
 		if !errors.Is(err, ErrSavedMessagesNotFound) {
 			logger.Error().Err(err).Msg("get saved messages")
-			return nil, fmt.Errorf("get saved messages: %w", err)
+			return nil, fmt.Errorf("[ProcessSavedMessages] get saved messages error: %w", err)
 		}
 	}
 
@@ -111,7 +114,6 @@ func (s savedService) ProcessSavedMessages(userID int) (*LoadSavedMessagesOutput
 		savedMessages = append(savedMessages, *fullMessage)
 	}
 
-	logger.Info().Interface("saved messages", savedMessages).Msg("successfully processed saved messages data")
 	return &LoadSavedMessagesOutput{
 		SavedMessages:      savedMessages,
 		SavedMessagesCount: len(savedMessages),

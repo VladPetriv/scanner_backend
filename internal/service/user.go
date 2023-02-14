@@ -10,9 +10,9 @@ import (
 )
 
 type userService struct {
+	store   *store.Store
 	logger  *logger.Logger
 	message MessageService
-	store   *store.Store
 }
 
 var _ UserService = (*userService)(nil)
@@ -32,17 +32,18 @@ func (s userService) CreateUser(user *model.User) (int, error) {
 	if err != nil {
 		if !errors.Is(err, ErrUserNotFound) {
 			logger.Error().Err(err).Msg("get user by username")
-			return 0, err
+			return 0, fmt.Errorf("[CreateUser] get user by username error: %w", err)
 		}
 	}
 	if candidate != nil {
+		logger.Info().Msg("user found")
 		return candidate.ID, nil
 	}
 
 	id, err := s.store.User.CreateUser(user)
 	if err != nil {
 		logger.Error().Err(err).Msg("create user")
-		return id, fmt.Errorf("create user: %w", err)
+		return id, fmt.Errorf("create user error: %w", err)
 	}
 
 	logger.Info().Int("userID", id).Msg("user successfully created")
@@ -59,6 +60,7 @@ func (s userService) GetUserByUsername(username string) (*model.User, error) {
 	}
 
 	if user == nil {
+		logger.Info().Msg("user not found")
 		return nil, ErrUserNotFound
 	}
 
@@ -76,6 +78,7 @@ func (s userService) GetUserByID(id int) (*model.User, error) {
 	}
 
 	if user == nil {
+		logger.Info().Msg("user not found")
 		return nil, ErrUserNotFound
 	}
 
@@ -88,26 +91,21 @@ func (s userService) ProcessUserPage(userID int) (*LoadUserOutput, error) {
 
 	user, err := s.GetUserByID(userID)
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) {
-			logger.Info().Err(err).Msg("user not found")
-			return nil, err
+		if !errors.Is(err, ErrUserNotFound) {
+			logger.Error().Err(err).Msg("get user by id")
+			return nil, fmt.Errorf("[ProcessUserPage] get user by id error: %w", err)
 		}
 
-		logger.Error().Err(err).Msg("get user by id")
-		return nil, err
 	}
 
 	messages, err := s.message.GetFullMessagesByUserID(user.ID)
 	if err != nil {
 		if errors.Is(err, ErrMessagesNotFound) {
-			return nil, err
+			logger.Error().Err(err).Msg("get messages by user id")
+			return nil, fmt.Errorf("[ProcessUserPage] get messages by user id error: %w", err)
 		}
-
-		logger.Error().Err(err).Msg("get messages by user id")
-		return nil, fmt.Errorf("get messages by user id: %w", err)
 	}
 
-	logger.Info().Msg("successfully processed user page")
 	return &LoadUserOutput{
 		TgUser:        user,
 		Messages:      messages,

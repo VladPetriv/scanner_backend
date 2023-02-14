@@ -22,13 +22,13 @@ func NewManager(store *store.Store, logger *logger.Logger) (*Manager, error) {
 		return nil, fmt.Errorf("no store provided")
 	}
 
-	replyService := NewReplyService(store)
-	webUserService := NewWebUserService(store)
+	replyService := NewReplyService(store, logger)
+	webUserService := NewWebUserService(store, logger)
 	messageService := NewMessageService(store, logger, replyService)
 	channelService := NewChannelService(store, logger, messageService)
 	userService := NewUserService(store, logger, messageService)
 	savedService := NewSavedService(store, logger, messageService)
-	authService := NewAuthService(webUserService)
+	authService := NewAuthService(webUserService, logger)
 
 	srvManager := &Manager{
 		Channel: channelService,

@@ -16,7 +16,9 @@ type messageService struct {
 	reply  ReplyService
 }
 
-func NewMessageService(store *store.Store, logger *logger.Logger, replyService ReplyService) MessageService {
+var _ MessageService = (*messageService)(nil)
+
+func NewMessageService(store *store.Store, logger *logger.Logger, replyService ReplyService) *messageService {
 	return &messageService{
 		store:  store,
 		logger: logger,
@@ -29,13 +31,10 @@ func (s messageService) CreateMessage(message *model.DBMessage) (int, error) {
 
 	candidate, err := s.GetMessageByTitle(message.Title)
 	if err != nil {
-		if errors.Is(err, ErrMessageNotFound) {
-			logger.Info().Msg("message not found")
-			return 0, err
+		if !errors.Is(err, ErrMessageNotFound) {
+			logger.Error().Err(err).Msg("get message by title")
+			return 0, fmt.Errorf("[CreateMessage] get message by title error: %w", err)
 		}
-
-		logger.Error().Err(err).Msg("get message by title")
-		return 0, err
 	}
 
 	if candidate != nil && candidate.ChannelID == message.ChannelID {
@@ -186,7 +185,7 @@ func (s messageService) ProcessMessagePage(messageID int) (*LoadMessageOutput, e
 	if err != nil {
 		if !errors.Is(err, ErrMessageNotFound) {
 			logger.Error().Err(err).Msg("get message by id")
-			return nil, fmt.Errorf("get message by id: %w", err)
+			return nil, fmt.Errorf("[ProcessMessagePage] get message by id error: %w", err)
 		}
 	}
 
@@ -194,7 +193,7 @@ func (s messageService) ProcessMessagePage(messageID int) (*LoadMessageOutput, e
 	if err != nil {
 		if !errors.Is(err, ErrRepliesNotFound) {
 			logger.Error().Err(err).Msg("get replies by message id")
-			return nil, fmt.Errorf("get replies by message id: %w", err)
+			return nil, fmt.Errorf("[ProcessMessagePage] get replies by message id error: %w", err)
 		}
 	}
 
@@ -211,7 +210,7 @@ func (s messageService) ProcessHomePage(page int) (*LoadHomeOutput, error) {
 	if err != nil {
 		if !errors.Is(err, ErrMessagesCountNotFound) {
 			logger.Error().Err(err).Msg("get messages count")
-			return nil, fmt.Errorf("get messages count error: %w", err)
+			return nil, fmt.Errorf("[ProcessMessagePage] get messages count error: %w", err)
 		}
 	}
 
@@ -219,7 +218,7 @@ func (s messageService) ProcessHomePage(page int) (*LoadHomeOutput, error) {
 	if err != nil {
 		if !errors.Is(err, ErrMessagesNotFound) {
 			logger.Error().Err(err).Msg("get messages by page")
-			return nil, fmt.Errorf("get messages by page error: %w", err)
+			return nil, fmt.Errorf("[ProcessMessagePage] get messages by page error: %w", err)
 		}
 	}
 
