@@ -27,7 +27,7 @@ func main() {
 		log.Fatal().Err(err).Msg("create store")
 	}
 
-	serviceManger, err := service.NewManager(store)
+	serviceManger, err := service.NewManager(store, log)
 	if err != nil {
 		log.Fatal().Err(err).Msg("create service manager")
 	}
