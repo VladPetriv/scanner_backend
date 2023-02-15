@@ -8,6 +8,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,7 +45,9 @@ func Test_CreateWebUser(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
 		tt.mock(webUserRepo)
 
 		err := webUserService.CreateWebUser(tt.input)
@@ -100,7 +104,9 @@ func Test_GetWebUserByID(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
 		tt.mock(webUserRepo)
 
 		got, err := webUserService.GetWebUserByID(tt.input)
@@ -160,7 +166,9 @@ func Test_GetWebUserByEmail(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
 		tt.mock(webUserRepo)
 
 		got, err := webUserService.GetWebUserByEmail(tt.input)

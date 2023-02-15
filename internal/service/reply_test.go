@@ -10,6 +10,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 func Test_CreateReply(t *testing.T) {
@@ -46,7 +48,9 @@ func Test_CreateReply(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		replyRepo := &mocks.ReplyRepo{}
-		replyService := service.NewReplyService(&store.Store{Reply: replyRepo})
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
 		tt.mock(replyRepo)
 
 		err := replyService.CreateReply(tt.input)
@@ -107,7 +111,9 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		replyRepo := &mocks.ReplyRepo{}
-		replyService := service.NewReplyService(&store.Store{Reply: replyRepo})
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
 		tt.mock(replyRepo)
 
 		got, err := replyService.GetFullRepliesByMessageID(tt.input)

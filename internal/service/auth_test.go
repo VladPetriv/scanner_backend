@@ -8,6 +8,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -64,8 +66,9 @@ func Test_Register(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
-		authService := service.NewAuthService(webUserService)
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
+		authService := service.NewAuthService(webUserService, logger)
 		tt.mock(webUserRepo)
 
 		err := authService.Register(tt.input)
@@ -146,8 +149,9 @@ func Test_Login(t *testing.T) {
 		t.Logf("running %s", tt.name)
 
 		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
-		authService := service.NewAuthService(webUserService)
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
+		authService := service.NewAuthService(webUserService, logger)
 		tt.mock(webUserRepo)
 
 		got, err := authService.Login(tt.input.Email, tt.input.Password)

@@ -10,6 +10,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 func Test_CreateUser(t *testing.T) {
@@ -68,7 +70,13 @@ func Test_CreateUser(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		userRepo := &mocks.UserRepo{}
-		userService := service.NewUserService(&store.Store{User: userRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		userService := service.NewUserService(&store.Store{User: userRepo}, logger, messageService)
 		tt.mock(userRepo)
 
 		got, err := userService.CreateUser(tt.input)
@@ -126,7 +134,13 @@ func Test_GetUserByUsername(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		userRepo := &mocks.UserRepo{}
-		userService := service.NewUserService(&store.Store{User: userRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		userService := service.NewUserService(&store.Store{User: userRepo}, logger, messageService)
 		tt.mock(userRepo)
 
 		got, err := userService.GetUserByUsername(tt.input)
@@ -184,7 +198,13 @@ func Test_GetUserByID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		userRepo := &mocks.UserRepo{}
-		userService := service.NewUserService(&store.Store{User: userRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		userService := service.NewUserService(&store.Store{User: userRepo}, logger, messageService)
 		tt.mock(userRepo)
 
 		got, err := userService.GetUserByID(tt.input)

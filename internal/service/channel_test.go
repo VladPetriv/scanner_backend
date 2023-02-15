@@ -10,6 +10,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 func Test_CreateChannel(t *testing.T) {
@@ -66,7 +68,13 @@ func Test_CreateChannel(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo}, logger, messageService)
 		tt.mock(channelRepo)
 
 		err := channelService.CreateChannel(tt.input)
@@ -120,7 +128,13 @@ func Test_GetChannels(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo}, logger, messageService)
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannels()
@@ -189,10 +203,16 @@ func Test_GetChannelsByPage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelServie := service.NewChannelService(&store.Store{Channel: channelRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo}, logger, messageService)
 		tt.mock(channelRepo)
 
-		got, err := channelServie.GetChannelsByPage(tt.input)
+		got, err := channelService.GetChannelsByPage(tt.input)
 		if tt.expectedError != nil {
 			assert.Error(t, err)
 			assert.EqualValues(t, tt.expectedError, err)
@@ -248,7 +268,13 @@ func Test_GetChannelByName(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo}, logger, messageService)
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannelByName(tt.input)
@@ -299,7 +325,13 @@ func Test_GetChannelStats(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		channelRepo := &mocks.ChannelRepo{}
-		channelService := service.NewChannelService(&store.Store{Channel: channelRepo})
+		messageRepo := &mocks.MessageRepo{}
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+		channelService := service.NewChannelService(&store.Store{Channel: channelRepo}, logger, messageService)
 		tt.mock(channelRepo)
 
 		got, err := channelService.GetChannelStats(tt.input)

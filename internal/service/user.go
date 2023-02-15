@@ -95,7 +95,6 @@ func (s userService) ProcessUserPage(userID int) (*LoadUserOutput, error) {
 			logger.Error().Err(err).Msg("get user by id")
 			return nil, fmt.Errorf("[ProcessUserPage] get user by id error: %w", err)
 		}
-
 	}
 
 	messages, err := s.message.GetFullMessagesByUserID(user.ID)

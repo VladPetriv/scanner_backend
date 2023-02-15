@@ -10,6 +10,8 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
 func Test_CreateMessage(t *testing.T) {
@@ -67,7 +69,10 @@ func Test_CreateMessage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.CreateMessage(tt.input)
@@ -119,7 +124,10 @@ func Test_GetMessagesCount(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetMessagesCount()
@@ -176,7 +184,10 @@ func Test_GetMessagesLengthByChannelID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetMessagesCountByChannelID(tt.input)
@@ -234,7 +245,10 @@ func Test_GetMessageByTitle(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetMessageByTitle(tt.input)
@@ -295,7 +309,10 @@ func Test_GetFullMessagesByPage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessagesByPage(tt.input)
@@ -357,7 +374,10 @@ func Test_GetFullMessagesByChannelIDAndPage(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessagesByChannelIDAndPage(tt.input, 1)
@@ -418,7 +438,10 @@ func Test_GetFullMessagesByUserID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessagesByUserID(tt.input)
@@ -476,7 +499,10 @@ func Test_GetFullMessagesByMessageID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
+		replyRepo := &mocks.ReplyRepo{}
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyRepo)
 		tt.mock(messageRepo)
 
 		got, err := messageService.GetFullMessageByMessageID(tt.input)
