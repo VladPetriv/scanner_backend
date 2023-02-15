@@ -49,7 +49,7 @@ func Test_CreateUser(t *testing.T) {
 				).WithArgs("test", "test test", "test.jpg").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         &model.User{Username: "test", FullName: "test test", ImageURL: "test.jpg"},
-			expectedError: fmt.Errorf("create tg user: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -121,7 +121,7 @@ func Test_GetUserByUsername(t *testing.T) {
 					WithArgs("test").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         "test",
-			expectedError: fmt.Errorf("get user by username: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -193,7 +193,7 @@ func Test_GetUserByID(t *testing.T) {
 					WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get user by id: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {

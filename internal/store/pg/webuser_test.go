@@ -44,7 +44,7 @@ func Test_CreateWebUser(t *testing.T) {
 					WithArgs("test@test.com", "test").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         &model.WebUser{Email: "test@test.com", Password: "test"},
-			expectedError: fmt.Errorf("create web user: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -115,7 +115,7 @@ func Test_GetWebUserByID(t *testing.T) {
 					WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get web user by id: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -187,7 +187,7 @@ func Test_GetWebUserByEmail(t *testing.T) {
 					WithArgs("test@test.com").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         "test@test.com",
-			expectedError: fmt.Errorf("get web user by email: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {

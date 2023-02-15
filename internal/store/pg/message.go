@@ -3,7 +3,6 @@ package pg
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
@@ -25,7 +24,7 @@ func (repo MessageRepo) CreateMessage(message *model.DBMessage) (int, error) {
 		message.MessageURL, message.ImageURL,
 	)
 	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("create message: %w", err)
+		return 0, err
 	}
 
 	return id, nil
@@ -40,7 +39,7 @@ func (repo MessageRepo) GetMessagesCount() (int, error) {
 			return 0, nil
 		}
 
-		return 0, fmt.Errorf("get messages count: %w", err)
+		return 0, err
 	}
 
 	return count, nil
@@ -59,7 +58,7 @@ func (repo MessageRepo) GetMessagesCountByChannelID(channelID int) (int, error) 
 			return 0, nil
 		}
 
-		return 0, fmt.Errorf("get messages count by channel id: %w", err)
+		return 0, err
 	}
 
 	return count, nil
@@ -74,7 +73,7 @@ func (repo MessageRepo) GetMessageByTitle(title string) (*model.DBMessage, error
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get message by title: %w", err)
+		return nil, err
 	}
 
 	return &message, nil
@@ -96,7 +95,7 @@ func (repo MessageRepo) GetFullMessagesByPage(page int) ([]model.FullMessage, er
 		page,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get full messages by page: %w", err)
+		return nil, err
 	}
 
 	if len(messages) == 0 {
@@ -123,7 +122,7 @@ func (repo MessageRepo) GetFullMessagesByChannelIDAndPage(channelID, page int) (
 		channelID, page,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get full messages by channel id and page: %w", err)
+		return nil, err
 	}
 
 	if len(messages) == 0 {
@@ -149,7 +148,7 @@ func (repo MessageRepo) GetFullMessagesByUserID(id int) ([]model.FullMessage, er
 		id,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get full messages by user id: %w", err)
+		return nil, err
 	}
 
 	if len(messages) == 0 {
@@ -179,7 +178,7 @@ func (repo MessageRepo) GetFullMessageByID(messageID int) (*model.FullMessage, e
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get full message by id: %w", err)
+		return nil, err
 	}
 
 	return &message, nil

@@ -44,7 +44,7 @@ func Test_CreateSavedMessage(t *testing.T) {
 					WithArgs(1, 2).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         &model.Saved{WebUserID: 1, MessageID: 2},
-			expectedError: fmt.Errorf("create saved message: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -117,7 +117,7 @@ func Test_GetSavedMessages(t *testing.T) {
 					WithArgs(2).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         2,
-			expectedError: fmt.Errorf("get saved messages: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -189,7 +189,7 @@ func Test_GetSavedMessageByID(t *testing.T) {
 					WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get saved message by id: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -246,7 +246,7 @@ func Test_DeleteSavedMessage(t *testing.T) {
 					WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("delete saved message: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
