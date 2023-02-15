@@ -157,7 +157,6 @@ linters:
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     - whitespace # detects leading and trailing whitespace
     - godox # detects FIXME, TODO and other comment keywords
-    - wrapcheck # checks that errors returned from external packages are wrapped
 
 issues:
   # Maximum count of issues with the same text.
@@ -180,4 +179,3 @@ issues:
         - goconst
         - gosec
         - noctx
-        - wrapcheck
