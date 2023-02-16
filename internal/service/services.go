@@ -100,7 +100,6 @@ type LoadUserOutput struct {
 var ErrUserNotFound = errors.New("user not found")
 
 type WebUserService interface {
-	GetWebUserByID(userID int) (*model.WebUser, error)
 	GetWebUserByEmail(email string) (*model.WebUser, error)
 	CreateWebUser(user *model.WebUser) error
 }

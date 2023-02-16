@@ -27,21 +27,6 @@ func (repo WebUserRepo) CreateWebUser(user *model.WebUser) error {
 	return nil
 }
 
-func (repo WebUserRepo) GetWebUserByID(id int) (*model.WebUser, error) {
-	var user model.WebUser
-
-	err := repo.db.Get(&user, "SELECT * FROM web_user WHERE id = $1;", id)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-
-		return nil, err
-	}
-
-	return &user, nil
-}
-
 func (repo WebUserRepo) GetWebUserByEmail(email string) (*model.WebUser, error) {
 	var user model.WebUser
 
