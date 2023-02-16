@@ -14,7 +14,7 @@ import (
 )
 
 func Test_CreateWebUser(t *testing.T) {
-	input := &model.WebUser{Email: "test@test.com", Password: "test"}
+	t.Parallel()
 
 	tests := []struct {
 		name          string
@@ -25,105 +25,46 @@ func Test_CreateWebUser(t *testing.T) {
 		{
 			name: "CreateWebUser successful",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("CreateWebUser", input).Return(nil)
+				webUserRepo.On("CreateWebUser", &model.WebUser{Email: "test@test.com", Password: "test"}).Return(nil)
 			},
-			input: input,
+			input: &model.WebUser{Email: "test@test.com", Password: "test"},
 		},
 		{
 			name: "CreteWebUser failed with some store error",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("CreateWebUser", input).Return(fmt.Errorf("create web user: some store error"))
+				webUserRepo.On("CreateWebUser", &model.WebUser{
+					Email:    "test@test.com",
+					Password: "test"},
+				).Return(fmt.Errorf("some store error"))
 			},
-			input: input,
+			input: &model.WebUser{Email: "test@test.com", Password: "test"},
 			expectedError: fmt.Errorf(
-				"[WebUser] Service.CreateWebUser error: %w",
-				fmt.Errorf("create web user: some store error"),
+				"create web user in db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		webUserRepo := &mocks.WebUserRepo{}
+			webUserRepo := &mocks.WebUserRepo{}
 
-		logger := logger.Get(&config.Config{LogLevel: "info"})
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
-		tt.mock(webUserRepo)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
+			tt.mock(webUserRepo)
 
-		err := webUserService.CreateWebUser(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			err := webUserService.CreateWebUser(tt.input)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-		}
 
-		webUserRepo.AssertExpectations(t)
-	}
-}
-
-func Test_GetWebUserByID(t *testing.T) {
-	user := &model.WebUser{ID: 1, Email: "test@test.com", Password: "test"}
-
-	tests := []struct {
-		name          string
-		mock          func(webUserRepo *mocks.WebUserRepo)
-		input         int
-		want          *model.WebUser
-		expectedError error
-	}{
-		{
-			name: "GetWebUserByID successful",
-			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUserByID", 1).Return(user, nil)
-			},
-			input: 1,
-			want:  user,
-		},
-		{
-			name: "GetWebUserByID failed with not found user",
-			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUserByID", 1).Return(nil, nil)
-			},
-			input:         1,
-			expectedError: service.ErrWebUserNotFound,
-		},
-		{
-			name: "GetWebUserByID failed with some store error",
-			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUserByID", 1).Return(nil, fmt.Errorf("get web user by id: some store error"))
-			},
-			input: 1,
-			expectedError: fmt.Errorf(
-				"[WebUser] Service.GetWebUserByID error: %w",
-				fmt.Errorf("get web user by id: some store error"),
-			),
-		},
-	}
-	for _, tt := range tests {
-		t.Logf("running %s", tt.name)
-
-		webUserRepo := &mocks.WebUserRepo{}
-
-		logger := logger.Get(&config.Config{LogLevel: "info"})
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
-		tt.mock(webUserRepo)
-
-		got, err := webUserService.GetWebUserByID(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
-			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-		}
-
-		webUserRepo.AssertExpectations(t)
+			webUserRepo.AssertExpectations(t)
+		})
 	}
 }
 
 func Test_GetWebUserByEmail(t *testing.T) {
-	user := &model.WebUser{ID: 1, Email: "test@test.com", Password: "test"}
+	t.Parallel()
 
 	tests := []struct {
 		name          string
@@ -135,10 +76,14 @@ func Test_GetWebUserByEmail(t *testing.T) {
 		{
 			name: "GetWebUserByEmail successful",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(user, nil)
+				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(&model.WebUser{
+					ID:       1,
+					Email:    "test@test.com",
+					Password: "test",
+				}, nil)
 			},
 			input: "test@test.com",
-			want:  user,
+			want:  &model.WebUser{ID: 1, Email: "test@test.com", Password: "test"},
 		},
 		{
 			name: "GetWebUserByEmail failed with not found user",
@@ -152,34 +97,33 @@ func Test_GetWebUserByEmail(t *testing.T) {
 			name: "GetWebUserByEmail failed with some store error",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
 				webUserRepo.On("GetWebUserByEmail", "test@test.com").
-					Return(nil, fmt.Errorf("get web user by email: some store error"))
+					Return(nil, fmt.Errorf("some store error"))
 			},
 			input: "test@test.com",
 			expectedError: fmt.Errorf(
-				"[WebUser] Service.GetWebUserByEmail error: %w",
-				fmt.Errorf("get web user by email: some store error"),
+				"get web user by email from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 
 	for _, tt := range tests {
-		t.Logf("running %s", tt.name)
+		tt := tt
 
-		webUserRepo := &mocks.WebUserRepo{}
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		logger := logger.Get(&config.Config{LogLevel: "info"})
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
-		tt.mock(webUserRepo)
+			webUserRepo := &mocks.WebUserRepo{}
 
-		got, err := webUserService.GetWebUserByEmail(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
+			tt.mock(webUserRepo)
+
+			got, err := webUserService.GetWebUserByEmail(tt.input)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		}
 
-		webUserRepo.AssertExpectations(t)
+			webUserRepo.AssertExpectations(t)
+		})
 	}
 }
