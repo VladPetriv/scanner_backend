@@ -52,32 +52,6 @@ func (_m *WebUserRepo) GetWebUserByEmail(email string) (*model.WebUser, error) {
 	return r0, r1
 }
 
-// GetWebUserByID provides a mock function with given fields: id
-func (_m *WebUserRepo) GetWebUserByID(id int) (*model.WebUser, error) {
-	ret := _m.Called(id)
-
-	var r0 *model.WebUser
-	var r1 error
-	if rf, ok := ret.Get(0).(func(int) (*model.WebUser, error)); ok {
-		return rf(id)
-	}
-	if rf, ok := ret.Get(0).(func(int) *model.WebUser); ok {
-		r0 = rf(id)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.WebUser)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(int) error); ok {
-		r1 = rf(id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 type mockConstructorTestingTNewWebUserRepo interface {
 	mock.TestingT
 	Cleanup(func())
