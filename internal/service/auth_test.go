@@ -80,7 +80,6 @@ func TestAuthService_Register(t *testing.T) {
 			assert.Equal(t, tt.expectedError, err)
 
 			webUserRepo.AssertExpectations(t)
-
 		})
 	}
 }
