@@ -25,34 +25,16 @@ func NewSavedService(store *store.Store, logger *logger.Logger, messageService M
 	}
 }
 
-func (s savedService) GetSavedMessages(userID int) ([]model.Saved, error) {
-	logger := s.logger
-
-	messages, err := s.store.Saved.GetSavedMessages(userID)
-	if err != nil {
-		logger.Error().Err(err).Msg("get saved messages by user id")
-		return nil, fmt.Errorf("get saved messages by user id error: %w", err)
-	}
-
-	if messages == nil {
-		logger.Info().Msg("saved messages not found")
-		return nil, ErrSavedMessagesNotFound
-	}
-
-	logger.Info().Interface("messages", messages).Msg("successfully got saved messages")
-	return messages, nil
-}
-
 func (s savedService) GetSavedMessageByMessageID(id int) (*model.Saved, error) {
 	logger := s.logger
 
 	message, err := s.store.Saved.GetSavedMessageByID(id)
 	if err != nil {
-		logger.Error().Err(err).Msg("get saved message by id")
-		return nil, fmt.Errorf("get saved message by id error: %w", err)
+		logger.Error().Err(err).Msg("get saved message by message id")
+		return nil, fmt.Errorf("get saved message by message id from db: %w", err)
 	}
-
 	if message == nil {
+		logger.Info().Msg("saved message not found")
 		return nil, ErrSavedMessageNotFound
 	}
 
@@ -66,7 +48,7 @@ func (s savedService) CreateSavedMessage(savedMessage *model.Saved) error {
 	err := s.store.Saved.CreateSavedMessage(savedMessage)
 	if err != nil {
 		logger.Error().Err(err).Msg("create saved message")
-		return fmt.Errorf("create saved message error: %w", err)
+		return fmt.Errorf("create saved message in db: %w", err)
 	}
 
 	logger.Info().Msg("saved message successfully created")
@@ -79,7 +61,7 @@ func (s savedService) DeleteSavedMessage(id int) error {
 	err := s.store.Saved.DeleteSavedMessage(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("delete saved message")
-		return fmt.Errorf("delete saved message: %w", err)
+		return fmt.Errorf("delete saved message from db: %w", err)
 	}
 
 	logger.Info().Msg("successfully delete saved message")
@@ -91,19 +73,24 @@ func (s savedService) ProcessSavedMessages(userID int) (*LoadSavedMessagesOutput
 
 	var savedMessages []model.FullMessage
 
-	messages, err := s.GetSavedMessages(userID)
+	messages, err := s.store.Saved.GetSavedMessages(userID)
 	if err != nil {
-		if !errors.Is(err, ErrSavedMessagesNotFound) {
-			logger.Error().Err(err).Msg("get saved messages")
-			return nil, fmt.Errorf("[ProcessSavedMessages] get saved messages error: %w", err)
+		if errors.Is(err, ErrSavedMessagesNotFound) {
+			logger.Info().Msg("messages not found")
+			return &LoadSavedMessagesOutput{}, nil
 		}
+
+		logger.Error().Err(err).Msg("get saved messages")
+		return nil, fmt.Errorf("get saved messages from db: %w", err)
 	}
 
 	for _, msg := range messages {
 		fullMessage, err := s.message.GetFullMessageByMessageID(msg.MessageID)
 		if err != nil {
-			if !errors.Is(err, ErrMessageNotFound) {
-				logger.Error().Err(err).Msg("get full message by id")
+			if errors.Is(err, ErrMessageNotFound) {
+				logger.Info().Msg("message not found")
+			} else {
+				logger.Error().Err(err).Msg("get full messages by message id")
 			}
 
 			continue

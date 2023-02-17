@@ -69,8 +69,7 @@ type ReplyService interface {
 var ErrRepliesNotFound = errors.New("replies not found")
 
 type SavedService interface {
-	GetSavedMessages(UserID int) ([]model.Saved, error)
-	GetSavedMessageByMessageID(ID int) (*model.Saved, error)
+	GetSavedMessageByMessageID(id int) (*model.Saved, error)
 	CreateSavedMessage(saved *model.Saved) error
 	DeleteSavedMessage(ID int) error
 	ProcessSavedMessages(userID int) (*LoadSavedMessagesOutput, error)
