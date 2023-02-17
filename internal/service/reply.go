@@ -28,7 +28,7 @@ func (s replyService) CreateReply(reply *model.DBReply) error {
 	err := s.store.Reply.CreateReply(reply)
 	if err != nil {
 		logger.Error().Err(err).Msg("create reply")
-		return fmt.Errorf("create reply error: %w", err)
+		return fmt.Errorf("create reply in db: %w", err)
 	}
 
 	logger.Info().Msg("reply successfully created")
@@ -41,11 +41,11 @@ func (s replyService) GetFullRepliesByMessageID(messageID int) ([]model.FullRepl
 	replies, err := s.store.Reply.GetFullRepliesByMessageID(messageID)
 	if err != nil {
 		logger.Error().Err(err).Msg("get replies by message id")
-		return nil, fmt.Errorf("get replies by message id error: %w", err)
+		return nil, fmt.Errorf("get replies by message id from db: %w", err)
 	}
 
 	if replies == nil {
-		logger.Info().Msg("replies not found")
+		logger.Info().Msg("full replies by message id not found")
 		return nil, ErrRepliesNotFound
 	}
 
