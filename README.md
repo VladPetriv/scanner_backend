@@ -56,22 +56,16 @@ Start the server locally:
 
 ```bash
   # Make sure that Apache Kafka and PostgreSQL are running
-  make run-l # Or you can use "go run ./cmd/main.go"
+  make run
 ```
 
-Start the server with docker compose:
 
-```bash
-  make build
-  
-  make run 
-```
 ## Running Tests
 
 To run tests, run the following command:
 
 ```bash
-  # Run it only if "mocks" folder not exist or if you updated "service.go" or "repository.go" files
+  # Run it only if "mocks" folder not exist or if you updated "repository.go" files
   make mock 
 ```
 
