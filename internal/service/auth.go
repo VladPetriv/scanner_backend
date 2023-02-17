@@ -30,8 +30,10 @@ func (s authService) Register(user *model.WebUser) error {
 	if err != nil {
 		if !errors.Is(err, ErrWebUserNotFound) {
 			logger.Error().Err(err).Msg("get web user by email")
-			return fmt.Errorf("[Register] get web user by email error: %w", err)
+			return fmt.Errorf("[Register]: %w", err)
 		}
+
+		logger.Info().Str("email", user.Email).Msg("web user not found")
 	}
 	if candidate != nil {
 		logger.Info().Msg("web user is exist")
@@ -40,8 +42,8 @@ func (s authService) Register(user *model.WebUser) error {
 
 	hashedPassword, err := password.HashPassword(user.Password)
 	if err != nil {
-		logger.Error().Err(err).Msg("hash password")
-		return fmt.Errorf("hash password error: %w", err)
+		logger.Error().Err(err).Msg("hash user password")
+		return fmt.Errorf("hash user password: %w", err)
 	}
 
 	user.Password = hashedPassword
@@ -49,7 +51,7 @@ func (s authService) Register(user *model.WebUser) error {
 	err = s.WebUserService.CreateWebUser(user)
 	if err != nil {
 		logger.Error().Err(err).Msg("create web user")
-		return fmt.Errorf("[Register] create web user error: %w", err)
+		return fmt.Errorf("[Register]: %w", err)
 	}
 
 	logger.Info().Msg("user successfully registered")
@@ -62,16 +64,19 @@ func (s authService) Login(email string, userPassword string) (string, error) {
 	candidate, err := s.WebUserService.GetWebUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, ErrWebUserNotFound) {
-			logger.Error().Err(err).Msg("get web user by email")
-			return "", fmt.Errorf("[Login] get web user by email error: %w", err)
+			logger.Info().Msg("web user not found")
+			return "", err
 		}
+
+		logger.Error().Err(err).Msg("get web user by email")
+		return "", fmt.Errorf("[Login]: %w", err)
 	}
 
-	if password.ComparePassword(userPassword, candidate.Password) {
-		logger.Info().Msg("user successfully logined")
-		return email, nil
+	if !password.ComparePassword(userPassword, candidate.Password) {
+		logger.Info().Msg("incorrect password")
+		return "", ErrIncorrectPassword
 	}
 
-	logger.Info().Msg("incorrect password")
-	return "", ErrIncorrectPassword
+	logger.Info().Msg("user successfully logined")
+	return email, nil
 }
