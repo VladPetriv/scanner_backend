@@ -31,20 +31,23 @@ func (s channelService) CreateChannel(channel *model.DBChannel) error {
 
 	candidate, err := s.GetChannelByName(channel.Name)
 	if err != nil {
-		if !errors.Is(err, ErrChannelNotFound) {
-			logger.Error().Err(err).Msg("get channel by name")
-			return fmt.Errorf("[CreateChannel] get channel by name error: %w", err)
+		if errors.Is(err, ErrChannelNotFound) {
+			logger.Info().Str("channel name", channel.Name).Msg("channel not found")
+			return err
 		}
+
+		logger.Error().Err(err).Msg("get channel by name")
+		return fmt.Errorf("[CreateChannel]: %w", err)
 	}
 	if candidate != nil {
-		logger.Info().Msg("channel exists")
+		logger.Info().Interface("candidate", candidate).Msg("channel exists")
 		return ErrChannelExists
 	}
 
 	err = s.store.Channel.CreateChannel(channel)
 	if err != nil {
 		logger.Error().Err(err).Msg("create channel")
-		return fmt.Errorf("create channel error: %w", err)
+		return fmt.Errorf("create channel in db: %w", err)
 	}
 
 	logger.Info().Msg("channel successfully created")
@@ -57,7 +60,7 @@ func (s channelService) GetChannels() ([]model.Channel, error) {
 	channels, err := s.store.Channel.GetChannels()
 	if err != nil {
 		logger.Error().Err(err).Msg("get channels")
-		return nil, fmt.Errorf("get channels error: %w", err)
+		return nil, fmt.Errorf("get channels from db: %w", err)
 	}
 
 	if channels == nil {
@@ -75,11 +78,11 @@ func (s channelService) GetChannelsByPage(page int) ([]model.Channel, error) {
 	channels, err := s.store.Channel.GetChannelsByPage(convert.PageToOffset(page))
 	if err != nil {
 		logger.Error().Err(err).Msg("get channels by page")
-		return nil, fmt.Errorf("get channels by page error: %w", err)
+		return nil, fmt.Errorf("get channels by page from db: %w", err)
 	}
 
 	if channels == nil {
-		logger.Info().Msg("channels not found")
+		logger.Info().Int("page", page).Msg("channels not found")
 		return nil, ErrChannelsNotFound
 	}
 
@@ -93,7 +96,7 @@ func (s channelService) GetChannelByName(name string) (*model.Channel, error) {
 	channel, err := s.store.Channel.GetChannelByName(name)
 	if err != nil {
 		logger.Error().Err(err).Msg("get channel by name")
-		return nil, fmt.Errorf("get channel by name error: %w", err)
+		return nil, fmt.Errorf("get channel by name from db: %w", err)
 	}
 
 	if channel == nil {
@@ -114,6 +117,11 @@ func (s channelService) GetChannelStats(channelID int) (*model.Stat, error) {
 		return nil, fmt.Errorf("get channels statistic error: %w", err)
 	}
 
+	if stat == nil {
+		logger.Info().Int("channel id", channelID).Msg("channel statistic not found")
+		return nil, ErrChannelStatisticNotFound
+	}
+
 	logger.Info().Interface("statistic", stat).Msg("successfully got channel statistic")
 	return stat, nil
 }
@@ -123,26 +131,40 @@ func (s channelService) ProcessChannelPage(channelName string, page int) (*LoadC
 
 	channel, err := s.GetChannelByName(channelName)
 	if err != nil {
-		if !errors.Is(err, ErrChannelNotFound) {
-			logger.Error().Err(err).Msg("get channel by name")
-			return nil, fmt.Errorf("[ProcessChannelPage] get channel by name error: %w", err)
+		if errors.Is(err, ErrChannelNotFound) {
+			logger.Info().Str("channel name", channelName).Msg("channel by name not found")
+			return &LoadChannelOutput{}, nil
 		}
+
+		logger.Error().Err(err).Msg("get channel by name")
+		return nil, fmt.Errorf("[ProcessChannelPage]: %w", err)
 	}
 
 	messagesCount, err := s.message.GetMessagesCountByChannelID(channel.ID)
 	if err != nil {
-		if !errors.Is(err, ErrMessagesCountNotFound) {
-			logger.Error().Err(err).Msg("get messages count by channel id")
-			return nil, fmt.Errorf("[ProcessChannelPage] get message count by channel id error: %w", err)
+		if errors.Is(err, ErrMessagesCountNotFound) {
+			logger.Info().Int("channel id", channel.ID).Msg("messages count by channel id not found")
+			return &LoadChannelOutput{
+				Channel: *channel,
+			}, nil
 		}
+
+		logger.Error().Err(err).Msg("get messages count by channel id")
+		return nil, fmt.Errorf("[ProcessChannelPage] get message count by channel id error: %w", err)
 	}
 
 	messages, err := s.message.GetFullMessagesByChannelIDAndPage(channel.ID, page)
 	if err != nil {
-		if !errors.Is(err, ErrMessagesNotFound) {
-			logger.Error().Err(err).Msg("get messages by channel id and page")
-			return nil, fmt.Errorf("[ProcessChannelPage] get messages by channel id and page error: %w", err)
+		if errors.Is(err, ErrMessagesNotFound) {
+			logger.Info().Int("page", page).Msg("messages not found")
+			return &LoadChannelOutput{
+				Channel:       *channel,
+				MessagesCount: messagesCount,
+			}, nil
 		}
+
+		logger.Error().Err(err).Msg("get messages by channel id and page")
+		return nil, fmt.Errorf("[ProcessChannelPage]: %w", err)
 	}
 
 	return &LoadChannelOutput{
@@ -157,10 +179,13 @@ func (s channelService) ProcessChannelsPage(page int) (*LoadChannelsOutput, erro
 
 	channels, err := s.GetChannelsByPage(page)
 	if err != nil {
-		if !errors.Is(err, ErrChannelsNotFound) {
-			logger.Error().Err(err).Msg("get channels by page")
-			return nil, fmt.Errorf("[ProcessChannelsPage] get channels by page error: %w", err)
+		if errors.Is(err, ErrChannelsNotFound) {
+			logger.Info().Int("page", page).Msg("channels by page not found")
+			return &LoadChannelsOutput{}, nil
 		}
+
+		logger.Error().Err(err).Msg("get channels by page")
+		return nil, fmt.Errorf("[ProcessChannelsPage] get channels by page error: %w", err)
 	}
 
 	for index, channel := range channels {

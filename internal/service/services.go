@@ -27,9 +27,10 @@ type LoadChannelsOutput struct {
 }
 
 var (
-	ErrChannelsNotFound = errors.New("channels not found")
-	ErrChannelNotFound  = errors.New("channel not found")
-	ErrChannelExists    = errors.New("channel is exist")
+	ErrChannelsNotFound         = errors.New("channels not found")
+	ErrChannelNotFound          = errors.New("channel not found")
+	ErrChannelExists            = errors.New("channel is exist")
+	ErrChannelStatisticNotFound = errors.New("channel statistic not found")
 )
 
 type MessageService interface {
