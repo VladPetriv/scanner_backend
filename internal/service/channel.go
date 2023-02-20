@@ -113,7 +113,7 @@ func (s channelService) GetChannelStats(channelID int) (*model.Stat, error) {
 	stat, err := s.store.Channel.GetChannelStats(channelID)
 	if err != nil {
 		logger.Error().Err(err).Msg("get channels statistic")
-		return nil, fmt.Errorf("get channels statistic error: %w", err)
+		return nil, fmt.Errorf("get channel statistic from db: %w", err)
 	}
 
 	if stat == nil {
