@@ -149,7 +149,7 @@ func (s channelService) ProcessChannelPage(channelName string, page int) (*LoadC
 		}
 
 		logger.Error().Err(err).Msg("get messages count by channel id")
-		return nil, fmt.Errorf("[ProcessChannelPage] get message count by channel id error: %w", err)
+		return nil, fmt.Errorf("[ProcessChannelPage]: %w", err)
 	}
 
 	messages, err := s.message.GetFullMessagesByChannelIDAndPage(channel.ID, page)
@@ -184,7 +184,7 @@ func (s channelService) ProcessChannelsPage(page int) (*LoadChannelsOutput, erro
 		}
 
 		logger.Error().Err(err).Msg("get channels by page")
-		return nil, fmt.Errorf("[ProcessChannelsPage] get channels by page error: %w", err)
+		return nil, fmt.Errorf("[ProcessChannelsPage]: %w", err)
 	}
 
 	for index, channel := range channels {
