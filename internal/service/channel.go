@@ -31,13 +31,12 @@ func (s channelService) CreateChannel(channel *model.DBChannel) error {
 
 	candidate, err := s.GetChannelByName(channel.Name)
 	if err != nil {
-		if errors.Is(err, ErrChannelNotFound) {
-			logger.Info().Str("channel name", channel.Name).Msg("channel not found")
-			return err
+		if !errors.Is(err, ErrChannelNotFound) {
+			logger.Error().Err(err).Msg("get channel by name")
+			return fmt.Errorf("[CreateChannel]: %w", err)
 		}
 
-		logger.Error().Err(err).Msg("get channel by name")
-		return fmt.Errorf("[CreateChannel]: %w", err)
+		logger.Info().Str("channel name", channel.Name).Msg("channel not found")
 	}
 	if candidate != nil {
 		logger.Info().Interface("candidate", candidate).Msg("channel exists")
