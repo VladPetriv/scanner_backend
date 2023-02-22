@@ -37,11 +37,9 @@ type MessageService interface {
 	CreateMessage(message *model.DBMessage) (int, error)
 	GetMessagesCount() (int, error)
 	GetMessagesCountByChannelID(ID int) (int, error)
-	GetMessageByTitle(title string) (*model.DBMessage, error)
-	GetFullMessagesByPage(page int) ([]model.FullMessage, error)
 	GetFullMessagesByChannelIDAndPage(ID, page int) ([]model.FullMessage, error)
 	GetFullMessagesByUserID(ID int) ([]model.FullMessage, error)
-	GetFullMessageByMessageID(ID int) (*model.FullMessage, error)
+	GetFullMessageByMessageID(id int) (*model.FullMessage, error)
 	ProcessMessagePage(messageID int) (*LoadMessageOutput, error)
 	ProcessHomePage(page int) (*LoadHomeOutput, error)
 }
