@@ -29,12 +29,13 @@ func NewMessageService(store *store.Store, logger *logger.Logger, replyService R
 func (s messageService) CreateMessage(message *model.DBMessage) (int, error) {
 	logger := s.logger
 
-	candidate, err := s.GetMessageByTitle(message.Title)
+	candidate, err := s.store.Message.GetMessageByTitle(message.Title)
 	if err != nil {
-		if !errors.Is(err, ErrMessageNotFound) {
-			logger.Error().Err(err).Msg("get message by title")
-			return 0, fmt.Errorf("[CreateMessage] get message by title error: %w", err)
-		}
+		logger.Error().Err(err).Msg("get message by title")
+		return 0, fmt.Errorf("get message by title from db: %w", err)
+	}
+	if candidate == nil {
+		logger.Info().Str("message title", message.Title).Msg("message not found")
 	}
 
 	if candidate != nil && candidate.ChannelID == message.ChannelID {
@@ -45,7 +46,7 @@ func (s messageService) CreateMessage(message *model.DBMessage) (int, error) {
 	id, err := s.store.Message.CreateMessage(message)
 	if err != nil {
 		logger.Error().Err(err).Msg("create message")
-		return id, fmt.Errorf("create message error: %w", err)
+		return id, fmt.Errorf("create message in db: %w", err)
 	}
 
 	logger.Info().Int("message id", id).Msg("message successfully created")
@@ -58,7 +59,7 @@ func (s messageService) GetMessagesCount() (int, error) {
 	count, err := s.store.Message.GetMessagesCount()
 	if err != nil {
 		logger.Error().Err(err).Msg("get messages count")
-		return 0, fmt.Errorf("get messages count error: %w", err)
+		return 0, fmt.Errorf("get messages count from db: %w", err)
 	}
 
 	if count == 0 {
@@ -76,7 +77,7 @@ func (s messageService) GetMessagesCountByChannelID(id int) (int, error) {
 	count, err := s.store.Message.GetMessagesCountByChannelID(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("get messages count by channel id")
-		return 0, fmt.Errorf("get messages count by channel id error: %w", err)
+		return 0, fmt.Errorf("get messages count by channel id from db: %w", err)
 	}
 
 	if count == 0 {
@@ -88,53 +89,17 @@ func (s messageService) GetMessagesCountByChannelID(id int) (int, error) {
 	return count, nil
 }
 
-func (s messageService) GetMessageByTitle(title string) (*model.DBMessage, error) {
-	logger := s.logger
-
-	message, err := s.store.Message.GetMessageByTitle(title)
-	if err != nil {
-		logger.Error().Err(err).Msg("get message by title")
-		return nil, fmt.Errorf("get message by title error: %w", err)
-	}
-
-	if message == nil {
-		logger.Info().Msg("message not found")
-		return nil, ErrMessageNotFound
-	}
-
-	logger.Info().Interface("message", message).Msg("successfully got message by title")
-	return message, nil
-}
-
-func (s messageService) GetFullMessagesByPage(page int) ([]model.FullMessage, error) {
-	logger := s.logger
-
-	messages, err := s.store.Message.GetFullMessagesByPage(convert.PageToOffset(page))
-	if err != nil {
-		logger.Error().Err(err).Msg("get full messages by page")
-		return nil, fmt.Errorf("get full messages by page error: %w", err)
-	}
-
-	if messages == nil {
-		logger.Info().Msg("messages not found")
-		return nil, ErrMessagesNotFound
-	}
-
-	logger.Info().Interface("messages", messages).Msg("successfully got message by page")
-	return messages, nil
-}
-
 func (s messageService) GetFullMessagesByChannelIDAndPage(id, page int) ([]model.FullMessage, error) {
 	logger := s.logger
 
 	messages, err := s.store.Message.GetFullMessagesByChannelIDAndPage(id, convert.PageToOffset(page))
 	if err != nil {
-		logger.Error().Err(err).Msg("get full messages by page and channel id")
-		return nil, fmt.Errorf("get full messages by page and channel id error: %w", err)
+		logger.Error().Err(err).Msg("get full messages by channel id and page")
+		return nil, fmt.Errorf("get full messages by channel id and page from db: %w", err)
 	}
 
 	if messages == nil {
-		logger.Info().Msg("messages not found")
+		logger.Info().Msg("full messages by channel id and page not found")
 		return nil, ErrMessagesNotFound
 	}
 
@@ -148,11 +113,11 @@ func (s messageService) GetFullMessagesByUserID(id int) ([]model.FullMessage, er
 	messages, err := s.store.Message.GetFullMessagesByUserID(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("get full messages by user id")
-		return nil, fmt.Errorf("get full messages by user id error: %w", err)
+		return nil, fmt.Errorf("get full messages by user id from db: %w", err)
 	}
 
 	if messages == nil {
-		logger.Info().Msg("messages not found")
+		logger.Info().Msg("full messages by user id not found")
 		return nil, ErrMessagesNotFound
 	}
 
@@ -166,11 +131,11 @@ func (s messageService) GetFullMessageByMessageID(id int) (*model.FullMessage, e
 	message, err := s.store.Message.GetFullMessageByID(id)
 	if err != nil {
 		logger.Error().Err(err).Msg("get full message by message id")
-		return nil, fmt.Errorf("get full message by message id error: %w", err)
+		return nil, fmt.Errorf("get full message by message id from db: %w", err)
 	}
 
 	if message == nil {
-		logger.Info().Msg("message not found")
+		logger.Info().Int("message id", id).Msg("message by id not found")
 		return nil, ErrMessageNotFound
 	}
 
@@ -181,20 +146,27 @@ func (s messageService) GetFullMessageByMessageID(id int) (*model.FullMessage, e
 func (s messageService) ProcessMessagePage(messageID int) (*LoadMessageOutput, error) {
 	logger := s.logger
 
-	message, err := s.GetFullMessageByMessageID(messageID)
+	message, err := s.store.Message.GetFullMessageByID(messageID)
 	if err != nil {
-		if !errors.Is(err, ErrMessageNotFound) {
-			logger.Error().Err(err).Msg("get message by id")
-			return nil, fmt.Errorf("[ProcessMessagePage] get message by id error: %w", err)
-		}
+		logger.Error().Err(err).Msg("get full message by id")
+		return nil, fmt.Errorf("get full message by id from db: %w", err)
+	}
+	if message == nil {
+		logger.Info().Int("message id", messageID).Msg("message by id not found")
+		return &LoadMessageOutput{}, nil
 	}
 
 	replies, err := s.reply.GetFullRepliesByMessageID(message.ID)
 	if err != nil {
-		if !errors.Is(err, ErrRepliesNotFound) {
-			logger.Error().Err(err).Msg("get replies by message id")
-			return nil, fmt.Errorf("[ProcessMessagePage] get replies by message id error: %w", err)
+		if errors.Is(err, ErrRepliesNotFound) {
+			logger.Info().Int("message id", message.ID).Msg("full replies by message id not found")
+			return &LoadMessageOutput{
+				Message: message,
+			}, nil
 		}
+
+		logger.Error().Err(err).Msg("get replies by message id")
+		return nil, fmt.Errorf("[ProcessMessagePage]: %w", err)
 	}
 
 	message.Replies = replies
@@ -206,20 +178,25 @@ func (s messageService) ProcessMessagePage(messageID int) (*LoadMessageOutput, e
 func (s messageService) ProcessHomePage(page int) (*LoadHomeOutput, error) {
 	logger := s.logger
 
-	messagesCount, err := s.GetMessagesCount()
+	messagesCount, err := s.store.Message.GetMessagesCount()
 	if err != nil {
-		if !errors.Is(err, ErrMessagesCountNotFound) {
-			logger.Error().Err(err).Msg("get messages count")
-			return nil, fmt.Errorf("[ProcessMessagePage] get messages count error: %w", err)
-		}
+		logger.Error().Err(err).Msg("get messages count")
+		return nil, fmt.Errorf("get messages count from db: %w", err)
+	}
+	if messagesCount == 0 {
+		logger.Info().Msg("message count not found")
 	}
 
-	messages, err := s.GetFullMessagesByPage(page)
+	messages, err := s.store.Message.GetFullMessagesByPage(convert.PageToOffset(page))
 	if err != nil {
-		if !errors.Is(err, ErrMessagesNotFound) {
-			logger.Error().Err(err).Msg("get messages by page")
-			return nil, fmt.Errorf("[ProcessMessagePage] get messages by page error: %w", err)
-		}
+		logger.Error().Err(err).Msg("get messages by page")
+		return nil, fmt.Errorf("[ProcessMessagePage] get messages by page error: %w", err)
+	}
+	if messages == nil {
+		logger.Info().Int("page", page).Msg("full messages by page not found")
+		return &LoadHomeOutput{
+			MessagesCount: messagesCount,
+		}, nil
 	}
 
 	return &LoadHomeOutput{
