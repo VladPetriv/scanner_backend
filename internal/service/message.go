@@ -185,18 +185,13 @@ func (s messageService) ProcessHomePage(page int) (*LoadHomeOutput, error) {
 	}
 	if messagesCount == 0 {
 		logger.Info().Msg("message count not found")
+		return &LoadHomeOutput{}, nil
 	}
 
 	messages, err := s.store.Message.GetFullMessagesByPage(convert.PageToOffset(page))
 	if err != nil {
 		logger.Error().Err(err).Msg("get messages by page")
-		return nil, fmt.Errorf("[ProcessMessagePage] get messages by page error: %w", err)
-	}
-	if messages == nil {
-		logger.Info().Int("page", page).Msg("full messages by page not found")
-		return &LoadHomeOutput{
-			MessagesCount: messagesCount,
-		}, nil
+		return nil, fmt.Errorf("get full messages by page from db: %w", err)
 	}
 
 	return &LoadHomeOutput{
