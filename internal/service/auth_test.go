@@ -8,10 +8,14 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Register(t *testing.T) {
+func TestAuthService_Register(t *testing.T) {
+	t.Parallel()
+
 	input := &model.WebUser{Email: "test@test.com", Password: "test"}
 
 	tests := []struct {
@@ -39,48 +43,50 @@ func Test_Register(t *testing.T) {
 		{
 			name: "Register failed with some store error when get user by email",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(nil, fmt.Errorf("get web user by email: some error"))
+				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(nil, fmt.Errorf("some store error"))
 			},
-			input: input,
+			input: &model.WebUser{Email: "test@test.com", Password: "test"},
 			expectedError: fmt.Errorf(
-				"[Auth] Service.Register error: %w",
-				fmt.Errorf("[WebUser] Service.GetWebUserByEmail error: %w", fmt.Errorf("get web user by email: some error")),
+				"[Register]: %w",
+				fmt.Errorf("get web user by email from db: %w", fmt.Errorf("some store error")),
 			),
 		},
 		{
 			name: "Register failed with some store error when create user",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
 				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(nil, nil)
-				webUserRepo.On("CreateWebUser", input).Return(fmt.Errorf("create web user: some error"))
+				webUserRepo.On("CreateWebUser", input).Return(fmt.Errorf("some store error"))
 			},
 			input: input,
 			expectedError: fmt.Errorf(
-				"[Auth] Service.Register error: %w",
-				fmt.Errorf("[WebUser] Service.CreateWebUser error: %w", fmt.Errorf("create web user: some error")),
+				"[Register]: %w",
+				fmt.Errorf("create web user in db: %w", fmt.Errorf("some store error")),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
-		authService := service.NewAuthService(webUserService)
-		tt.mock(webUserRepo)
+			webUserRepo := &mocks.WebUserRepo{}
 
-		err := authService.Register(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
+			authService := service.NewAuthService(webUserService, logger)
+			tt.mock(webUserRepo)
+
+			err := authService.Register(tt.input)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-		}
 
-		webUserRepo.AssertExpectations(t)
+			webUserRepo.AssertExpectations(t)
+		})
 	}
 }
 
-func Test_Login(t *testing.T) {
+func TestAuthService_Login(t *testing.T) {
+	t.Parallel()
+
 	returned := &model.WebUser{
 		Email:    "test@test.com",
 		Password: "$2a$14$EutZAenAn0GJ223ZMKX/h.WSz8pMuejC0D1QerS5160ibJqjG1Eve",
@@ -112,10 +118,7 @@ func Test_Login(t *testing.T) {
 			input: &model.WebUser{
 				Email: "test@test.com",
 			},
-			expectedError: fmt.Errorf(
-				"[Auth] Service.Login error: %w",
-				service.ErrWebUserNotFound,
-			),
+			expectedError: service.ErrWebUserNotFound,
 		},
 		{
 			name: "Login failed with incorrect password",
@@ -131,34 +134,34 @@ func Test_Login(t *testing.T) {
 		{
 			name: "Login failed with some store error when get user",
 			mock: func(webUserRepo *mocks.WebUserRepo) {
-				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(nil, fmt.Errorf("get web user by email: some error"))
+				webUserRepo.On("GetWebUserByEmail", "test@test.com").Return(nil, fmt.Errorf("some store error"))
 			},
 			input: &model.WebUser{
 				Email: "test@test.com",
 			},
 			expectedError: fmt.Errorf(
-				"[Auth] Service.Login error: %w",
-				fmt.Errorf("[WebUser] Service.GetWebUserByEmail error: %w", fmt.Errorf("get web user by email: some error")),
+				"[Login]: %w",
+				fmt.Errorf("get web user by email from db: %w", fmt.Errorf("some store error")),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		webUserRepo := &mocks.WebUserRepo{}
-		webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo})
-		authService := service.NewAuthService(webUserService)
-		tt.mock(webUserRepo)
+			webUserRepo := &mocks.WebUserRepo{}
 
-		got, err := authService.Login(tt.input.Email, tt.input.Password)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			webUserService := service.NewWebUserService(&store.Store{WebUser: webUserRepo}, logger)
+			authService := service.NewAuthService(webUserService, logger)
+			tt.mock(webUserRepo)
+
+			got, err := authService.Login(tt.input.Email, tt.input.Password)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		}
 
-		webUserRepo.AssertExpectations(t)
+			webUserRepo.AssertExpectations(t)
+		})
 	}
 }

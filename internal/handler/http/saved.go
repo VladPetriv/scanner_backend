@@ -10,63 +10,55 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
 
-type SavedPageData struct {
+type savedPageData struct {
 	DefaultPageData PageData
 	Messages        []model.FullMessage
 	MessagesLength  int
 }
 
 func (h Handler) loadSavedMessagesPage(w http.ResponseWriter, r *http.Request) {
+	data := savedPageData{
+		DefaultPageData: PageData{
+			Type:         "saved",
+			Title:        "Saved user messages",
+			WebUserEmail: "",
+			WebUserID:    0,
+		},
+	}
+
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
-	}
 
-	var messages []model.FullMessage
-
-	savedMessages, err := h.service.Saved.GetSavedMessages(userID)
-	if err != nil {
-		h.log.Error().Err(err).Msg("get saved messages")
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+		return
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
-
-	for _, msg := range savedMessages {
-		fullMessage, err := h.service.Message.GetFullMessageByMessageID(msg.MessageID)
-		if err != nil {
-			h.log.Error().Err(err).Msg("get full message by message id")
-
-			continue
-		}
-
-		fullMessage.SavedID = msg.ID
-
-		messages = append(messages, *fullMessage)
+	if navBarChannels != nil {
+		data.DefaultPageData.Channels = GetRightChannelsCountForNavBar(navBarChannels)
+		data.DefaultPageData.ChannelsLength = len(navBarChannels)
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
-
-	data := SavedPageData{
-		DefaultPageData: PageData{
-			Type:           "saved",
-			Title:          "Saved user messages",
-			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
-			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   "",
-			WebUserID:      0,
-		},
-		Messages:       messages,
-		MessagesLength: len(messages),
-	}
 	if user != nil {
 		data.DefaultPageData.WebUserEmail = user.Email
 		data.DefaultPageData.WebUserID = user.ID
+	}
+
+	pageData, err := h.service.Saved.ProcessSavedMessages(userID)
+	if err != nil {
+		h.log.Error().Err(err).Msg("get data for saved page")
+	}
+	if pageData != nil {
+		data.Messages = pageData.SavedMessages
+		data.MessagesLength = pageData.SavedMessagesCount
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)
@@ -79,23 +71,32 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert user id to int")
+
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+		return
 	}
 
 	messageID, err := strconv.Atoi(mux.Vars(r)["message_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert message id to int")
+
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+		return
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
+
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+		return
 	}
 
 	err = h.service.Saved.CreateSavedMessage(&model.Saved{WebUserID: userID, MessageID: messageID})
 	if err != nil {
 		h.log.Error().Err(err).Msg("create saved message")
 
-		http.Redirect(w, r, "/home", http.StatusConflict)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
 	}
 
@@ -103,17 +104,23 @@ func (h Handler) createSavedMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) deleteSavedMessage(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(r)["saved_id"])
+	messageID, err := strconv.Atoi(mux.Vars(r)["saved_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("convert saved message id to int")
+
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+		return
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
+
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
+		return
 	}
 
-	err = h.service.Saved.DeleteSavedMessage(id)
+	err = h.service.Saved.DeleteSavedMessage(messageID)
 	if err != nil {
 		h.log.Error().Err(err).Msg("delete saved message")
 	}

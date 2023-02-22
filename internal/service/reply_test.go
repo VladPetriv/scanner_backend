@@ -10,9 +10,11 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
-func Test_CreateReply(t *testing.T) {
+func TestReplyService_CreateReply(t *testing.T) {
 	t.Parallel()
 
 	replyInput := &model.DBReply{UserID: 1, MessageID: 1, Title: "test", ImageURL: "test.jpg"}
@@ -31,14 +33,14 @@ func Test_CreateReply(t *testing.T) {
 			input: replyInput,
 		},
 		{
-			name: "CreteReply failed with some sql error",
+			name: "CreteReply failed with some store error",
 			mock: func(replyRepo *mocks.ReplyRepo) {
-				replyRepo.On("CreateReply", replyInput).Return(fmt.Errorf("failed to create reply: some error"))
+				replyRepo.On("CreateReply", replyInput).Return(fmt.Errorf("some store error"))
 			},
 			input: replyInput,
 			expectedError: fmt.Errorf(
-				"[Reply] Service.CreateReply error: %w",
-				fmt.Errorf("failed to create reply: some error"),
+				"create reply in db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
@@ -46,16 +48,13 @@ func Test_CreateReply(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		replyRepo := &mocks.ReplyRepo{}
-		replyService := service.NewReplyService(&store.Store{Reply: replyRepo})
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
 		tt.mock(replyRepo)
 
 		err := replyService.CreateReply(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
-			assert.EqualValues(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-		}
+		assert.Equal(t, tt.expectedError, err)
 
 		replyRepo.AssertExpectations(t)
 	}
@@ -93,12 +92,12 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 		{
 			name: "GetFullRepliesByMessageID failed with store error",
 			mock: func(replyRepo *mocks.ReplyRepo) {
-				replyRepo.On("GetFullRepliesByMessageID", 1).Return(nil, fmt.Errorf("get full replies by message id: some error"))
+				replyRepo.On("GetFullRepliesByMessageID", 1).Return(nil, fmt.Errorf("some store error"))
 			},
 			input: 1,
 			expectedError: fmt.Errorf(
-				"[Reply] Service.GetFullRepliesByMessageID error: %w",
-				fmt.Errorf("get full replies by message id: some error"),
+				"get replies by message id from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
@@ -107,17 +106,14 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 		t.Logf("running: %s", tt.name)
 
 		replyRepo := &mocks.ReplyRepo{}
-		replyService := service.NewReplyService(&store.Store{Reply: replyRepo})
+
+		logger := logger.Get(&config.Config{LogLevel: "info"})
+		replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
 		tt.mock(replyRepo)
 
 		got, err := replyService.GetFullRepliesByMessageID(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
-			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-		}
+		assert.Equal(t, tt.expectedError, err)
+		assert.Equal(t, tt.want, got)
 
 		replyRepo.AssertExpectations(t)
 	}

@@ -1,8 +1,6 @@
 package pg
 
 import (
-	"fmt"
-
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
 
@@ -20,7 +18,7 @@ func (repo ReplyRepo) CreateReply(reply *model.DBReply) error {
 		reply.UserID, reply.MessageID, reply.Title, reply.ImageURL,
 	)
 	if err != nil {
-		return fmt.Errorf("create reply: %w", err)
+		return err
 	}
 
 	return nil
@@ -40,7 +38,7 @@ func (repo ReplyRepo) GetFullRepliesByMessageID(messageID int) ([]model.FullRepl
 		messageID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get full replies by message id: %w", err)
+		return nil, err
 	}
 
 	if len(replies) == 0 {

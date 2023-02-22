@@ -3,7 +3,6 @@ package pg
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
@@ -24,7 +23,7 @@ func (repo UserRepo) CreateUser(user *model.User) (int, error) {
 		user.Username, user.FullName, user.ImageURL,
 	)
 	if err := row.Scan(&id); err != nil {
-		return 0, fmt.Errorf("create tg user: %w", err)
+		return 0, err
 	}
 
 	return id, nil
@@ -39,7 +38,7 @@ func (repo UserRepo) GetUserByUsername(username string) (*model.User, error) {
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get user by username: %w", err)
+		return nil, err
 	}
 
 	return &user, nil
@@ -54,7 +53,7 @@ func (repo UserRepo) GetUserByID(id int) (*model.User, error) {
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get user by id: %w", err)
+		return nil, err
 	}
 
 	return &user, nil

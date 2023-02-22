@@ -12,7 +12,7 @@ import (
 
 const messagesPerPage = 10
 
-type HomePageData struct {
+type homePageData struct {
 	DefaultPageData PageData
 	Messages        []model.FullMessage
 	MessagesLength  int
@@ -20,49 +20,48 @@ type HomePageData struct {
 }
 
 func (h Handler) loadHomePage(w http.ResponseWriter, r *http.Request) {
+	data := homePageData{
+		DefaultPageData: PageData{
+			Title:        "Telegram Overflow",
+			Type:         "messages",
+			WebUserEmail: "",
+			WebUserID:    0,
+		},
+	}
+
 	page, err := strconv.Atoi(r.URL.Query().Get("page"))
 	if err != nil {
-		h.log.Error().Err(err).Msg("convert page to int")
+		h.log.Error().Err(err).Msg("convert page value for messages to int")
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error().Err(err).Msg("get channels for nav bar")
 	}
-
-	messagesCount, err := h.service.Message.GetMessagesCount()
-	if err != nil {
-		h.log.Error().Err(err).Msg("get messages count")
+	if navBarChannels != nil {
+		data.DefaultPageData.Channels = GetRightChannelsCountForNavBar(navBarChannels)
+		data.DefaultPageData.ChannelsLength = len(navBarChannels)
 	}
-
-	messages, err := h.service.Message.GetFullMessagesByPage(page)
-	if err != nil {
-		h.log.Error().Err(err).Msg("get full messages by page")
-	}
-
-	messages = updateMessagesStatuses(messages, h.service)
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
-
-	data := HomePageData{
-		DefaultPageData: PageData{
-			Title:          "Telegram Overflow",
-			Type:           "messages",
-			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
-			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   "",
-			WebUserID:      0,
-		},
-		Messages:       messages,
-		MessagesLength: messagesCount,
-		Pager:          pagination.New(messagesCount, messagesPerPage, page, "/home/?page=0"),
-	}
 	if user != nil {
 		data.DefaultPageData.WebUserEmail = user.Email
 		data.DefaultPageData.WebUserID = user.ID
+	}
+
+	pageData, err := h.service.Message.ProcessHomePage(page)
+	if err != nil {
+		h.log.Error().Err(err).Msg("get data for home page")
+	}
+	if pageData != nil {
+		pageData.Messages = updateMessagesStatuses(pageData.Messages, h.service)
+
+		data.Messages = pageData.Messages
+		data.MessagesLength = pageData.MessagesCount
+		data.Pager = pagination.New(pageData.MessagesCount, messagesPerPage, page, "/home/?page=0")
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)

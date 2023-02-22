@@ -46,7 +46,7 @@ func Test_CreateChannel(t *testing.T) {
 				).WithArgs("test", "test T", "test.jpg").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         &model.DBChannel{Name: "test", Title: "test T", ImageURL: "test.jpg"},
-			expectedError: fmt.Errorf("create channel: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -117,7 +117,7 @@ func Test_GetChannels(t *testing.T) {
 				mock.ExpectQuery("SELECT * FROM channel;").
 					WillReturnError(fmt.Errorf("some sql error"))
 			},
-			expectedError: fmt.Errorf("get channels: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -193,7 +193,7 @@ func Test_GetChannelsByPage(t *testing.T) {
 					WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get channels by page: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 
@@ -266,7 +266,7 @@ func Test_GetChannelByName(t *testing.T) {
 					WithArgs("test").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         "test",
-			expectedError: fmt.Errorf("get channel by name: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 
@@ -356,7 +356,7 @@ func Test_GetChannelStats(t *testing.T) {
 				).WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get channel statistic: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {

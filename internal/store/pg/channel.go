@@ -3,7 +3,6 @@ package pg
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
@@ -22,7 +21,7 @@ func (repo ChannelPgRepo) CreateChannel(channel *model.DBChannel) error {
 		channel.Name, channel.Title, channel.ImageURL,
 	)
 	if err != nil {
-		return fmt.Errorf("create channel: %w", err)
+		return err
 	}
 
 	return nil
@@ -33,7 +32,7 @@ func (repo ChannelPgRepo) GetChannels() ([]model.Channel, error) {
 
 	err := repo.db.Select(&channels, "SELECT * FROM channel;")
 	if err != nil {
-		return nil, fmt.Errorf("get channels: %w", err)
+		return nil, err
 	}
 
 	if len(channels) == 0 {
@@ -48,7 +47,7 @@ func (repo ChannelPgRepo) GetChannelsByPage(page int) ([]model.Channel, error) {
 
 	err := repo.db.Select(&channels, "SELECT * FROM channel LIMIT 10 OFFSET $1;", page)
 	if err != nil {
-		return nil, fmt.Errorf("get channels by page: %w", err)
+		return nil, err
 	}
 
 	if len(channels) == 0 {
@@ -67,7 +66,7 @@ func (repo ChannelPgRepo) GetChannelByName(name string) (*model.Channel, error) 
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get channel by name: %w", err)
+		return nil, err
 	}
 
 	return &channel, nil
@@ -89,7 +88,7 @@ func (repo ChannelPgRepo) GetChannelStats(channelID int) (*model.Stat, error) {
 		channelID,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get channel statistic: %w", err)
+		return nil, err
 	}
 
 	defer rows.Close()

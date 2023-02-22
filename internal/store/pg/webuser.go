@@ -3,7 +3,6 @@ package pg
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
@@ -22,25 +21,10 @@ func (repo WebUserRepo) CreateWebUser(user *model.WebUser) error {
 		user.Email, user.Password,
 	)
 	if err != nil {
-		return fmt.Errorf("create web user: %w", err)
+		return err
 	}
 
 	return nil
-}
-
-func (repo WebUserRepo) GetWebUserByID(id int) (*model.WebUser, error) {
-	var user model.WebUser
-
-	err := repo.db.Get(&user, "SELECT * FROM web_user WHERE id = $1;", id)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-
-		return nil, fmt.Errorf("get web user by id: %w", err)
-	}
-
-	return &user, nil
 }
 
 func (repo WebUserRepo) GetWebUserByEmail(email string) (*model.WebUser, error) {
@@ -52,7 +36,7 @@ func (repo WebUserRepo) GetWebUserByEmail(email string) (*model.WebUser, error) 
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get web user by email: %w", err)
+		return nil, err
 	}
 
 	return &user, nil

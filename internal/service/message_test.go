@@ -10,10 +10,12 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 	"github.com/VladPetriv/scanner_backend/internal/store"
 	"github.com/VladPetriv/scanner_backend/internal/store/mocks"
+	"github.com/VladPetriv/scanner_backend/pkg/config"
+	"github.com/VladPetriv/scanner_backend/pkg/logger"
 )
 
-func Test_CreateMessage(t *testing.T) {
-	messageInput := &model.DBMessage{ChannelID: 1, UserID: 1, Title: "test", MessageURL: "test.url", ImageURL: "test.jpg"}
+func TestMessageService_CreateMessage(t *testing.T) {
+	t.Parallel()
 
 	tests := []struct {
 		name          string
@@ -26,64 +28,111 @@ func Test_CreateMessage(t *testing.T) {
 			name: "CreateMessage successful",
 			mock: func(messageRepo *mocks.MessageRepo) {
 				messageRepo.On("GetMessageByTitle", "test").Return(nil, nil)
-				messageRepo.On("CreateMessage", messageInput).Return(1, nil)
+				messageRepo.On("CreateMessage", &model.DBMessage{
+					ChannelID:  1,
+					UserID:     1,
+					Title:      "test",
+					MessageURL: "test.url",
+					ImageURL:   "test.jpg",
+				}).Return(1, nil)
 			},
-			input: messageInput,
-			want:  1,
+			input: &model.DBMessage{
+				ChannelID:  1,
+				UserID:     1,
+				Title:      "test",
+				MessageURL: "test.url",
+				ImageURL:   "test.jpg",
+			},
+			want: 1,
 		},
 		{
 			name: "CreateMessage failed with existed message",
 			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetMessageByTitle", "test").Return(messageInput, nil)
+				messageRepo.On("GetMessageByTitle", "test").Return(&model.DBMessage{
+					ChannelID:  1,
+					UserID:     1,
+					Title:      "test",
+					MessageURL: "test.url",
+					ImageURL:   "test.jpg",
+				}, nil)
 			},
-			input:         messageInput,
+			input: &model.DBMessage{
+				ChannelID:  1,
+				UserID:     1,
+				Title:      "test",
+				MessageURL: "test.url",
+				ImageURL:   "test.jpg",
+			},
 			expectedError: service.ErrMessageExists,
 		},
 		{
 			name: "CreateMessage failed with some store error when get message by title",
 			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetMessageByTitle", "test").Return(nil, fmt.Errorf("get message by title: some error"))
+				messageRepo.On("GetMessageByTitle", "test").Return(nil, fmt.Errorf("some store error"))
 			},
-			input: messageInput,
+			input: &model.DBMessage{
+				ChannelID:  1,
+				UserID:     1,
+				Title:      "test",
+				MessageURL: "test.url",
+				ImageURL:   "test.jpg",
+			},
 			expectedError: fmt.Errorf(
-				"[Message] Service.GetMessageByTitle error: %w",
-				fmt.Errorf("get message by title: some error"),
+				"get message by title from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 		{
 			name: "CreateMessage failed with some store error",
 			mock: func(messageRepo *mocks.MessageRepo) {
 				messageRepo.On("GetMessageByTitle", "test").Return(nil, nil)
-				messageRepo.On("CreateMessage", messageInput).Return(0, fmt.Errorf("create message: some error"))
+				messageRepo.On("CreateMessage", &model.DBMessage{
+					ChannelID:  1,
+					UserID:     1,
+					Title:      "test",
+					MessageURL: "test.url",
+					ImageURL:   "test.jpg",
+				},
+				).Return(0, fmt.Errorf("some store error"))
 			},
-			input: messageInput,
+			input: &model.DBMessage{
+				ChannelID:  1,
+				UserID:     1,
+				Title:      "test",
+				MessageURL: "test.url",
+				ImageURL:   "test.jpg",
+			},
 			expectedError: fmt.Errorf(
-				"[Message] Service.CreateMessage error: %w",
-				fmt.Errorf("create message: some error"),
+				"create message in db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
 
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo)
 
-		got, err := messageService.CreateMessage(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
-			assert.EqualValues(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-			assert.EqualValues(t, tt.want, got)
-		}
+			got, err := messageService.CreateMessage(tt.input)
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.want, got)
 
-		messageRepo.AssertExpectations(t)
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
 	}
 }
 
-func Test_GetMessagesCount(t *testing.T) {
+func TestMessageService_GetMessagesCount(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name          string
 		mock          func(messageRepo *mocks.MessageRepo)
@@ -107,35 +156,40 @@ func Test_GetMessagesCount(t *testing.T) {
 		{
 			name: "GetMessagesCount failed with some store error",
 			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetMessagesCount").Return(0, fmt.Errorf("get messages count: some error"))
+				messageRepo.On("GetMessagesCount").Return(0, fmt.Errorf("some store error"))
 			},
 			expectedError: fmt.Errorf(
-				"[Message] Service.GetMessagesCount error: %w",
-				fmt.Errorf("get messages count: some error"),
+				"get messages count from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
 
-		got, err := messageService.GetMessagesCount()
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo)
+
+			got, err := messageService.GetMessagesCount()
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		}
 
-		messageRepo.AssertExpectations(t)
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
 	}
 }
 
-func Test_GetMessagesLengthByChannelID(t *testing.T) {
+func TestMessageService_GetMessagesCountByChannelID(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name          string
 		mock          func(messageRepo *mocks.MessageRepo)
@@ -163,155 +217,41 @@ func Test_GetMessagesLengthByChannelID(t *testing.T) {
 			name: "GetMessagesCountByChannelID failed with some store error",
 			mock: func(messageRepo *mocks.MessageRepo) {
 				messageRepo.On("GetMessagesCountByChannelID", 1).
-					Return(0, fmt.Errorf("get messages count by channel id: some error"))
+					Return(0, fmt.Errorf("some store error"))
 			},
 			input: 1,
 			expectedError: fmt.Errorf(
-				"[Message] Service.GetMessagesCountByChannelID error: %w",
-				fmt.Errorf("get messages count by channel id: some error"),
+				"get messages count by channel id from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
 
-		got, err := messageService.GetMessagesCountByChannelID(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo)
+
+			got, err := messageService.GetMessagesCountByChannelID(tt.input)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		}
 
-		messageRepo.AssertExpectations(t)
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
 	}
 }
 
-func Test_GetMessageByTitle(t *testing.T) {
-	message := &model.DBMessage{ID: 1, Title: "test"}
+func TestMessageService_GetFullMessagesByChannelIDAndPage(t *testing.T) {
+	t.Parallel()
 
-	tests := []struct {
-		name          string
-		mock          func(messageRepo *mocks.MessageRepo)
-		input         string
-		want          *model.DBMessage
-		expectedError error
-	}{
-		{
-			name: "GetMessageByTitle successful",
-			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetMessageByTitle", "test").Return(message, nil)
-			},
-			input: "test",
-			want:  message,
-		},
-		{
-			name: "GetMessageByTitle failed with not found message",
-			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetMessageByTitle", "test").Return(nil, nil)
-			},
-			input:         "test",
-			expectedError: service.ErrMessageNotFound,
-		},
-		{
-			name: "GetMessageByTitle failed with some store error",
-			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetMessageByTitle", "test").Return(nil, fmt.Errorf("get message by title: some error"))
-			},
-			input: "test",
-			expectedError: fmt.Errorf(
-				"[Message] Service.GetMessageByTitle error: %w",
-				fmt.Errorf("get message by title: some error"),
-			),
-		},
-	}
-	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
-
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
-
-		got, err := messageService.GetMessageByTitle(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
-			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-		}
-
-		messageRepo.AssertExpectations(t)
-	}
-}
-
-func Test_GetFullMessagesByPage(t *testing.T) {
-	messages := []model.FullMessage{
-		{ID: 1, Title: "test1"},
-		{ID: 2, Title: "test2"},
-	}
-
-	tests := []struct {
-		name          string
-		mock          func(messageRepo *mocks.MessageRepo)
-		input         int
-		want          []model.FullMessage
-		expectedError error
-	}{
-		{
-			name: "GetFullMessagesByPage successful",
-			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetFullMessagesByPage", 0).Return(messages, nil)
-			},
-			input: 1,
-			want:  messages,
-		},
-		{
-			name: "GetFullMessagesByPage failed with not found messages",
-			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetFullMessagesByPage", 0).Return(nil, nil)
-			},
-			input:         1,
-			expectedError: service.ErrMessagesNotFound,
-		},
-		{
-			name: "GetFullMessagesByPage failed with some store error",
-			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetFullMessagesByPage", 0).Return(nil, fmt.Errorf("get full messages by page: some error"))
-			},
-			input: 1,
-			expectedError: fmt.Errorf(
-				"[Message] Service.GetFullMessagesByPage error: %w",
-				fmt.Errorf("get full messages by page: some error"),
-			),
-		},
-	}
-	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
-
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
-
-		got, err := messageService.GetFullMessagesByPage(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
-			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-		}
-
-		messageRepo.AssertExpectations(t)
-	}
-}
-
-func Test_GetFullMessagesByChannelIDAndPage(t *testing.T) {
 	messages := []model.FullMessage{
 		{ID: 1, Title: "test1", ChannelID: 1, ImageURL: "test1.jpg"},
 		{ID: 2, Title: "test2", ChannelID: 1, ImageURL: "test2.jpg"},
@@ -343,37 +283,40 @@ func Test_GetFullMessagesByChannelIDAndPage(t *testing.T) {
 		{
 			name: "GetFullMessagesByChannelIDAndPage failed with some store error",
 			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetFullMessagesByChannelIDAndPage", 1, 0).
-					Return(nil, fmt.Errorf("get full messages by channel id: some error"))
+				messageRepo.On("GetFullMessagesByChannelIDAndPage", 1, 0).Return(nil, fmt.Errorf("some store error"))
 			},
 			input: 1,
 			expectedError: fmt.Errorf(
-				"[Message] Service.GetFullMessagesByChannelIDAndPage error: %w",
-				fmt.Errorf("get full messages by channel id: some error"),
+				"get full messages by channel id and page from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
 
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo)
 
-		got, err := messageService.GetFullMessagesByChannelIDAndPage(tt.input, 1)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			got, err := messageService.GetFullMessagesByChannelIDAndPage(tt.input, 1)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		}
 
-		messageRepo.AssertExpectations(t)
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
 	}
 }
 
-func Test_GetFullMessagesByUserID(t *testing.T) {
+func TestMessageService_GetFullMessagesByUserID(t *testing.T) {
+	t.Parallel()
+
 	messages := []model.FullMessage{
 		{ID: 1, Title: "test1", ChannelID: 1, UserID: 1, ImageURL: "test1.jpg"},
 		{ID: 2, Title: "test2", ChannelID: 2, UserID: 1, ImageURL: "test2.jpg"},
@@ -405,37 +348,40 @@ func Test_GetFullMessagesByUserID(t *testing.T) {
 		{
 			name: "GetFullMessagesByUserID failed with some store error",
 			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetFullMessagesByUserID", 1).Return(nil, fmt.Errorf("get full messages by user id: some error"))
+				messageRepo.On("GetFullMessagesByUserID", 1).Return(nil, fmt.Errorf("some store error"))
 			},
 			input: 1,
 			expectedError: fmt.Errorf(
-				"[Message] Service.GetFullMessagesByUserID error: %w",
-				fmt.Errorf("get full messages by user id: some error"),
+				"get full messages by user id from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
 
-		got, err := messageService.GetFullMessagesByUserID(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo)
+
+			got, err := messageService.GetFullMessagesByUserID(tt.input)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		}
 
-		messageRepo.AssertExpectations(t)
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
 	}
 }
 
 func Test_GetFullMessagesByMessageID(t *testing.T) {
-	messages := &model.FullMessage{ID: 1, Title: "test1", ChannelID: 1}
+	t.Parallel()
 
 	tests := []struct {
 		name          string
@@ -447,10 +393,18 @@ func Test_GetFullMessagesByMessageID(t *testing.T) {
 		{
 			name: "GetFullMessagesByMessageID successful",
 			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetFullMessageByID", 1).Return(messages, nil)
+				messageRepo.On("GetFullMessageByID", 1).Return(&model.FullMessage{
+					ID:        1,
+					Title:     "test1",
+					ChannelID: 1,
+				}, nil)
 			},
 			input: 1,
-			want:  messages,
+			want: &model.FullMessage{
+				ID:        1,
+				Title:     "test1",
+				ChannelID: 1,
+			},
 		},
 		{
 			name: "GetFullMessagesByMessageID failed with not found message",
@@ -463,31 +417,233 @@ func Test_GetFullMessagesByMessageID(t *testing.T) {
 		{
 			name: "GetFullMessagesByMessageID failed with some store error",
 			mock: func(messageRepo *mocks.MessageRepo) {
-				messageRepo.On("GetFullMessageByID", 1).Return(nil, fmt.Errorf("get full message by message id: some error"))
+				messageRepo.On("GetFullMessageByID", 1).Return(nil, fmt.Errorf("some store error"))
 			},
 			input: 1,
 			expectedError: fmt.Errorf(
-				"[Message] Service.GetFullMessageByMessageID error: %w",
-				fmt.Errorf("get full message by message id: some error"),
+				"get full message by message id from db: %w",
+				fmt.Errorf("some store error"),
 			),
 		},
 	}
 	for _, tt := range tests {
-		t.Logf("running: %s", tt.name)
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-		messageRepo := &mocks.MessageRepo{}
-		messageService := service.NewMessageService(&store.Store{Message: messageRepo})
-		tt.mock(messageRepo)
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
 
-		got, err := messageService.GetFullMessageByMessageID(tt.input)
-		if tt.expectedError != nil {
-			assert.Error(t, err)
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo)
+
+			got, err := messageService.GetFullMessageByMessageID(tt.input)
 			assert.Equal(t, tt.expectedError, err)
-		} else {
-			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
-		}
 
-		messageRepo.AssertExpectations(t)
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestMessageService_ProcessMessagePager(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		mock          func(messageRepo *mocks.MessageRepo, replyRepo *mocks.ReplyRepo)
+		input         int
+		expectedError error
+		want          *service.LoadMessageOutput
+	}{
+		{
+			name: "ProcessMessagePage successful",
+			mock: func(messageRepo *mocks.MessageRepo, replyRepo *mocks.ReplyRepo) {
+				messageRepo.On("GetFullMessageByID", 1).Return(&model.FullMessage{
+					ID:    1,
+					Title: "test",
+				}, nil)
+				replyRepo.On("GetFullRepliesByMessageID", 1).Return([]model.FullReply{
+					{
+						ID:    1,
+						Title: "test 1",
+					},
+					{
+						ID:    2,
+						Title: "test 2",
+					},
+				}, nil)
+			},
+			input: 1,
+			want: &service.LoadMessageOutput{
+				Message: &model.FullMessage{
+					ID:    1,
+					Title: "test",
+					Replies: []model.FullReply{
+						{
+							ID:    1,
+							Title: "test 1",
+						},
+						{
+							ID:    2,
+							Title: "test 2",
+						},
+					},
+					RepliesCount: 2,
+				},
+			},
+		},
+		{
+			name: "ProcessMessagePage failed with not found message",
+			mock: func(messageRepo *mocks.MessageRepo, replyRepo *mocks.ReplyRepo) {
+				messageRepo.On("GetFullMessageByID", 1).Return(nil, nil)
+			},
+			input: 1,
+			want:  &service.LoadMessageOutput{},
+		},
+		{
+			name: "ProcessMessagePage failed with not found replies",
+			mock: func(messageRepo *mocks.MessageRepo, replyRepo *mocks.ReplyRepo) {
+				messageRepo.On("GetFullMessageByID", 1).Return(nil, nil)
+			},
+			input: 1,
+			want:  &service.LoadMessageOutput{},
+		},
+		{
+			name: "ProcessMessagePage failed with some store error when get message by id",
+			mock: func(messageRepo *mocks.MessageRepo, replyRepo *mocks.ReplyRepo) {
+				messageRepo.On("GetFullMessageByID", 1).Return(nil, fmt.Errorf("some store error"))
+			},
+			input: 1,
+			expectedError: fmt.Errorf(
+				"get full message by id from db: %w",
+				fmt.Errorf("some store error"),
+			),
+		},
+		{
+			name: "ProcessMessagePage failed with some store error when get full replies by message id",
+			mock: func(messageRepo *mocks.MessageRepo, replyRepo *mocks.ReplyRepo) {
+				messageRepo.On("GetFullMessageByID", 1).Return(&model.FullMessage{
+					ID:    1,
+					Title: "test",
+				}, nil)
+				replyRepo.On("GetFullRepliesByMessageID", 1).Return(nil, fmt.Errorf("some store error"))
+			},
+			input: 1,
+			expectedError: fmt.Errorf(
+				"[ProcessMessagePage]: %w",
+				fmt.Errorf(
+					"get replies by message id from db: %w",
+					fmt.Errorf("some store error"),
+				),
+			),
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
+
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo, replyRepo)
+
+			got, err := messageService.ProcessMessagePage(tt.input)
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.want, got)
+
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestMessageService_ProcessHomePage(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		mock          func(messageRepo *mocks.MessageRepo)
+		input         int
+		want          *service.LoadHomeOutput
+		expectedError error
+	}{
+		{
+			name: "ProcessHomePage successful",
+			mock: func(messageRepo *mocks.MessageRepo) {
+				messageRepo.On("GetMessagesCount").Return(2, nil)
+				messageRepo.On("GetFullMessagesByPage", 0).Return([]model.FullMessage{
+					{ID: 1},
+					{ID: 2},
+				}, nil)
+			},
+			input: 1,
+			want: &service.LoadHomeOutput{
+				Messages: []model.FullMessage{
+					{ID: 1},
+					{ID: 2},
+				},
+				MessagesCount: 2,
+			},
+		},
+		{
+			name: "ProcessHomePage failed with not found messages",
+			mock: func(messageRepo *mocks.MessageRepo) {
+				messageRepo.On("GetMessagesCount").Return(0, nil)
+			},
+			input: 1,
+			want:  &service.LoadHomeOutput{},
+		},
+		{
+			name: "ProcessHomePage failed with some store error when get messages count",
+			mock: func(messageRepo *mocks.MessageRepo) {
+				messageRepo.On("GetMessagesCount").Return(0, fmt.Errorf("some store error"))
+			},
+			input: 1,
+			expectedError: fmt.Errorf(
+				"get messages count from db: %w",
+				fmt.Errorf("some store error"),
+			),
+		},
+		{
+			name: "ProcessHomePage failed with some store error when get messages by page",
+			mock: func(messageRepo *mocks.MessageRepo) {
+				messageRepo.On("GetMessagesCount").Return(1, nil)
+				messageRepo.On("GetFullMessagesByPage", 0).Return(nil, fmt.Errorf("some store error"))
+			},
+			input: 1,
+			expectedError: fmt.Errorf(
+				"get full messages by page from db: %w",
+				fmt.Errorf("some store error"),
+			),
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			messageRepo := &mocks.MessageRepo{}
+			replyRepo := &mocks.ReplyRepo{}
+
+			logger := logger.Get(&config.Config{LogLevel: "info"})
+			replyService := service.NewReplyService(&store.Store{Reply: replyRepo}, logger)
+			messageService := service.NewMessageService(&store.Store{Message: messageRepo}, logger, replyService)
+			tt.mock(messageRepo)
+
+			got, err := messageService.ProcessHomePage(tt.input)
+			assert.Equal(t, tt.expectedError, err)
+			assert.Equal(t, tt.want, got)
+
+			messageRepo.AssertExpectations(t)
+			replyRepo.AssertExpectations(t)
+		})
 	}
 }

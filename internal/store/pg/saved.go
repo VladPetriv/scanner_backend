@@ -3,7 +3,6 @@ package pg
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/VladPetriv/scanner_backend/internal/model"
 )
@@ -22,7 +21,7 @@ func (repo SavedRepo) CreateSavedMessage(saved *model.Saved) error {
 		saved.WebUserID, saved.MessageID,
 	)
 	if err != nil {
-		return fmt.Errorf("create saved message: %w", err)
+		return err
 	}
 
 	return nil
@@ -33,7 +32,7 @@ func (repo SavedRepo) GetSavedMessages(userID int) ([]model.Saved, error) {
 
 	err := repo.db.Select(&savedMessages, "SELECT * FROM saved WHERE user_id = $1;", userID)
 	if err != nil {
-		return nil, fmt.Errorf("get saved messages: %w", err)
+		return nil, err
 	}
 
 	if len(savedMessages) == 0 {
@@ -52,7 +51,7 @@ func (repo SavedRepo) GetSavedMessageByID(id int) (*model.Saved, error) {
 			return nil, nil
 		}
 
-		return nil, fmt.Errorf("get saved message by id: %w", err)
+		return nil, err
 	}
 
 	return &savedMessage, nil
@@ -61,7 +60,7 @@ func (repo SavedRepo) GetSavedMessageByID(id int) (*model.Saved, error) {
 func (repo SavedRepo) DeleteSavedMessage(id int) error {
 	_, err := repo.db.Exec("DELETE FROM saved WHERE id = $1;", id)
 	if err != nil {
-		return fmt.Errorf("delete saved message: %w", err)
+		return err
 	}
 
 	return nil

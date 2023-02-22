@@ -17,50 +17,48 @@ type UserPageData struct {
 }
 
 func (h Handler) loadUserPage(w http.ResponseWriter, r *http.Request) {
+	data := UserPageData{
+		DefaultPageData: PageData{
+			Type:         "user",
+			Title:        "Telegram User",
+			WebUserEmail: "",
+			WebUserID:    0,
+		},
+	}
+
 	userID, err := strconv.Atoi(mux.Vars(r)["user_id"])
 	if err != nil {
 		h.log.Error().Err(err).Msg("covert user id to int")
 
-		http.Redirect(w, r, "/home", http.StatusNotFound)
+		http.Redirect(w, r, "/home", http.StatusMovedPermanently)
 		return
-	}
-
-	tgUser, err := h.service.User.GetUserByID(userID)
-	if err != nil {
-		h.log.Error().Err(err).Msg("get user by id")
 	}
 
 	navBarChannels, err := h.service.Channel.GetChannels()
 	if err != nil {
 		h.log.Error().Err(err).Msg("get channels for navbar")
 	}
-
-	messages, err := h.service.Message.GetFullMessagesByUserID(tgUser.ID)
-	if err != nil {
-		h.log.Error().Err(err).Msg("get full messages by user id")
+	if navBarChannels != nil {
+		data.DefaultPageData.Channels = GetRightChannelsCountForNavBar(navBarChannels)
+		data.DefaultPageData.ChannelsLength = len(navBarChannels)
 	}
 
 	user, err := h.service.WebUser.GetWebUserByEmail(h.getUserFromSession(r))
 	if err != nil {
 		h.log.Error().Err(err).Msg("get web user by email")
 	}
-
-	data := UserPageData{
-		DefaultPageData: PageData{
-			Type:           "user",
-			Title:          "Telegram User",
-			Channels:       GetRightChannelsCountForNavBar(navBarChannels),
-			ChannelsLength: len(navBarChannels),
-			WebUserEmail:   "",
-			WebUserID:      0,
-		},
-		User:           *tgUser,
-		Messages:       messages,
-		MessagesLength: len(messages),
-	}
 	if user != nil {
 		data.DefaultPageData.WebUserEmail = user.Email
 		data.DefaultPageData.WebUserID = user.ID
+	}
+
+	pageData, err := h.service.User.ProcessUserPage(userID)
+	if err != nil {
+		h.log.Error().Err(err).Msg("get data for usar page")
+	}
+	if pageData != nil {
+		data.Messages = pageData.Messages
+		data.MessagesLength = len(pageData.Messages)
 	}
 
 	err = h.templates.ExecuteTemplate(w, "base", data)

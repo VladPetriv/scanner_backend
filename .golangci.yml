@@ -147,7 +147,6 @@ linters:
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
     - reassign # checks that package variables are not reassigned
-    - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - stylecheck # is a replacement for golint
     - tenv # detects using os.Setenv instead of t.Setenv since Go1.17
     - testableexamples # checks if examples are testable (have an expected output)
@@ -158,7 +157,6 @@ linters:
     - usestdlibvars # detects the possibility to use variables/constants from the Go standard library
     - whitespace # detects leading and trailing whitespace
     - godox # detects FIXME, TODO and other comment keywords
-    - wrapcheck # checks that errors returned from external packages are wrapped
 
 issues:
   # Maximum count of issues with the same text.
@@ -181,4 +179,3 @@ issues:
         - goconst
         - gosec
         - noctx
-        - wrapcheck

@@ -48,7 +48,7 @@ func Test_CreateReply(t *testing.T) {
 				).WithArgs(1, 1, "test", "test.jpg").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         &model.DBReply{UserID: 1, MessageID: 1, Title: "test", ImageURL: "test.jpg"},
-			expecterError: fmt.Errorf("create reply: %w", fmt.Errorf("some sql error")),
+			expecterError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -145,7 +145,7 @@ func Test_GetFullRepliesByMessageID(t *testing.T) {
 				).WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get full replies by message id: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 

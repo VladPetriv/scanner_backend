@@ -58,7 +58,7 @@ func Test_CreateMessage(t *testing.T) {
 				ImageURL:   "test.jpg",
 			},
 			wantErr:       true,
-			expectedError: fmt.Errorf("create message: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -127,7 +127,7 @@ func Test_GetMessagesCount(t *testing.T) {
 				mock.ExpectQuery("SELECT COUNT(*) FROM message;").
 					WillReturnError(fmt.Errorf("some sql error"))
 			},
-			expectedError: fmt.Errorf("get messages count: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -202,7 +202,7 @@ func Test_GetMessagesCountByChannelID(t *testing.T) {
 				).WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get messages count by channel id: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -274,7 +274,7 @@ func Test_GetMessageByTitle(t *testing.T) {
 				).WithArgs("test").WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         "test",
-			expectedError: fmt.Errorf("get message by title: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -396,7 +396,7 @@ func Test_GetFullMessagesByPage(t *testing.T) {
 				).WithArgs(10).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         10,
-			expectedError: fmt.Errorf("get full messages by page: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -521,7 +521,7 @@ func Test_GetFullMessagesByChannelIDAndPage(t *testing.T) {
 			},
 			channelID:     1,
 			page:          10,
-			expectedError: fmt.Errorf("get full messages by channel id and page: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -639,7 +639,7 @@ func Test_GetFullMessagesByUserID(t *testing.T) {
 				).WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get full messages by user id: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 	for _, tt := range tests {
@@ -750,7 +750,7 @@ func Test_GetFullMessageByID(t *testing.T) {
 				).WithArgs(1).WillReturnError(fmt.Errorf("some sql error"))
 			},
 			input:         1,
-			expectedError: fmt.Errorf("get full message by id: %w", fmt.Errorf("some sql error")),
+			expectedError: fmt.Errorf("some sql error"),
 		},
 	}
 

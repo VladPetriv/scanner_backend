@@ -9,13 +9,13 @@ import (
 	"github.com/VladPetriv/scanner_backend/internal/service"
 )
 
-type AuthPageData struct {
+type authPageData struct {
 	Title   string
 	Message string
 }
 
 func (h Handler) loadRegistrationPage(w http.ResponseWriter, r *http.Request) {
-	data := AuthPageData{
+	data := authPageData{
 		Title: "Registration",
 	}
 
@@ -27,7 +27,7 @@ func (h Handler) loadRegistrationPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) loadLoginPage(w http.ResponseWriter, r *http.Request) {
-	data := AuthPageData{
+	data := authPageData{
 		Title: "login",
 	}
 
@@ -39,7 +39,7 @@ func (h Handler) loadLoginPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) registration(w http.ResponseWriter, r *http.Request) {
-	authPageData := AuthPageData{
+	data := authPageData{
 		Title: "Registration",
 	}
 
@@ -49,11 +49,11 @@ func (h Handler) registration(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrWebUserIsExist):
-			authPageData.Message = fmt.Sprintf("User with email %s is exist!", user.Email)
+			data.Message = fmt.Sprintf("User with email %s is exist!", user.Email)
 		default:
-			authPageData.Message = "Failed to register new user!"
+			data.Message = "Failed to register new user!"
 		}
-		err = h.tmpTree["register"].Execute(w, authPageData)
+		err = h.tmpTree["register"].Execute(w, data)
 		if err != nil {
 			h.log.Error().Err(err).Msg("execute register template")
 		}
@@ -63,7 +63,7 @@ func (h Handler) registration(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) login(w http.ResponseWriter, r *http.Request) {
-	authPageData := AuthPageData{
+	data := authPageData{
 		Title: "Login",
 	}
 
@@ -73,11 +73,12 @@ func (h Handler) login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrWebUserNotFound):
-			authPageData.Message = fmt.Sprintf("User with email %s not found!", user.Email)
+			data.Message = fmt.Sprintf("User with email %s not found!", user.Email)
 		case errors.Is(err, service.ErrIncorrectPassword):
-			authPageData.Message = "User password is incorrect!"
+			data.Message = "User password is incorrect!"
 		default:
-			authPageData.Message = "Failed to login!"
+			data.Message = "Failed to login!"
+
 			h.log.Error().Err(err).Msg("login user")
 		}
 	}
@@ -90,7 +91,7 @@ func (h Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.tmpTree["login"].Execute(w, authPageData)
+	err = h.tmpTree["login"].Execute(w, data)
 	if err != nil {
 		h.log.Error().Err(err).Msg("execute login template")
 	}
