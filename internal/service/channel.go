@@ -35,8 +35,6 @@ func (s channelService) CreateChannel(channel *model.DBChannel) error {
 			logger.Error().Err(err).Msg("get channel by name")
 			return fmt.Errorf("[CreateChannel]: %w", err)
 		}
-
-		logger.Info().Str("channel name", channel.Name).Msg("channel not found")
 	}
 	if candidate != nil {
 		logger.Info().Interface("candidate", candidate).Msg("channel exists")
@@ -99,7 +97,7 @@ func (s channelService) GetChannelByName(name string) (*model.Channel, error) {
 	}
 
 	if channel == nil {
-		logger.Info().Msg("channel not found")
+		logger.Info().Str("channel name", name).Msg("channel not found")
 		return nil, ErrChannelNotFound
 	}
 
