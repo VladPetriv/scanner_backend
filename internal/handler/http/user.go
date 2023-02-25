@@ -57,6 +57,7 @@ func (h Handler) loadUserPage(w http.ResponseWriter, r *http.Request) {
 		h.log.Error().Err(err).Msg("get data for usar page")
 	}
 	if pageData != nil {
+		data.User = *pageData.TgUser
 		data.Messages = pageData.Messages
 		data.MessagesLength = len(pageData.Messages)
 	}
